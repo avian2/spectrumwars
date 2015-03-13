@@ -25,11 +25,11 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.reconfigure(2.4e9, 0, 100e3)
+				self.set_configuration(2.4e9, 0, 100e3)
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.reconfigure(2.4e9, 0, 100e3)
+				self.set_configuration(2.4e9, 0, 100e3)
 				self.send()
 
 		result = self._run_game(Receiver, Transmitter)
@@ -39,11 +39,11 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.reconfigure(2.4e9, 0, 100e3)
+				self.set_configuration(2.4e9, 0, 100e3)
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.reconfigure(2.5e9, 0, 100e3)
+				self.set_configuration(2.5e9, 0, 100e3)
 				self.send()
 
 		result = self._run_game(Receiver, Transmitter)
@@ -53,11 +53,11 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.reconfigure(2.4e9, 0, 100e3)
+				self.set_configuration(2.4e9, 0, 100e3)
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.reconfigure(2.4e9, 0, 100e3)
+				self.set_configuration(2.4e9, 0, 100e3)
 
 				while True:
 					self.send()
@@ -71,14 +71,14 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.reconfigure(2.4e9, 0, 100e3)
+				self.set_configuration(2.4e9, 0, 100e3)
 
 			def recv(self):
 				cnt[0] += 1
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.reconfigure(2.4e9, 0, 100e3)
+				self.set_configuration(2.4e9, 0, 100e3)
 				self.send()
 
 		result = self._run_game(Receiver, Transmitter)

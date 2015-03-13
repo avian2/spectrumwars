@@ -13,7 +13,7 @@ class Transceiver(object):
 	def start(self):
 		pass
 
-	def reconfigure(self, frequency, power, bandwidth):
+	def set_configuration(self, frequency, power, bandwidth):
 		self._settings = (frequency, power, bandwidth)
 
 	def send(self):
