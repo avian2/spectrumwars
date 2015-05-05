@@ -1,4 +1,23 @@
+import threading
+
 class StopGame(Exception): pass
+
+class Testbed(object):
+	def get_radio_pair(self):
+		pass
+
+class Radio(object):
+	def __init__(self, neighbor):
+		pass
+
+	def send(self):
+		pass
+
+	def set_configuration(self):
+		pass
+
+	def recv(self, timeout=2.):
+		pass
 
 class Player(object):
 	def __init__(self, rxcls, txcls):
@@ -37,19 +56,28 @@ class GameController(object):
 
 		game.instantiate()
 
-		try:
-			for player in game.players:
-				player.rx.start()
-				player.tx.start()
+		workers = []
 
-			status = GameStatus()
+		for player in game.players:
+			for transceiver in player.rx, player.tx:
+				worker = threading.Thread(target=self.worker, args=(game, transceiver))
+				worker.start()
+
+				workers.append(worker)
+
+		for worker in workers:
+			worker.join()
+
+		return [ player.result for player in game.players ]
+
+	def worker(self, game, transceiver):
+
+		try:
+			transceiver.start()
 
 			for i in xrange(game.time_limit):
-				for player in game.players:
-					player.rx.status_update(status)
-					player.tx.status_update(status)
+				status = GameStatus()
+				transceiver.status_update(status)
 
 		except StopGame:
 			pass
-
-		return [ player.result for player in game.players ]
