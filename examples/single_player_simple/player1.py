@@ -4,4 +4,6 @@ class Receiver(Transceiver):
 	pass
 
 class Transmitter(Transceiver):
-	pass
+	def start(self):
+		while True:
+			self.send()

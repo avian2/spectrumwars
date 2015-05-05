@@ -2,6 +2,8 @@ import logging
 import threading
 import time
 
+log = logging.getLogger(__name__)
+
 class StopGame(Exception): pass
 
 class Player(object):
@@ -44,7 +46,7 @@ class GameController(object):
 
 	def run(self, game):
 
-		logging.debug("Instantiating player classes")
+		log.debug("Instantiating player classes")
 		game.instantiate()
 
 		transceivers = []
@@ -64,7 +66,7 @@ class GameController(object):
 		for worker in workers:
 			worker.join()
 
-		logging.debug("Cleaning up transceivers")
+		log.debug("Cleaning up transceivers")
 
 		# clean up any remaining packets in queues
 		for transceiver in transceivers:
@@ -77,7 +79,7 @@ class GameController(object):
 
 		game.state = 'finished'
 
-		logging.debug("Game concluded")
+		log.debug("Game concluded")
 
 		return [ player.result for player in game.players ]
 
@@ -85,7 +87,7 @@ class GameController(object):
 
 		name = "(%d %s)" % (transceiver._i, transceiver._role)
 
-		logging.debug("%s worker started" % name)
+		log.debug("%s worker started" % name)
 
 		try:
 			transceiver.start()
@@ -93,14 +95,18 @@ class GameController(object):
 			for i in xrange(game.time_limit):
 				transceiver._recv()
 
+				log.debug("%s status update (%d/%d)" % (name, i, game.time_limit))
+
 				status = GameStatus()
 				transceiver.status_update(status)
 
 				if game.state != 'running':
-					logging.debug("%s stopping game" % name)
+					log.debug("%s stopping game" % name)
 					break
 
+			log.debug("%s reached time limit" % name)
+
 		except StopGame:
-			logging.debug("%s wants to stop game" % name)
+			log.debug("%s wants to stop game" % name)
 
 		game.state = 'stopping'

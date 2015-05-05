@@ -5,6 +5,8 @@ import sys
 
 from spectrumwars import Player, Game, GameController, Testbed
 
+log = logging.getLogger(__name__)
+
 def get_players(path):
 
 	players = []
@@ -26,13 +28,13 @@ def get_players(path):
 
 		n += 1
 
-	print "Loaded %d players" % (n-1,)
+	log.info("Loaded %d players" % (n-1,))
 
 	return players
 
 def main():
 	PACKET_LIMIT = 50
-	TIME_LIMIT = 50
+	TIME_LIMIT = 10
 
 	logging.basicConfig(level=logging.DEBUG)
 
@@ -42,13 +44,13 @@ def main():
 	game = Game(testbed, players, packet_limit=PACKET_LIMIT, time_limit=TIME_LIMIT)
 	ctl = GameController()
 
-	print "Running game..."
+	log.info("Running game...")
 
 	results = ctl.run(game)
 
-	print "Done."
-	print "Results:"
+	log.info("Done.")
 
+	print "Results:"
 	for i, result in enumerate(results):
 		print "Player %d:" % (i+1,)
 		print "    packets: %d" % (result.packets)

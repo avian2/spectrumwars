@@ -1,6 +1,9 @@
+import logging
 import serial
 import threading
 import Queue
+
+log = logging.getLogger(__name__)
 
 class RadioError(Exception): pass
 class RadioTimeout(Exception): pass
@@ -43,7 +46,7 @@ class RadioRaw(object):
 		self.command_lock.release()
 
 		if resp is None:
-			raise RadioTimeout("timeout waiting for response to %r" % (cmd,))
+			raise RadioTimeout("%s: timeout waiting for response to %r" % (self.device, cmd))
 		elif resp == "O":
 			pass
 		elif resp.startswith("E "):
@@ -61,7 +64,7 @@ class RadioRaw(object):
 		except Queue.Empty:
 			raise RadioTimeout("timeout waiting for reception")
 		else:
-			yield resp.strip()
+			return resp.strip()
 
 	def recv_flush(self):
 		try:
@@ -71,7 +74,7 @@ class RadioRaw(object):
 			pass
 
 	def debug(self, msg):
-		print "%s >>> %s" % (self.device, msg)
+		log.debug("%s: radio debug: %s" % (self.device, msg))
 
 	def worker(self):
 		while self.run:
@@ -102,14 +105,14 @@ class Radio(object):
 			try:
 				self.raw.cmd(cmd)
 			except RadioTimeout:
-				pass
-			except RadioError:
-				pass
+				log.warning("Command timeout: %r" % (cmd,))
+			except RadioError, e:
+				log.warning("Command error: %r: %s" % (cmd, e))
 			else:
 				break
 
 	def send(self, data):
-		self._cmd("t %02x 00")
+		self._cmd("t %02x 00" % (self.neighbor,))
 
 	def set_configuration(self, frequency, power, bandwidth):
 		pass
