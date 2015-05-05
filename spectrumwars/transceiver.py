@@ -19,17 +19,17 @@ class Transceiver(object):
 	def set_configuration(self, frequency, power, bandwidth):
 		self._settings = (frequency, power, bandwidth)
 
-	def send(self):
-		self._player.rx._recv(self._settings)
+	def send(self, data=None):
+		self._player.rx._recv(self._settings, data)
 
-	def _recv(self, settings):
+	def _recv(self, settings, data):
 		if self._settings == settings:
 			self._player.result.packets += 1
 
 			if self._player.result.packets >= self._game.packet_limit:
 				raise StopGame
 
-			self.recv()
+			self.recv(data)
 
-	def recv(self):
+	def recv(self, data):
 		pass

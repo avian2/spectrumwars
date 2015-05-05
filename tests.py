@@ -76,7 +76,7 @@ class TestGame(unittest.TestCase):
 			def start(self):
 				self.set_configuration(2.4e9, 0, 100e3)
 
-			def recv(self):
+			def recv(self, data):
 				cnt[0] += 1
 
 		class Transmitter(Transceiver):
@@ -86,6 +86,25 @@ class TestGame(unittest.TestCase):
 
 		result = self._run_game(Receiver, Transmitter)
 		self.assertEqual(cnt[0], 1)
+
+	def test_recv_packet_data(self):
+
+		cnt = [0]
+
+		class Receiver(Transceiver):
+			def start(self):
+				self.set_configuration(2.4e9, 0, 100e3)
+
+			def recv(self, data):
+				cnt[0] = data
+
+		class Transmitter(Transceiver):
+			def start(self):
+				self.set_configuration(2.4e9, 0, 100e3)
+				self.send("foo")
+
+		result = self._run_game(Receiver, Transmitter)
+		self.assertEqual(cnt[0], "foo")
 
 	def test_status(self):
 
