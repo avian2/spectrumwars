@@ -36,6 +36,9 @@ class MockRadio(object):
 		else:
 			return data
 
+	def stop(self):
+		pass
+
 class TestGame(unittest.TestCase):
 
 	PACKET_LIMIT = 50

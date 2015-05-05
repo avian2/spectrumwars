@@ -43,3 +43,6 @@ class Transceiver(object):
 
 	def recv(self, data):
 		pass
+
+	def _stop(self):
+		self._radio.stop()

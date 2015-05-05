@@ -66,6 +66,7 @@ class GameController(object):
 		for transceiver in transceivers:
 			try:
 				transceiver._recv()
+				transceiver._stop()
 			except StopGame:
 				pass
 
