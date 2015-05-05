@@ -1,4 +1,5 @@
 import imp
+import logging
 import os
 import sys
 
@@ -32,6 +33,8 @@ def get_players(path):
 def main():
 	PACKET_LIMIT = 50
 	TIME_LIMIT = 50
+
+	logging.basicConfig(level=logging.DEBUG)
 
 	testbed = Testbed()
 	players = get_players(sys.argv[1])
