@@ -90,6 +90,10 @@ class RadioRaw(object):
 				self.debug(resp.strip())
 
 class Radio(object):
+
+	#DATA_LEN = 252
+	DATA_LEN = 50
+
 	def __init__(self, path, addr):
 
 		self.raw = RadioRaw(path)
@@ -112,14 +116,44 @@ class Radio(object):
 				break
 
 	def send(self, data):
-		self._cmd("t %02x 00" % (self.neighbor,))
+
+		if data is None:
+			data = ''
+
+		if len(data) > self.DATA_LEN - 1:
+			data = data[:self.DATA_LEN-1]
+
+		bindata =	[ len(data) ] + \
+				[ ord(c) for c in data ] + \
+				[ 0 ] * (self.DATA_LEN - 1 - len(data))
+
+		assert len(bindata) == self.DATA_LEN
+
+		strdata = ''.join(("%02x" % v) for v in bindata)
+
+		self._cmd("t %02x %s" % (self.neighbor, strdata))
 
 	def set_configuration(self, frequency, power, bandwidth):
 		pass
 
 	def recv(self, timeout=1.):
 		data = self.raw.recv(timeout=timeout)
-		return data
+
+		assert data.startswith("R ")
+
+		strdata = data[2:]
+
+		assert len(strdata) == self.DATA_LEN*2
+
+		n = int(strdata[0:2], 16)
+		assert n <= self.DATA_LEN - 1
+
+		bindata = []
+
+		for i in xrange(1, n+1):
+			bindata.append(chr(int(strdata[i*2:i*2+2], 16)))
+
+		return ''.join(bindata)
 
 	def stop(self):
 		self.raw.stop()

@@ -1,9 +1,10 @@
 from spectrumwars import Transceiver
 
 class Receiver(Transceiver):
-	pass
+	def recv(self, data):
+		assert data == 'foo'
 
 class Transmitter(Transceiver):
 	def start(self):
 		while True:
-			self.send()
+			self.send("foo")
