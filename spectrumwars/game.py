@@ -25,6 +25,9 @@ class Game(object):
 		for i, player in enumerate(self.players):
 			player.instantiate(self, i)
 
+class GameStatus(object):
+	pass
+
 class GameController(object):
 	def __init__(self):
 		pass
@@ -37,6 +40,14 @@ class GameController(object):
 			for player in game.players:
 				player.rx.start()
 				player.tx.start()
+
+			status = GameStatus()
+
+			for i in xrange(100):
+				for player in game.players:
+					player.rx.status_update(status)
+					player.tx.status_update(status)
+
 		except StopGame:
 			pass
 

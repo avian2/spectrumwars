@@ -84,5 +84,16 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transmitter)
 		self.assertEqual(cnt[0], 1)
 
+	def test_status(self):
+
+		cnt = [0]
+
+		class Receiver(Transceiver):
+			def status_update(self, status):
+				cnt[0] += 1
+
+		result = self._run_game(Receiver, Transceiver)
+		self.assertEqual(cnt[0], 100)
+
 if __name__ == '__main__':
 	unittest.main()

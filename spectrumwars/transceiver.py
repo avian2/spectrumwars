@@ -13,6 +13,9 @@ class Transceiver(object):
 	def start(self):
 		pass
 
+	def status_update(self, status):
+		pass
+
 	def set_configuration(self, frequency, power, bandwidth):
 		self._settings = (frequency, power, bandwidth)
 
