@@ -22,6 +22,7 @@ class Player(object):
 class PlayerResult(object):
 	def __init__(self, packets=0):
 		self.packets = packets
+		self.crashed = False
 
 class Game(object):
 
@@ -90,7 +91,7 @@ class GameController(object):
 		log.debug("%s worker started" % name)
 
 		try:
-			transceiver.start()
+			transceiver._start()
 
 			for i in xrange(game.time_limit):
 				transceiver._recv()
@@ -98,7 +99,7 @@ class GameController(object):
 				log.debug("%s status update (%d/%d)" % (name, i, game.time_limit))
 
 				status = GameStatus()
-				transceiver.status_update(status)
+				transceiver._status_update(status)
 
 				if game.state != 'running':
 					log.debug("%s stopping game" % name)

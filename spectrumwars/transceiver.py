@@ -1,5 +1,9 @@
+import logging
+
 from spectrumwars.game import StopGame
 from spectrumwars.testbed import RadioTimeout
+
+log = logging.getLogger(__name__)
 
 class Transceiver(object):
 
@@ -12,8 +16,24 @@ class Transceiver(object):
 
 		self._settings = None
 
+	def _safe_call(self, f, *args, **kwargs):
+		try:
+			f(*args, **kwargs)
+		except StopGame:
+			raise
+		except:
+			self._player.result.crashed = True
+			log.warning("(%d %s) crashed" % (self._i, self._role), exc_info=True)
+			raise StopGame
+
+	def _start(self):
+		self._safe_call(self.start)
+
 	def start(self):
 		pass
+
+	def _status_update(self, status):
+		self._safe_call(self.status_update, status)
 
 	def status_update(self, status):
 		pass
@@ -39,7 +59,7 @@ class Transceiver(object):
 			if self._player.result.packets >= self._game.packet_limit:
 				raise StopGame
 
-			self.recv(data)
+			self._safe_call(self.recv, data)
 
 	def recv(self, data):
 		pass

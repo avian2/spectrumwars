@@ -157,5 +157,37 @@ class TestGame(unittest.TestCase):
 		self.assertGreater(cnt[0], 1)
 		#self.assertEqual(cnt[0], self.TIME_LIMIT)
 
+	def test_error_recv(self):
+
+		class Receiver(Transceiver):
+			def recv(self, data):
+				raise Exception
+
+		class Transmitter(Transceiver):
+			def start(self):
+				while True:
+					self.send()
+
+		result = self._run_game(Receiver, Transmitter)
+		self.assertEqual(result.crashed, True)
+
+	def test_error_start(self):
+
+		class Receiver(Transceiver):
+			def start(self):
+				raise Exception
+
+		result = self._run_game(Receiver, Transceiver)
+		self.assertEqual(result.crashed, True)
+
+	def test_error_status_update(self):
+
+		class Receiver(Transceiver):
+			def status_update(self, status):
+				raise Exception
+
+		result = self._run_game(Receiver, Transceiver)
+		self.assertEqual(result.crashed, True)
+
 if __name__ == '__main__':
 	unittest.main()
