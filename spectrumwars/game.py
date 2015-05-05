@@ -16,10 +16,11 @@ class PlayerResult(object):
 		self.packets = packets
 
 class Game(object):
-	packet_num = 100
 
-	def __init__(self, players):
+	def __init__(self, players, packet_limit=100, time_limit=100):
 		self.players = players
+		self.packet_limit = packet_limit
+		self.time_limit = time_limit
 
 	def instantiate(self):
 		for i, player in enumerate(self.players):
@@ -43,7 +44,7 @@ class GameController(object):
 
 			status = GameStatus()
 
-			for i in xrange(100):
+			for i in xrange(game.time_limit):
 				for player in game.players:
 					player.rx.status_update(status)
 					player.tx.status_update(status)

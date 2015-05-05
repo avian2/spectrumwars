@@ -26,7 +26,7 @@ class Transceiver(object):
 		if self._settings == settings:
 			self._player.result.packets += 1
 
-			if self._player.result.packets >= self._game.packet_num:
+			if self._player.result.packets >= self._game.packet_limit:
 				raise StopGame
 
 			self.recv()
