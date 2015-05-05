@@ -1,4 +1,5 @@
-from spectrumwars.game import StopGame, RadioTimeout
+from spectrumwars.game import StopGame
+from spectrumwars.testbed import RadioTimeout
 
 class Transceiver(object):
 

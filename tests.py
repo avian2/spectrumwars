@@ -1,6 +1,40 @@
 import unittest
 
-from spectrumwars import Transceiver, Player, Game, GameController, Testbed
+import Queue
+from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
+
+class MockTestbed(object):
+	def get_radio_pair(self):
+
+		rxradio = MockRadio()
+		txradio = MockRadio()
+
+		rxradio.neighbor = txradio
+		txradio.neighbor = rxradio
+
+		return rxradio, txradio
+
+class MockRadio(object):
+	def __init__(self):
+		self.neighbor = None
+
+		self.settings = None
+		self.rx_queue = Queue.Queue()
+
+	def send(self, data):
+		if self.settings == self.neighbor.settings:
+			self.neighbor.rx_queue.put(data)
+
+	def set_configuration(self, frequency, power, bandwidth):
+		self.settings = (frequency, power, bandwidth)
+
+	def recv(self, timeout=1.):
+		try:
+			data = self.rx_queue.get(block=False)
+		except Queue.Empty:
+			raise RadioTimeout
+		else:
+			return data
 
 class TestGame(unittest.TestCase):
 
@@ -8,7 +42,7 @@ class TestGame(unittest.TestCase):
 	TIME_LIMIT = 50
 
 	def _run_game(self, rxcls, txcls):
-		testbed = Testbed()
+		testbed = MockTestbed()
 		player = Player(rxcls, txcls)
 		game = Game(testbed, [player], packet_limit=self.PACKET_LIMIT, time_limit=self.TIME_LIMIT)
 		ctl = GameController()
