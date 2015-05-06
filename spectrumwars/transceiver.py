@@ -50,6 +50,10 @@ class Transceiver(object):
 			raise StopGame
 
 	def _recv(self):
+		for data in self.recv_loop():
+			pass
+
+	def recv_loop(self, timeout=1.):
 		while True:
 			try:
 				data = self._radio.recv()
@@ -58,10 +62,12 @@ class Transceiver(object):
 
 			self._player.result.received_packets += 1
 
+			self._safe_call(self.recv, data)
+
+			yield data
+
 			if self._player.result.received_packets >= self._game.packet_limit:
 				raise StopGame
-
-			self._safe_call(self.recv, data)
 
 	def recv(self, data):
 		pass

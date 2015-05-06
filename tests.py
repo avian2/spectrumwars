@@ -4,13 +4,14 @@ import unittest
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
 
-logging.basicConfig(level=logging.INFO)
+level = logging.INFO
+logging.basicConfig(level=level)
 
 def log_exc_off():
 	logging.getLogger().setLevel(logging.ERROR)
 
 def log_exc_on():
-	logging.getLogger().setLevel(logging.INFO)
+	logging.getLogger().setLevel(level)
 
 
 class MockTestbed(object):
@@ -40,7 +41,7 @@ class MockRadio(object):
 
 	def recv(self, timeout=1.):
 		try:
-			data = self.rx_queue.get(block=False)
+			data = self.rx_queue.get(timeout=.01)
 		except Queue.Empty:
 			raise RadioTimeout
 		else:
@@ -204,6 +205,33 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transceiver)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
+
+	def test_recv_in_start(self):
+
+		cnt = [0, 0, 0]
+
+		class Receiver(Transceiver):
+			def start(self):
+				for data in self.recv_loop(timeout=2.):
+					cnt[1] += 1
+
+				print "exit"
+
+			def recv(self, data):
+				cnt[0] += 1
+
+		class Transmitter(Transceiver):
+			def start(self):
+				while True:
+					self.send()
+					cnt[2] += 1
+
+		result = self._run_game(Receiver, Transmitter)
+
+		self.assertEqual(result.crashed, False)
+		self.assertGreaterEqual(cnt[0], self.PACKET_LIMIT)
+		self.assertGreaterEqual(cnt[1], self.PACKET_LIMIT)
+		self.assertGreaterEqual(cnt[2], self.PACKET_LIMIT)
 
 if __name__ == '__main__':
 	unittest.main()
