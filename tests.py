@@ -1,7 +1,17 @@
+import logging
 import unittest
 
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
+
+logging.basicConfig(level=logging.INFO)
+
+def log_exc_off():
+	logging.getLogger().setLevel(logging.ERROR)
+
+def log_exc_on():
+	logging.getLogger().setLevel(logging.INFO)
+
 
 class MockTestbed(object):
 	def get_radio_pair(self):
@@ -168,7 +178,9 @@ class TestGame(unittest.TestCase):
 				while True:
 					self.send()
 
+		log_exc_off()
 		result = self._run_game(Receiver, Transmitter)
+		log_exc_on()
 		self.assertEqual(result.crashed, True)
 
 	def test_error_start(self):
@@ -177,7 +189,9 @@ class TestGame(unittest.TestCase):
 			def start(self):
 				raise Exception
 
+		log_exc_off()
 		result = self._run_game(Receiver, Transceiver)
+		log_exc_on()
 		self.assertEqual(result.crashed, True)
 
 	def test_error_status_update(self):
@@ -186,7 +200,9 @@ class TestGame(unittest.TestCase):
 			def status_update(self, status):
 				raise Exception
 
+		log_exc_off()
 		result = self._run_game(Receiver, Transceiver)
+		log_exc_on()
 		self.assertEqual(result.crashed, True)
 
 if __name__ == '__main__':
