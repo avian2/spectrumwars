@@ -1,6 +1,7 @@
 import logging
 import serial
 import threading
+import time
 import Queue
 
 log = logging.getLogger(__name__)
@@ -181,3 +182,6 @@ class Testbed(object):
 		txradio.neighbor = rxradio.addr
 
 		return rxradio, txradio
+
+	def time(self):
+		return time.time()

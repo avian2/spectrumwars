@@ -33,6 +33,10 @@ class Game(object):
 		self.packet_limit = packet_limit
 		self.time_limit = time_limit
 
+		self.update_interval = 1
+		self.start_time = None
+		self.end_time = None
+
 		self.state = 'new'
 
 	def instantiate(self):
@@ -56,6 +60,8 @@ class GameController(object):
 
 		game.state = 'running'
 
+		game.start_time = game.testbed.time()
+
 		for player in game.players:
 			for transceiver in player.rx, player.tx:
 				transceivers.append(transceiver)
@@ -68,12 +74,14 @@ class GameController(object):
 		for worker in workers:
 			worker.join()
 
+		self.end_time = game.testbed.time()
+
 		log.debug("Cleaning up transceivers")
 
 		# clean up any remaining packets in queues
 		for transceiver in transceivers:
 			try:
-				transceiver._recv()
+				transceiver._recv(timeout=0.1)
 			except StopGame:
 				pass
 
@@ -94,10 +102,12 @@ class GameController(object):
 		try:
 			transceiver._start()
 
-			for i in xrange(game.time_limit):
-				transceiver._recv()
+			i = 0
+			while game.testbed.time() - game.start_time < game.time_limit:
 
-				log.debug("%s status update (%d/%d)" % (name, i, game.time_limit))
+				transceiver._recv(timeout=game.update_interval)
+
+				log.debug("%s status update (%d)" % (name, i))
 
 				status = GameStatus()
 				transceiver._status_update(status)
@@ -105,8 +115,8 @@ class GameController(object):
 				if game.state != 'running':
 					log.debug("%s stopping game" % name)
 					break
-
-			log.debug("%s reached time limit" % name)
+			else:
+				log.debug("%s reached time limit" % name)
 
 		except StopGame:
 			log.debug("%s wants to stop game" % name)

@@ -49,14 +49,14 @@ class Transceiver(object):
 		if self._game.state != 'running':
 			raise StopGame
 
-	def _recv(self):
-		for data in self.recv_loop():
+	def _recv(self, timeout):
+		for data in self.recv_loop(timeout):
 			pass
 
 	def recv_loop(self, timeout=1.):
 		while True:
 			try:
-				data = self._radio.recv()
+				data = self._radio.recv(timeout=timeout)
 			except RadioTimeout:
 				break
 

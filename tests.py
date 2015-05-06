@@ -17,16 +17,22 @@ def log_exc_on():
 class MockTestbed(object):
 	def get_radio_pair(self):
 
-		rxradio = MockRadio()
-		txradio = MockRadio()
+		rxradio = MockRadio(self)
+		txradio = MockRadio(self)
 
 		rxradio.neighbor = txradio
 		txradio.neighbor = rxradio
 
+		self.clock = 0.
+
 		return rxradio, txradio
 
+	def time(self):
+		return self.clock
+
 class MockRadio(object):
-	def __init__(self):
+	def __init__(self, testbed):
+		self.testbed = testbed
 		self.neighbor = None
 
 		self.settings = None
@@ -39,10 +45,11 @@ class MockRadio(object):
 	def set_configuration(self, frequency, power, bandwidth):
 		self.settings = (frequency, power, bandwidth)
 
-	def recv(self, timeout=1.):
+	def recv(self, timeout=None):
 		try:
 			data = self.rx_queue.get(timeout=.01)
 		except Queue.Empty:
+			self.testbed.clock += timeout
 			raise RadioTimeout
 		else:
 			return data
