@@ -53,6 +53,7 @@ def main():
 	print "Results:"
 	for i, result in enumerate(results):
 		print "Player %d:" % (i+1,)
-		print "    packets: %d" % (result.packets)
+		print "    crashed: %s" % (result.crashed,)
+		print "    packets: %d" % (result.packets,)
 
 main()
