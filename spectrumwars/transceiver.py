@@ -38,11 +38,13 @@ class Transceiver(object):
 	def status_update(self, status):
 		pass
 
-	def set_configuration(self, frequency, power, bandwidth):
-		self._radio.set_configuration(frequency, power, bandwidth)
+	def set_configuration(self, frequency, bandwidth, power):
+		self._radio.set_configuration(frequency, bandwidth, power)
 
 	def send(self, data=None):
 		self._radio.send(data)
+
+		self._player.result.transmit_packets += 1
 
 		if self._game.state != 'running':
 			raise StopGame
@@ -54,9 +56,9 @@ class Transceiver(object):
 			except RadioTimeout:
 				break
 
-			self._player.result.packets += 1
+			self._player.result.received_packets += 1
 
-			if self._player.result.packets >= self._game.packet_limit:
+			if self._player.result.received_packets >= self._game.packet_limit:
 				raise StopGame
 
 			self._safe_call(self.recv, data)

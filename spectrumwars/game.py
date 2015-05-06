@@ -20,8 +20,9 @@ class Player(object):
 		self.result = PlayerResult()
 
 class PlayerResult(object):
-	def __init__(self, packets=0):
-		self.packets = packets
+	def __init__(self):
+		self.received_packets = 0
+		self.transmit_packets = 0
 		self.crashed = False
 
 class Game(object):

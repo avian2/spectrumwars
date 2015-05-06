@@ -60,7 +60,7 @@ class TestGame(unittest.TestCase):
 			pass
 
 		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(result.packets, 0)
+		self.assertEqual(result.received_packets, 0)
 
 	def test_one_packet(self):
 
@@ -74,7 +74,7 @@ class TestGame(unittest.TestCase):
 				self.send()
 
 		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(result.packets, 1)
+		self.assertEqual(result.received_packets, 1)
 
 	def test_one_packet_miss(self):
 
@@ -88,7 +88,7 @@ class TestGame(unittest.TestCase):
 				self.send()
 
 		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(result.packets, 0)
+		self.assertEqual(result.received_packets, 0)
 
 	def test_all_packets(self):
 
@@ -104,8 +104,8 @@ class TestGame(unittest.TestCase):
 					self.send()
 
 		result = self._run_game(Receiver, Transmitter)
-		self.assertGreater(result.packets, 0)
-		#self.assertEqual(result.packets, self.PACKET_LIMIT)
+		self.assertGreater(result.received_packets, 0)
+		#self.assertEqual(result.received_packets, self.PACKET_LIMIT)
 
 	def test_recv_packet(self):
 

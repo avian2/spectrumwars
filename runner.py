@@ -52,8 +52,12 @@ def main():
 
 	print "Results:"
 	for i, result in enumerate(results):
+
+		ratio = 100. * result.received_packets / result.transmit_packets
+
 		print "Player %d:" % (i+1,)
 		print "    crashed: %s" % (result.crashed,)
-		print "    packets: %d" % (result.packets,)
+		print "    transmit packets: %d" % (result.transmit_packets,)
+		print "    received packets: %d (%.0f%%)" % (result.received_packets, ratio)
 
 main()

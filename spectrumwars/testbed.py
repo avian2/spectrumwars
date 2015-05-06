@@ -132,8 +132,8 @@ class Radio(object):
 
 		self._cmd("t %02x %s" % (self.neighbor, strdata))
 
-	def set_configuration(self, frequency, power, bandwidth):
-		pass
+	def set_configuration(self, frequency, bandwidth, power):
+		self._cmd("c %x %x %x" % (frequency, bandwidth, power))
 
 	def recv(self, timeout=1.):
 		data = self.raw.recv(timeout=timeout)
