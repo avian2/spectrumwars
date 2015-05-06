@@ -91,8 +91,7 @@ class RadioRaw(object):
 
 class Radio(object):
 
-	#DATA_LEN = 252
-	DATA_LEN = 50
+	DATA_LEN = 252
 
 	def __init__(self, path, addr):
 
