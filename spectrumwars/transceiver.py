@@ -66,7 +66,7 @@ class Transceiver(object):
 
 			yield data
 
-			if self._player.result.received_packets >= self._game.packet_limit:
+			if self._game.should_finish():
 				raise StopGame
 
 	def recv(self, data):

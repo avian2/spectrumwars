@@ -39,6 +39,23 @@ class Game(object):
 
 		self.state = 'new'
 
+	def should_finish(self):
+
+		if self.testbed.time() - self.start_time > self.time_limit:
+			log.debug("game time limit reached!")
+			return True
+
+		for player in self.players:
+			if player.result.received_packets >= self.packet_limit:
+				log.debug("game packet limit reached by player %d!" %
+						player.rx._i)
+				return True
+
+		if self.state != 'running':
+			return True
+
+		return False
+
 	def instantiate(self):
 		for i, player in enumerate(self.players):
 			player.instantiate(self, i)
@@ -103,7 +120,7 @@ class GameController(object):
 			transceiver._start()
 
 			i = 0
-			while game.testbed.time() - game.start_time < game.time_limit:
+			while not game.should_finish():
 
 				transceiver._recv(timeout=game.update_interval)
 
@@ -112,13 +129,8 @@ class GameController(object):
 				status = GameStatus()
 				transceiver._status_update(status)
 
-				if game.state != 'running':
-					log.debug("%s stopping game" % name)
-					break
-			else:
-				log.debug("%s reached time limit" % name)
-
 		except StopGame:
-			log.debug("%s wants to stop game" % name)
+			pass
 
+		log.debug("%s worker stopped" % name)
 		game.state = 'stopping'
