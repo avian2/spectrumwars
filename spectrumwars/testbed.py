@@ -92,6 +92,7 @@ class RadioRaw(object):
 class Radio(object):
 
 	DATA_LEN = 252
+	CMD_RETRIES = 3
 
 	def __init__(self, path, addr):
 
@@ -104,7 +105,7 @@ class Radio(object):
 		self.neighbor = None
 
 	def _cmd(self, cmd):
-		while True:
+		for n in xrange(self.CMD_RETRIES):
 			try:
 				self.raw.cmd(cmd)
 			except RadioTimeout:
@@ -112,7 +113,9 @@ class Radio(object):
 			except RadioError, e:
 				log.warning("Command error: %r: %s" % (cmd, e))
 			else:
-				break
+				return
+
+		log.error("Giving up on %r after %d errors" % (cmd, n+1))
 
 	def send(self, data):
 
