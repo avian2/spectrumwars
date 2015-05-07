@@ -112,7 +112,7 @@ class GameController(object):
 		for worker in workers:
 			worker.join()
 
-		self.end_time = game.testbed.time()
+		game.end_time = game.testbed.time()
 
 		log.debug("Cleaning up transceivers")
 

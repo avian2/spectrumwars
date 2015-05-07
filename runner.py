@@ -58,8 +58,9 @@ def main():
 
 		print "Player %d:" % (i+1,)
 		print "    crashed: %s" % (result.crashed,)
-		print "    transmit packets: %d" % (result.transmit_packets,)
-		print "    received packets: %d (%.0f%%)" % (result.received_packets, ratio)
+		print "    transmitted packets: %d" % (result.transmit_packets,)
+		print "    received packets   : %d (%.0f%%)" % (result.received_packets, ratio)
+		print "Game time: %.1f seconds" % (game.end_time - game.start_time,)
 
 	pickle.dump(game.log, open("game.log", "wb"))
 
