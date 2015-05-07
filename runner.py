@@ -2,6 +2,7 @@ import imp
 import logging
 import os
 import sys
+import pickle
 
 from spectrumwars import Player, Game, GameController, Testbed
 
@@ -59,5 +60,7 @@ def main():
 		print "    crashed: %s" % (result.crashed,)
 		print "    transmit packets: %d" % (result.transmit_packets,)
 		print "    received packets: %d (%.0f%%)" % (result.received_packets, ratio)
+
+	pickle.dump(game.log, open("game.log", "wb"))
 
 main()

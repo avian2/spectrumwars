@@ -39,6 +39,8 @@ class Game(object):
 
 		self.state = 'new'
 
+		self.log = []
+
 	def should_finish(self):
 
 		if self.testbed.time() - self.start_time > self.time_limit:
@@ -59,6 +61,17 @@ class Game(object):
 	def instantiate(self):
 		for i, player in enumerate(self.players):
 			player.instantiate(self, i)
+
+	def log_event(self, type, **kwargs):
+		event = GameEvent(type, **kwargs)
+		event.timestamp = self.testbed.time()
+		self.log.append(event)
+
+class GameEvent(object):
+	def __init__(self, type, **kwargs):
+		self.type = type
+		self.timestamp = None
+		self.data = kwargs
 
 class GameStatus(object):
 	def __init__(self, spectrum):

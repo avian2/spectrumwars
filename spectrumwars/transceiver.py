@@ -10,9 +10,11 @@ class Transceiver(object):
 	def __init__(self, game, i, role, radio):
 		self._game = game
 		self._player = game.players[i]
+		self._radio = radio
+
 		self._i = i
 		self._role = role
-		self._radio = radio
+		self._name = "(%d %s)" % (self._i, self._role)
 
 		self._settings = None
 
@@ -23,7 +25,7 @@ class Transceiver(object):
 			raise
 		except:
 			self._player.result.crashed = True
-			log.warning("(%d %s) crashed" % (self._i, self._role), exc_info=True)
+			log.warning("%s crashed" % (self._name,), exc_info=True)
 			raise StopGame
 
 	def _start(self):
@@ -39,9 +41,12 @@ class Transceiver(object):
 		pass
 
 	def set_configuration(self, frequency, bandwidth, power):
+		self._game.log_event("config", name=self._name, frequency=frequency, bandwidth=bandwidth, power=power)
+
 		self._radio.set_configuration(frequency, bandwidth, power)
 
 	def send(self, data=None):
+		self._game.log_event("send", name=self._name)
 		self._radio.send(data)
 
 		self._player.result.transmit_packets += 1
@@ -61,6 +66,8 @@ class Transceiver(object):
 				break
 
 			self._player.result.received_packets += 1
+
+			self._game.log_event("recv", name=self._name)
 
 			self._safe_call(self.recv, data)
 
