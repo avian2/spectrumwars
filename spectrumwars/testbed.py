@@ -146,6 +146,7 @@ class Radio(object):
 
 		strdata = data[2:]
 
+		# NOTE: have seen this fail in clean-up
 		assert len(strdata) == self.DATA_LEN*2
 
 		n = int(strdata[0:2], 16)
