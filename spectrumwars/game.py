@@ -67,6 +67,12 @@ class Game(object):
 		event.timestamp = self.testbed.time()
 		self.log.append(event)
 
+	def get_status(self):
+		status = GameStatus(self.testbed.get_spectrum())
+		self.log_event("status", status=status)
+
+		return status
+
 class GameEvent(object):
 	def __init__(self, type, **kwargs):
 		self.type = type
@@ -140,7 +146,7 @@ class GameController(object):
 
 				log.debug("%s status update (%d)" % (name, i))
 
-				status = GameStatus(game.testbed.get_spectrum())
+				status = game.get_status()
 
 				transceiver._status_update(status)
 
