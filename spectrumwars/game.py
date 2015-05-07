@@ -67,9 +67,9 @@ class Game(object):
 		event.timestamp = self.testbed.time()
 		self.log.append(event)
 
-	def get_status(self):
+	def get_status(self, name):
 		status = GameStatus(self.testbed.get_spectrum())
-		self.log_event("status", status=status)
+		self.log_event("status", name=name, status=status)
 
 		return status
 
@@ -146,7 +146,7 @@ class GameController(object):
 
 				log.debug("%s status update (%d)" % (name, i))
 
-				status = game.get_status()
+				status = game.get_status(transceiver._name)
 
 				transceiver._status_update(status)
 

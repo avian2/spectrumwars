@@ -41,7 +41,7 @@ class Transceiver(object):
 		pass
 
 	def get_status(self):
-		return self._game.get_status()
+		return self._game.get_status(self._name)
 
 	def set_configuration(self, frequency, bandwidth, power):
 		self._game.log_event("config", name=self._name, frequency=frequency, bandwidth=bandwidth, power=power)
