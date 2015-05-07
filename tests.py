@@ -36,6 +36,9 @@ class MockTestbed(object):
 	def stop(self):
 		pass
 
+	def get_spectrum(self):
+		return True
+
 class MockRadio(object):
 	def __init__(self, testbed):
 		self.testbed = testbed
@@ -245,6 +248,19 @@ class TestGame(unittest.TestCase):
 		self.assertGreaterEqual(cnt[0], self.PACKET_LIMIT)
 		self.assertGreaterEqual(cnt[1], self.PACKET_LIMIT)
 		self.assertGreaterEqual(cnt[2], self.PACKET_LIMIT)
+
+	def test_status_update(self):
+
+		sl = []
+
+		class Receiver(Transceiver):
+			def status_update(self, status):
+				sl.append(status)
+
+		self._run_game(Receiver, Transceiver)
+
+		for s in sl:
+			self.assertTrue(s.spectrum)
 
 if __name__ == '__main__':
 	unittest.main()

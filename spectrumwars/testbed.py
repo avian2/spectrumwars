@@ -203,5 +203,8 @@ class Testbed(object):
 		for radio in self.radios:
 			radio.stop()
 
+	def get_spectrum(self):
+		return self.sensor.get_spectrum()
+
 	def time(self):
 		return time.time()

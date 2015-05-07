@@ -61,7 +61,8 @@ class Game(object):
 			player.instantiate(self, i)
 
 class GameStatus(object):
-	pass
+	def __init__(self, spectrum):
+		self.spectrum = spectrum
 
 class GameController(object):
 	def __init__(self):
@@ -126,7 +127,8 @@ class GameController(object):
 
 				log.debug("%s status update (%d)" % (name, i))
 
-				status = GameStatus()
+				status = GameStatus(game.testbed.get_spectrum())
+
 				transceiver._status_update(status)
 
 		except StopGame:
