@@ -51,7 +51,7 @@ class Transceiver(object):
 
 		self._player.result.transmit_packets += 1
 
-		if self._game.state != 'running':
+		if self._game.should_finish():
 			raise StopGame
 
 	def _recv(self, timeout):
