@@ -25,7 +25,11 @@ class SpectrumSensor:
 
 	def get_spectrum(self):
 		x = self.probe_signal.level()
-		return tuple(10.*log10(v) for v in x)
+
+		try:
+			return tuple(10.*log10(v) for v in x)
+		except ValueError:
+			return tuple([0] * len(x))
 
 	def setup_top_block(self):
 		self.tb = gr.top_block()
