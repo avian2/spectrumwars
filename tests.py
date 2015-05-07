@@ -30,6 +30,12 @@ class MockTestbed(object):
 	def time(self):
 		return self.clock
 
+	def start(self):
+		pass
+
+	def stop(self):
+		pass
+
 class MockRadio(object):
 	def __init__(self, testbed):
 		self.testbed = testbed

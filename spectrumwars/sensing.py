@@ -69,4 +69,5 @@ def main():
 
 	s.stop()
 
-main()
+if __name__ == "__main__":
+	main()

@@ -71,6 +71,7 @@ class GameController(object):
 
 		log.debug("Instantiating player classes")
 		game.instantiate()
+		game.testbed.start()
 
 		transceivers = []
 		workers = []
@@ -102,8 +103,7 @@ class GameController(object):
 			except StopGame:
 				pass
 
-			transceiver._stop()
-
+		game.testbed.stop()
 		game.state = 'finished'
 
 		log.debug("Game concluded")

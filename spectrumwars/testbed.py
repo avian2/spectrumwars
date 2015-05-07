@@ -4,6 +4,8 @@ import threading
 import time
 import Queue
 
+from spectrumwars import sensing
+
 log = logging.getLogger(__name__)
 
 class RadioError(Exception): pass
@@ -166,23 +168,40 @@ class Testbed(object):
 
 	def __init__(self):
 		self.n = 0
+		self.sensor = sensing.SpectrumSensor()
 
-	def get_radio(self):
+		self.radios = []
+
+	def _get_radio(self):
 		path = "/dev/ttyUSB%d" % (self.n,)
 		radio = Radio(path, self.n)
+
+		self.radios.append(radio)
 
 		self.n += 1
 		return radio
 
 	def get_radio_pair(self):
 
-		rxradio = self.get_radio()
-		txradio = self.get_radio()
+		rxradio = self._get_radio()
+		txradio = self._get_radio()
 
 		rxradio.neighbor = txradio.addr
 		txradio.neighbor = rxradio.addr
 
 		return rxradio, txradio
+
+	def start(self):
+		log.debug("starting spectrum sensor")
+		self.sensor.start()
+
+	def stop(self):
+		log.debug("stopping spectrum sensor")
+		self.sensor.stop()
+
+		log.debug("cleaning up radios")
+		for radio in self.radios:
+			radio.stop()
 
 	def time(self):
 		return time.time()
