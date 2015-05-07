@@ -35,7 +35,7 @@ def get_players(path):
 
 def main():
 	PACKET_LIMIT = 50
-	TIME_LIMIT = 20
+	TIME_LIMIT = 30
 
 	logging.basicConfig(level=logging.DEBUG)
 
