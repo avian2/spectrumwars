@@ -73,8 +73,8 @@ class Transceiver(object):
 
 			yield data
 
-			if self._game.should_finish():
-				raise StopGame
+		if self._game.should_finish():
+			raise StopGame
 
 	def recv(self, data):
 		pass
