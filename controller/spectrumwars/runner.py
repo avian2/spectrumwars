@@ -1,48 +1,43 @@
 import imp
 import logging
 import os
+import re
 import sys
 import pickle
+import argparse
 
 from spectrumwars import Player, Game, GameController, Testbed
 
 log = logging.getLogger(__name__)
 
-def get_players(path):
+def get_players(paths):
 
 	players = []
 
-	n = 1
-	while True:
-		name = "player%d" % (n,)
+	for path in paths:
+		name = os.path.basename(path)
+		name = re.sub("\.py$", "", name)
 
-		modpath = os.path.join(path, name + ".py")
-
-		if not os.path.exists(modpath):
-			break
-
-		mod = imp.load_source(name, modpath)
+		mod = imp.load_source(name, path)
 
 		player = Player(mod.Receiver, mod.Transmitter)
-
 		players.append(player)
 
-		n += 1
-
-	log.info("Loaded %d players" % (n-1,))
+	log.info("Loaded %d players" % (len(players),))
 
 	return players
 
-def main():
-	PACKET_LIMIT = 50
-	TIME_LIMIT = 30
-
+def run(args):
 	logging.basicConfig(level=logging.DEBUG)
 
-	testbed = Testbed()
-	players = get_players(sys.argv[1])
+	if not args.player_paths:
+		log.error("Please specify at least one player on the command line")
+		return
 
-	game = Game(testbed, players, packet_limit=PACKET_LIMIT, time_limit=TIME_LIMIT)
+	testbed = Testbed()
+	players = get_players(args.player_paths)
+
+	game = Game(testbed, players, packet_limit=args.packet_limit, time_limit=args.time_limit)
 	ctl = GameController()
 
 	log.info("Running game...")
@@ -62,4 +57,23 @@ def main():
 		print "    received packets   : %d (%.0f%%)" % (result.received_packets, ratio)
 		print "Game time: %.1f seconds" % (game.end_time - game.start_time,)
 
-	pickle.dump(game.log, open("game.log", "wb"))
+	if args.log_path:
+		pickle.dump(game.log, open(args.log_path, "wb"))
+
+def main():
+	parser = argparse.ArgumentParser(description="run a spectrum wars game")
+
+	parser.add_argument('player_paths', metavar='PATH', nargs='+',
+			help='path to .py file containing player classes')
+
+	parser.add_argument('--time-limit', metavar='SECONDS', type=int, dest='time_limit', default=30,
+			help='time limit for the game (default: 30 seconds)')
+	parser.add_argument('--packet-limit', metavar='PACKETS', type=int, dest='packet_limit', default=50,
+			help='number of packets required to win (default: 50)')
+
+	parser.add_argument('-l', '--log', metavar='PATH', dest='log_path',
+			help='path to save binary game log to')
+
+	args = parser.parse_args()
+
+	run(args)
