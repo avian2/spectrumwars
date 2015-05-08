@@ -4,6 +4,10 @@ SpectrumWars
 SpectrumWars is a work-in-progress programming game where players compete for
 bandwidth on a limited piece of a radio spectrum.
 
+On-line documentation:
+
+https://spectrumwars.readthedocs.org/en/latest/
+
 
 Contents at a glance
 --------------------
