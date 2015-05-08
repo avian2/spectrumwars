@@ -7,7 +7,7 @@ setup(name='spectrumwars',
     description='A programming game where players compete for radio bandwidth.',
     license='GPL3',
     author='Tomaz Solc',
-    author_email='tomaz.solc@tablix.org',
+    author_email='tomaz.solc@ijs.si',
     packages = [ 'spectrumwars', 'spectrumwars.testbed' ],
     entry_points = {
         'console_scripts': [

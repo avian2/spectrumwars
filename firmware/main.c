@@ -1,3 +1,10 @@
+/**
+ * @file
+ * @brief Firmware for SpectrumWars game
+ * @author Tomaz Solc
+ *
+ * copyright (c) SensorLab, Jozef Stefan Institute
+ */
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>

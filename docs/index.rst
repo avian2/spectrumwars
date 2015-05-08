@@ -11,6 +11,9 @@ Welcome to SpectrumWars documentation!
 SpectrumWars is a work-in-progress programming game where players compete for
 bandwidth on a limited piece of a radio spectrum.
 
+This Python implementation for VESNA sensor nodes was written by Tomaz Solc
+(tomaz.solc@ijs.si)
+
 Contents:
 
 .. toctree::
