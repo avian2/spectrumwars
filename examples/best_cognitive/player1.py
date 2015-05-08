@@ -14,7 +14,7 @@ class Transmitter(Transceiver):
 			ch = chl[random.randint(0, 20)]
 
 			self.set_configuration(ch, 0, 0)
-			for n in xrange(20):
+			for n in xrange(10):
 				self.send()
 
 class Receiver(Transceiver):
@@ -28,5 +28,9 @@ class Receiver(Transceiver):
 			for ch in chl[:5]:
 				self.set_configuration(ch, 0, 0)
 
+				found = False
 				for data in self.recv_loop(timeout=.2):
-					pass
+					found = True
+
+				if found:
+					break
