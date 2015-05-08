@@ -1,3 +1,4 @@
+import os
 import pickle
 import argparse
 
@@ -10,9 +11,7 @@ class ParsedLog:
 		self.tx = []
 		self.config = []
 
-def plot(args):
-	log = pickle.load(open(args.log_path[0], "rb"))
-
+def plot_player(log, i, out_path):
 	fig = pyplot.figure(figsize=(8,10))
 	ax = fig.add_subplot(111, axis_bgcolor='k')
 
@@ -24,6 +23,9 @@ def plot(args):
 	parsed = { 'rx': ParsedLog(), 'tx': ParsedLog() }
 
 	for event in log:
+		if event.data['i'] != i:
+			continue
+
 		p = parsed[event.data['role']]
 
 		if event.type == "config":
@@ -92,7 +94,21 @@ def plot(args):
 
 	pyplot.grid(color='w')
 
-	pyplot.savefig(args.out_path, dpi=120)
+	pyplot.savefig(out_path, dpi=120)
+
+def plot(args):
+	log = pickle.load(open(args.log_path[0], "rb"))
+
+	try:
+		os.mkdir(args.out_path)
+	except OSError:
+		pass
+
+	nplayers = max(l.data['i'] for l in log) + 1
+
+	for i in xrange(nplayers):
+		out_path = os.path.join(args.out_path, "player%d.png" % (i,))
+		plot_player(log, i, out_path)
 
 def main():
 	parser = argparse.ArgumentParser(description="plot the progress of a spectrum wars game")
