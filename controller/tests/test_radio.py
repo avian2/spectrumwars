@@ -3,86 +3,48 @@ import unittest
 import threading
 import Queue
 
-class RadioError(Exception): pass
-class RadioTimeout(Exception): pass
+from spectrumwars.testbed import RadioBase, RadioError, RadioTimeout
+from spectrumwars.testbed.vesna import RadioRaw as AsyncRadio
 
-class Radio(object):
-
-	COMMAND_RESPONSE_TIMEOUT = .5
-	RECEIVE_TIMEOUT = 2.
-	STOP_POLL = .5
-
+class SyncRadio(RadioBase):
 	def __init__(self, device):
 		self.device = device
-		self.comm = serial.Serial(device, 115200, timeout=self.STOP_POLL)
-
-		self.rx_queue = Queue.Queue()
-
-		self.command_lock = threading.Lock()
-		self.response_event = threading.Event()
-		self.response = None
-
-		self.run = True
-		self.worker_thread = threading.Thread(target=self.worker)
-		self.worker_thread.start()
-
-	def stop(self):
-		self.run = False
-		self.worker_thread.join()
+		self.comm = serial.Serial(device, 115200, timeout=2.)
 
 	def cmd(self, cmd):
-		self.command_lock.acquire()
-
-		self.response_event.clear()
 		self.comm.write("%s\n" % (cmd,))
 
-		if self.response_event.wait(self.COMMAND_RESPONSE_TIMEOUT):
-			resp = self.response
-		else:
-			resp = None
-
-		self.command_lock.release()
-
-		if resp is None:
-			raise RadioTimeout("timeout waiting for response to %r" % (cmd,))
-		elif resp == "O":
-			pass
-		elif resp.startswith("E "):
-			raise RadioError(resp[2:])
-		else:
-			print resp
-			assert False
+		while True:
+			resp = self.comm.readline()
+			if not resp:
+				raise RadioTimeout("timeout waiting for response to %r" % (cmd,))
+			elif resp == "O\n":
+				break
+			elif resp.startswith("E ") and resp.endswith("\n"):
+				raise RadioError(resp[2:-1])
+			else:
+				self.debug(resp.strip())
 
 	def recv(self):
-		try:
-			resp = self.rx_queue.get(timeout=self.RECEIVE_TIMEOUT)
-		except Queue.Empty:
-			raise RadioTimeout("timeout waiting for reception")
-		else:
-			return resp.strip()
+		while True:
+			resp = self.comm.readline()
+			if not resp:
+				raise RadioTimeout("timeout waiting for reception")
+			elif resp.startswith("R "):
+				return resp.strip()
+			else:
+				self.debug(resp.strip())
 
 	def recv_flush(self):
 		try:
 			while True:
-				self.rx_queue.get(block=False)
-		except Queue.Empty:
+				self.recv()
+		except RadioTimeout:
 			pass
 
 	def debug(self, msg):
-		print "%s >>> %s" % (self.device, msg)
-
-	def worker(self):
-		while self.run:
-			resp = self.comm.readline()
-			if not resp:
-				continue
-			elif resp.startswith("R "):
-				self.rx_queue.put(resp.strip())
-			elif resp.startswith("E ") or resp.startswith("O"):
-				self.response = resp.strip()
-				self.response_event.set()
-			else:
-				self.debug(resp.strip())
+		#print "%s >>> %s" % (self.device, msg)
+		pass
 
 class OnLineRadioTestCase(unittest.TestCase):
 
@@ -90,16 +52,21 @@ class OnLineRadioTestCase(unittest.TestCase):
 	NODE_2_DEV = "/dev/ttyUSB1"
 
 	@classmethod
-	def setUpClass(self):
-		self.node1 = Radio(self.NODE_1_DEV)
-		self.node2 = Radio(self.NODE_2_DEV)
+	def setUpClass(cls):
+		cls.node1 = cls.RADIO_CLASS(cls.NODE_1_DEV)
+		cls.node2 = cls.RADIO_CLASS(cls.NODE_2_DEV)
+
+		cls.node1.start()
+		cls.node2.start()
 
 	@classmethod
-	def tearDownClass(self):
-		self.node1.stop()
-		self.node2.stop()
+	def tearDownClass(cls):
+		cls.node1.stop()
+		cls.node2.stop()
 
 class TestRadioInterface(OnLineRadioTestCase):
+
+	RADIO_CLASS = SyncRadio
 
 	def test_set_address(self):
 		self.node2.cmd("a 01")
@@ -117,6 +84,9 @@ class TestRadioInterface(OnLineRadioTestCase):
 		self.assertRaises(RadioError, self.node1.cmd, "t 02 " + "01" * 254)
 
 class TestRadio(OnLineRadioTestCase):
+
+	RADIO_CLASS = SyncRadio
+
 	def setUp(self):
 		for node in self.node1, self.node2:
 			node.cmd("a 00")
@@ -145,7 +115,7 @@ class TestRadio(OnLineRadioTestCase):
 			self.node1.cmd("c 0 %x 0" % (bw,))
 			self.node2.cmd("c 0 %x 0" % (bw,))
 			for n in xrange(1, 253, 10):
-				print bw, n
+				#print bw, n
 				self._send_one(n=n)
 
 	def test_short(self):
@@ -176,19 +146,6 @@ class TestRadio(OnLineRadioTestCase):
 		self.node1.recv_flush()
 		self.node2.recv_flush()
 
-	def test_long_null_packet(self):
-		# this fails if data whitening isn't working
-		data = "00" * 252
-		N = 10
-
-		for n in xrange(N):
-			self.node1.cmd("t 0 %s" % (data,))
-
-		expected = "R %s" % (data,)
-		for n in xrange(N):
-			resp = self.node2.recv()
-			self.assertEqual(resp, expected)
-
 	def test_config_1(self):
 		for chan in xrange(0, 255, 50):
 			for bw in xrange(4):
@@ -203,6 +160,29 @@ class TestRadio(OnLineRadioTestCase):
 	def test_config_3(self):
 		self.node1.cmd("c 0 1 0")
 		self.assertRaises(RadioTimeout, self._send_one)
+
+class TestAsyncRadio(OnLineRadioTestCase):
+
+	RADIO_CLASS = AsyncRadio
+
+	def setUp(self):
+		for node in self.node1, self.node2:
+			node.cmd("a 00")
+			node.cmd("c 0 0 0")
+
+	def test_long_null_packet(self):
+		# this fails if data whitening isn't working
+		data = "00" * 252
+		N = 10
+
+		for n in xrange(N):
+			self.node1.cmd("t 0 %s" % (data,))
+
+		expected = "R %s" % (data,)
+		for n in xrange(N):
+			resp = self.node2.recv()
+			self.assertEqual(resp, expected)
+
 
 if __name__ == "__main__":
 	unittest.main()
