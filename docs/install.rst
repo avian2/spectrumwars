@@ -69,7 +69,7 @@ You need the following packages installed:
 
 * GNURadio with UHD (version 4.7.2 is known to work) - http://gnuradio.org
 
-* gr-specest - https://github.com/kit-cel/gr-specest
+* gr-specest - https://github.com/avian2/gr-specest
 
 * numpy (``apt-get install python-numpy``)
 * matplotlib (``apt-get install python-matplotlib``)
