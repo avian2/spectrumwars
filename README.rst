@@ -43,9 +43,3 @@ this program. If not, see http://www.gnu.org/licenses/
 
 ..
     vim: tw=75 ts=4 sw=4 expandtab softtabstop=4
-
-
-Requirements:
-
-GNU Radio
-gr-specest
