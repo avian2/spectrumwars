@@ -11,7 +11,8 @@ setup(name='spectrumwars',
     packages = [ 'spectrumwars', 'spectrumwars.testbed' ],
     entry_points = {
         'console_scripts': [
-            'spectrumwars_runner = spectrumwars.runner:main'
+            'spectrumwars_runner = spectrumwars.runner:main',
+            'spectrumwars_plot = spectrumwars.plotter:main'
         ]
     },
 
