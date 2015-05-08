@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+from spectrumwars.testbed import TestbedError
 
 log = logging.getLogger(__name__)
 

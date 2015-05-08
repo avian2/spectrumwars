@@ -1,4 +1,5 @@
 import logging
+import os
 import serial
 import threading
 import time
@@ -8,6 +9,7 @@ from spectrumwars import sensing
 
 log = logging.getLogger(__name__)
 
+class TestbedError(Exception): pass
 class RadioError(Exception): pass
 class RadioTimeout(Exception): pass
 
@@ -27,6 +29,7 @@ class RadioRaw(object):
 		self.response_event = threading.Event()
 		self.response = None
 
+	def start(self):
 		self.run = True
 		self.worker_thread = threading.Thread(target=self.worker)
 		self.worker_thread.start()
@@ -102,10 +105,12 @@ class Radio(object):
 		self.raw = RadioRaw(path)
 		self.addr = addr
 
-		self._cmd("a %02x" % (addr,))
-		self._cmd("c 0 0 0")
-
 		self.neighbor = None
+
+	def start(self):
+		self.raw.start()
+		self._cmd("a %02x" % (self.addr,))
+		self._cmd("c 0 0 0")
 
 	def _cmd(self, cmd):
 		for n in xrange(self.CMD_RETRIES):
@@ -173,13 +178,17 @@ class Testbed(object):
 		self.radios = []
 
 	def _get_radio(self):
-		path = "/dev/ttyUSB%d" % (self.n,)
-		radio = Radio(path, self.n)
+		for skipped in xrange(5):
+			path = "/dev/ttyUSB%d" % (self.n,)
+			self.n += 1
 
-		self.radios.append(radio)
+			if os.path.exists(path):
+				radio = Radio(path, self.n)
+				self.radios.append(radio)
 
-		self.n += 1
-		return radio
+				return radio
+
+		raise TestbedError("Can't get radio device (last tried %s)" % (path,))
 
 	def get_radio_pair(self):
 
@@ -194,6 +203,10 @@ class Testbed(object):
 	def start(self):
 		log.debug("starting spectrum sensor")
 		self.sensor.start()
+
+		log.debug("starting radios")
+		for radio in self.radios:
+			radio.start()
 
 	def stop(self):
 		log.debug("stopping spectrum sensor")
