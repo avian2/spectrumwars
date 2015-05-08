@@ -31,10 +31,6 @@ def get_players(paths):
 def run(args):
 	logging.basicConfig(level=logging.DEBUG)
 
-	if not args.player_paths:
-		log.error("Please specify at least one player on the command line")
-		return
-
 	testbed = Testbed()
 	players = get_players(args.player_paths)
 
