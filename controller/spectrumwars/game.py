@@ -150,6 +150,8 @@ class GameController(object):
 
 				transceiver._status_update(status)
 
+				i += 1
+
 		except StopGame:
 			pass
 
