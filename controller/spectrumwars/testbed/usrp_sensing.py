@@ -61,17 +61,3 @@ class SpectrumSensor:
 		self.tb.connect((fft_vxx, 0), (blocks_complex_to_mag_squared, 0))
 		self.tb.connect((blocks_complex_to_mag_squared, 0), (specest_moving_average_vff, 0))
 		self.tb.connect((specest_moving_average_vff, 0), (self.probe_signal, 0))
-
-def main():
-
-	s = SpectrumSensor()
-	s.start()
-
-	for i in xrange(60):
-		time.sleep(1)
-		print s.get_spectrum()
-
-	s.stop()
-
-if __name__ == "__main__":
-	main()
