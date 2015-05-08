@@ -8,6 +8,9 @@
 Welcome to SpectrumWars documentation!
 ======================================
 
+SpectrumWars is a work-in-progress programming game where players compete for
+bandwidth on a limited piece of a radio spectrum.
+
 Contents:
 
 .. toctree::
