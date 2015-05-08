@@ -63,5 +63,3 @@ def main():
 		print "Game time: %.1f seconds" % (game.end_time - game.start_time,)
 
 	pickle.dump(game.log, open("game.log", "wb"))
-
-main()

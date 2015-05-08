@@ -9,5 +9,11 @@ setup(name='spectrumwars',
     author='Tomaz Solc',
     author_email='tomaz.solc@tablix.org',
     packages = [ 'spectrumwars' ],
+    entry_points = {
+        'console_scripts': [
+            'spectrumwars_runner = spectrumwars.runner:main'
+        ]
+    },
+
     test_suite = 'tests',
 )
