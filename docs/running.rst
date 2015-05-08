@@ -8,7 +8,11 @@ To run a game with a single player that is specified by code in
 
    $ spectrumwars_runner -l example.log examples/better_cognitive.py
 
-The script runs the game and prints out some game statistics in the end::
+``spectrumwars_runner`` automatically finds any connected nodes (it
+assumes that all USB-to-serial devices are in fact connected to VESNA nodes)
+and assigns them to players.
+
+In the end, it prints out some game statistics::
 
    Results:
    Player 1:
@@ -17,9 +21,10 @@ The script runs the game and prints out some game statistics in the end::
        received packets   : 51 (56%)
    Game time: 11.5 seconds
 
-It also saves a binary log file to ``example.log``. This log contains useful
-debugging information about events that occurred during the game. You can
-visualize the log by running::
+It also saves a binary log file to ``example.log``. In addition to the ASCII
+log that is printed on the console, the binary log contains useful debugging
+information about events that occurred during the game. You can visualize the
+log by running::
 
    $ spectrumwars_plot -o example.out example.log
 
