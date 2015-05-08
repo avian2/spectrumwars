@@ -3,6 +3,7 @@ import unittest
 
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
+from spectrumwars.testbed import TestbedBase, RadioBase
 
 level = logging.INFO
 logging.basicConfig(level=level)
@@ -14,7 +15,7 @@ def log_exc_on():
 	logging.getLogger().setLevel(level)
 
 
-class MockTestbed(object):
+class MockTestbed(TestbedBase):
 	def get_radio_pair(self):
 
 		rxradio = MockRadio(self)
@@ -30,16 +31,10 @@ class MockTestbed(object):
 	def time(self):
 		return self.clock
 
-	def start(self):
-		pass
-
-	def stop(self):
-		pass
-
 	def get_spectrum(self):
 		return True
 
-class MockRadio(object):
+class MockRadio(RadioBase):
 	def __init__(self, testbed):
 		self.testbed = testbed
 		self.neighbor = None
@@ -62,9 +57,6 @@ class MockRadio(object):
 			raise RadioTimeout
 		else:
 			return data
-
-	def stop(self):
-		pass
 
 class TestGame(unittest.TestCase):
 

@@ -6,7 +6,8 @@ import sys
 import pickle
 import argparse
 
-from spectrumwars import Player, Game, GameController, Testbed
+from spectrumwars import Player, Game, GameController
+from spectrumwars.testbed.vesna import Testbed
 
 log = logging.getLogger(__name__)
 

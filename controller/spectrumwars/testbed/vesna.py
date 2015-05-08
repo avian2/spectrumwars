@@ -5,13 +5,10 @@ import threading
 import time
 import Queue
 
-from spectrumwars import sensing
+from spectrumwars.testbed import TestbedBase, RadioBase, RadioTimeout, RadioError, TestbedError
+from spectrumwars.testbed.usrp_sensing import SpectrumSensor
 
 log = logging.getLogger(__name__)
-
-class TestbedError(Exception): pass
-class RadioError(Exception): pass
-class RadioTimeout(Exception): pass
 
 class RadioRaw(object):
 
@@ -95,7 +92,7 @@ class RadioRaw(object):
 			else:
 				self.debug(resp.strip())
 
-class Radio(object):
+class Radio(RadioBase):
 
 	DATA_LEN = 252
 	CMD_RETRIES = 3
@@ -169,11 +166,11 @@ class Radio(object):
 	def stop(self):
 		self.raw.stop()
 
-class Testbed(object):
+class Testbed(TestbedBase):
 
 	def __init__(self):
 		self.n = 0
-		self.sensor = sensing.SpectrumSensor()
+		self.sensor = SpectrumSensor()
 
 		self.radios = []
 
