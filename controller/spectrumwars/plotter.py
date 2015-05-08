@@ -18,7 +18,7 @@ def plot(args):
 	for event in log:
 		
 		def pl(ch, marker):
-			if 'rx' in event.data['name']:
+			if 'rx' == event.data['role']:
 				color = (1,0,0)
 			else:
 				color = (0,1,0)
@@ -36,18 +36,18 @@ def plot(args):
 		
 		if event.type == "config":
 			pl(marker='+', ch=event.data['frequency'])
-			cur_ch[event.data['name']] = event.data['frequency']
+			cur_ch[event.data['role']] = event.data['frequency']
 		elif event.type == "send":
-			pl(marker='x', ch=cur_ch.get(event.data['name'], 0))
+			pl(marker='x', ch=cur_ch.get(event.data['role'], 0))
 		elif event.type == "recv":
-			pl(marker='o', ch=cur_ch.get(event.data['name'], 0))
+			pl(marker='o', ch=cur_ch.get(event.data['role'], 0))
 		elif event.type == "status":
 			s = np.array(event.data['status'].spectrum)
 			#s -= min(s)
 			#if max(s) > min(s):
 			#	s /= (max(s)-min(s))
 			
-			if 'rx' in event.data['name']:
+			if 'rx' in event.data['role']:
 				cmap = 'YlOrRd_r'
 			else:
 				cmap='YlGn_r'

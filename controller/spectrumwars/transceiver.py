@@ -41,15 +41,16 @@ class Transceiver(object):
 		pass
 
 	def get_status(self):
-		return self._game.get_status(self._name)
+		return self._game.get_status(self._i, self._role)
 
 	def set_configuration(self, frequency, bandwidth, power):
-		self._game.log_event("config", name=self._name, frequency=frequency, bandwidth=bandwidth, power=power)
+		self._game.log_event("config", i=self._i, role=self._role,
+				frequency=frequency, bandwidth=bandwidth, power=power)
 
 		self._radio.set_configuration(frequency, bandwidth, power)
 
 	def send(self, data=None):
-		self._game.log_event("send", name=self._name)
+		self._game.log_event("send", i=self._i, role=self._role)
 		self._radio.send(data)
 
 		self._player.result.transmit_packets += 1
@@ -70,7 +71,7 @@ class Transceiver(object):
 
 			self._player.result.received_packets += 1
 
-			self._game.log_event("recv", name=self._name)
+			self._game.log_event("recv",  i=self._i, role=self._role)
 
 			self._safe_call(self.recv, data)
 
