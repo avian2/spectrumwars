@@ -30,6 +30,11 @@ Implementation notes
   or worse. Current implementation is only a working demonstration of the class
   interface that is exposed to players.
 
+* I believe that in the final user interface for this game, it is crucial that
+  both console log of the running game and the visualized timeline are
+  presented to each player. Without this kind of feedback it is very hard to
+  develop a working algorith.
+
 * There is no concept of radio power usage, battery level, etc. as discussed in
   the original design document. I believe these are unnecessary complications
   and in any case would only be simulated since radios always run on external
