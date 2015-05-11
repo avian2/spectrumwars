@@ -3,6 +3,22 @@
 Implementation notes
 ====================
 
+* USRP spectrum sensing is inspired by a real-time signal analyzer. e.g. we do
+  continuous end-to-end FFTs with no blind time for all received samples. The
+  spectral density is then averaged over a window of 200 ms. This is the main
+  reason why sensing is very CPU intensive and we can't sense more than 64
+  channels (even if USRP frontend bandwidth would allow for more).
+
+  Sensing in this way is necessary because the radios have a very low duty
+  cycle (e.g. a "while True: send()" has only around 10% duty cycle). If we
+  would only take one sample the spectrum when players request it, it would
+  mostly appear empty. Hence the need to take a moving average if sensing is to
+  be useful for detecting transmissions.
+
+* The corrolary of the above is that even 64 channels is a very generous
+  portion of the spectrum for this game. A single channel could in theory
+  accomodate 10 players with very little interferrence.
+
 * Currently, it is very simple to cheat, since both of the player's transceiver
   classes exist in the same Python interpreter (in fact, in the same Python
   module). This makes it trivial to share state between the through global
