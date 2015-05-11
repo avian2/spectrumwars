@@ -94,11 +94,3 @@ To rebuild documentation run::
    $ make html
 
 Index is in ``_build/html/index.html``
-
-
-
-Requirements:
-
-GNU Radio
-gr-specest
-
