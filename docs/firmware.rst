@@ -103,6 +103,10 @@ R *<data>*
    Node received a packet. *<data>* is a hexadecimal string containing the
    data in the packet.
 
+   Radio does CRC checking in hardware and silently drops corrupted packets.
+   Hence it is very likely that the *<data>* string is identical to the one
+   passed to the corresponding *t* command.
+
 Any messages not conforming to this response format should be ignored by the
 controller.
 
