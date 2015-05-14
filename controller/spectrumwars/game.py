@@ -33,11 +33,12 @@ class PlayerResult(object):
 
 class Game(object):
 
-	def __init__(self, testbed, players, packet_limit=100, time_limit=100):
+	def __init__(self, testbed, players, packet_limit=100, time_limit=None, payload_limit=None):
 		self.testbed = testbed
 		self.players = players
 		self.packet_limit = packet_limit
 		self.time_limit = time_limit
+		self.payload_limit = payload_limit
 
 		self.update_interval = 1
 		self.start_time = None
@@ -49,15 +50,22 @@ class Game(object):
 
 	def should_finish(self):
 
-		if self.testbed.time() - self.start_time > self.time_limit:
-			log.debug("game time limit reached!")
-			return True
+		if self.time_limit is not None:
+			if self.testbed.time() - self.start_time > self.time_limit:
+				log.debug("game time limit reached!")
+				return True
 
 		for player in self.players:
-			if player.result.received_packets >= self.packet_limit:
-				log.debug("game packet limit reached by player %d!" %
-						player.rx._i)
-				return True
+			if self.packet_limit is not None:
+				if player.result.received_packets >= self.packet_limit:
+					log.debug("game packet limit reached by player %d!" %
+							player.rx._i)
+					return True
+			if self.payload_limit is not None:
+				if player.result.payload_bytes >= self.payload_limit:
+					log.debug("game payload limit reached by player %d!" %
+							player.rx._i)
+					return True
 
 		if self.state != 'running':
 			return True

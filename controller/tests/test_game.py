@@ -65,14 +65,18 @@ class TestGame(unittest.TestCase):
 
 	PACKET_LIMIT = 50
 	TIME_LIMIT = 50
+	PAYLOAD_LIMIT = 200*10
 
 	def setUp(self):
 		self.testbed = MockTestbed()
 
-	def _run_game(self, rxcls, txcls):
+	def _run_game(self, rxcls, txcls, packet_limit=PACKET_LIMIT, payload_limit=PAYLOAD_LIMIT,
+			time_limit=TIME_LIMIT):
 		player = Player(rxcls, txcls)
 		game = Game(self.testbed, [player],
-				packet_limit=self.PACKET_LIMIT, time_limit=self.TIME_LIMIT)
+				packet_limit=packet_limit,
+				time_limit=time_limit,
+				payload_limit=payload_limit)
 		ctl = GameController()
 		return ctl.run(game)[0]
 
@@ -139,9 +143,18 @@ class TestGame(unittest.TestCase):
 				while True:
 					self.send()
 
-		result = self._run_game(Receiver, Transmitter)
-		self.assertGreater(result.received_packets, 0)
-		#self.assertEqual(result.received_packets, self.PACKET_LIMIT)
+		result = self._run_game(Receiver, Transmitter, payload_limit=None, time_limit=None)
+		self.assertGreater(result.received_packets, self.PACKET_LIMIT)
+
+	def test_all_payload(self):
+
+		class Transmitter(Transceiver):
+			def start(self):
+				while True:
+					self.send()
+
+		result = self._run_game(Transceiver, Transmitter, packet_limit=None, time_limit=None)
+		self.assertGreater(result.payload_bytes, self.PAYLOAD_LIMIT)
 
 	def test_recv_packet(self):
 
@@ -295,7 +308,7 @@ class TestGame(unittest.TestCase):
 					self.send()
 					cnt[2] += 1
 
-		result = self._run_game(Receiver, Transmitter)
+		result = self._run_game(Receiver, Transmitter, payload_limit=None)
 
 		self.assertEqual(result.crashed, False)
 		self.assertGreaterEqual(cnt[0], self.PACKET_LIMIT)
