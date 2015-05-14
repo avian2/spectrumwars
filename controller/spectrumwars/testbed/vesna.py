@@ -216,5 +216,8 @@ class Testbed(TestbedBase):
 	def get_spectrum(self):
 		return self.sensor.get_spectrum()
 
+	def get_packet_size(self):
+		return Radio.DATA_LEN - 1
+
 	def time(self):
 		return time.time()
