@@ -12,8 +12,8 @@ class ParsedLog:
 		self.config = []
 
 def plot_player(log, i, out_path):
-	fig = pyplot.figure(figsize=(8,10))
-	ax = fig.add_subplot(111, axis_bgcolor='k')
+	fig = pyplot.figure(figsize=(16,10))
+	ax = fig.add_subplot(121, axis_bgcolor='k')
 
 	min_t = min(l.timestamp for l in log)
 	max_t = max(l.timestamp for l in log)
@@ -22,11 +22,21 @@ def plot_player(log, i, out_path):
 
 	parsed = { 'rx': ParsedLog(), 'tx': ParsedLog() }
 
+	payload = []
+	pkt_sent = []
+	pkt_recv = []
+
 	for event in log:
 		if event.data['i'] != i:
 			continue
 
 		p = parsed[event.data['role']]
+
+		timestamp = event.timestamp - min_t
+
+		payload.append((event.results[i].payload_bytes, timestamp))
+		pkt_sent.append((event.results[i].transmit_packets, timestamp))
+		pkt_recv.append((event.results[i].received_packets, timestamp))
 
 		if event.type == "config":
 			l = p.config
@@ -41,7 +51,7 @@ def plot_player(log, i, out_path):
 				l = None
 
 		if l is not None:
-			l.append((ch, event.timestamp-min_t))
+			l.append((ch, timestamp))
 		elif event.type == "status":
 			s = np.array(event.data['status'].spectrum)
 
@@ -51,7 +61,7 @@ def plot_player(log, i, out_path):
 				cmap='YlGn_r'
 
 			ax.scatter(range(len(s)),
-					   [event.timestamp - min_t]*len(s),
+					   [timestamp]*len(s),
 					   c=s,
 					   s=50,
 					   marker='s',
@@ -88,11 +98,41 @@ def plot_player(log, i, out_path):
 	ax.set_ylim(0, max_t-min_t)
 	ax.set_xlim(0, 64)
 	pyplot.xlabel("frequency [channel]")
-	pyplot.ylabel("time [s]")
+	pyplot.ylabel("game time [s]")
 
 	pyplot.legend()
 
 	pyplot.grid(color='w')
+
+
+	ax = fig.add_subplot(122)
+	ax.set_ylim(0, max_t-min_t)
+
+	payload = np.array(payload)
+	payloadn = np.array(payload)
+	payloadn[:,0] = 100. * payload[:,0] / max(payload[:,0])
+
+	pkt_recv = np.array(pkt_recv)
+	pkt_sent = np.array(pkt_sent)
+
+	pkt_recvn = np.array(pkt_recv)
+	pkt_recvn[:,0] = 100. * pkt_recv[:,0] / max(pkt_sent[:,0])
+
+	pkt_sentn = np.array(pkt_sent)
+	pkt_sentn[:,0] = 100. * pkt_sent[:,0] / max(pkt_sent[:,0])
+
+	def plot(l, **kwargs):
+		l = np.array(l)
+		ax.plot(l[:,0], l[:,1], '.-', **kwargs)
+
+	plot(payloadn, label='payload', color='b')
+	plot(pkt_recvn, label='packets recv', color='r')
+	plot(pkt_sentn, label='packets sent', color='g')
+
+	pyplot.xlabel("[%]")
+	pyplot.ylabel("game time [s]")
+	pyplot.legend(loc='lower right')
+	pyplot.grid()
 
 	pyplot.savefig(out_path, dpi=120)
 

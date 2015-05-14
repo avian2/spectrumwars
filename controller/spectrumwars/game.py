@@ -1,3 +1,4 @@
+import copy
 import logging
 import threading
 import time
@@ -79,6 +80,7 @@ class Game(object):
 	def log_event(self, type, **kwargs):
 		event = GameEvent(type, **kwargs)
 		event.timestamp = self.testbed.time()
+		event.results = [ copy.copy(player.result) for player in self.players ]
 		self.log.append(event)
 
 	def get_status(self, i, role):

@@ -16,10 +16,11 @@ In the end, it prints out some game statistics::
 
    Results:
    Player 1:
-       crashed: False
-       transmitted packets: 91
-       received packets   : 51 (56%)
-   Game time: 11.5 seconds
+       crashed             : False
+       transmitted packets : 95
+       received packets    : 51 (54%)
+       transferred payload : 12801 bytes (avg 1099.6 bytes/s)
+   Game time: 11.6 seconds
 
 It also saves a binary log file to ``example.log``. In addition to the ASCII
 log that is printed on the console, the binary log contains useful debugging
