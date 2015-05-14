@@ -34,6 +34,9 @@ class MockTestbed(TestbedBase):
 	def get_spectrum(self):
 		return True
 
+	def get_packet_size(self):
+		return 200
+
 class MockRadio(RadioBase):
 	def __init__(self, testbed):
 		self.testbed = testbed
@@ -63,10 +66,13 @@ class TestGame(unittest.TestCase):
 	PACKET_LIMIT = 50
 	TIME_LIMIT = 50
 
+	def setUp(self):
+		self.testbed = MockTestbed()
+
 	def _run_game(self, rxcls, txcls):
-		testbed = MockTestbed()
 		player = Player(rxcls, txcls)
-		game = Game(testbed, [player], packet_limit=self.PACKET_LIMIT, time_limit=self.TIME_LIMIT)
+		game = Game(self.testbed, [player],
+				packet_limit=self.PACKET_LIMIT, time_limit=self.TIME_LIMIT)
 		ctl = GameController()
 		return ctl.run(game)[0]
 
@@ -94,6 +100,17 @@ class TestGame(unittest.TestCase):
 
 		result = self._run_game(Receiver, Transmitter)
 		self.assertEqual(result.received_packets, 1)
+		self.assertEqual(result.payload_bytes, self.testbed.get_packet_size())
+
+	def test_one_packet_reverse(self):
+
+		class Receiver(Transceiver):
+			def start(self):
+				self.send()
+
+		result = self._run_game(Receiver, Transceiver)
+		self.assertEqual(result.received_packets, 1)
+		self.assertEqual(result.payload_bytes, 0)
 
 	def test_one_packet_miss(self):
 
@@ -148,6 +165,7 @@ class TestGame(unittest.TestCase):
 	def test_recv_packet_data(self):
 
 		cnt = [0]
+		foo = "foo"
 
 		class Receiver(Transceiver):
 			def start(self):
@@ -159,10 +177,28 @@ class TestGame(unittest.TestCase):
 		class Transmitter(Transceiver):
 			def start(self):
 				self.set_configuration(2.4e9, 0, 100e3)
-				self.send("foo")
+				self.send(foo)
 
 		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(cnt[0], "foo")
+		self.assertEqual(cnt[0], foo)
+		self.assertEqual(result.payload_bytes, self.testbed.get_packet_size() - len(foo))
+
+	def test_max_length_packet_data(self):
+
+		cnt = [0]
+		foo = "x" * self.testbed.get_packet_size()
+
+		class Receiver(Transceiver):
+			def recv(self, data):
+				cnt[0] = data
+
+		class Transmitter(Transceiver):
+			def start(self):
+				self.send(foo)
+
+		result = self._run_game(Receiver, Transmitter)
+		self.assertEqual(cnt[0], foo)
+		self.assertEqual(result.payload_bytes, 0)
 
 	def test_status(self):
 
@@ -175,6 +211,17 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transceiver)
 		self.assertGreater(cnt[0], 1)
 		#self.assertEqual(cnt[0], self.TIME_LIMIT)
+
+	def test_get_packet_size(self):
+
+		cnt = [0]
+
+		class Receiver(Transceiver):
+			def start(self):
+				cnt[0] = self.get_packet_size()
+
+		result = self._run_game(Receiver, Transceiver)
+		self.assertEqual(cnt[0], self.testbed.get_packet_size())
 
 	def test_error_recv(self):
 

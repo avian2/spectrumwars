@@ -71,6 +71,12 @@ class Transceiver(object):
 
 			self._player.result.received_packets += 1
 
+			if self._role == 'rx':
+				payload_bytes = self.get_packet_size()
+				if data:
+					payload_bytes -= len(data)
+				self._player.result.payload_bytes += payload_bytes
+
 			self._game.log_event("recv",  i=self._i, role=self._role)
 
 			self._safe_call(self.recv, data)
@@ -85,3 +91,6 @@ class Transceiver(object):
 
 	def _stop(self):
 		self._radio.stop()
+
+	def get_packet_size(self):
+		return self._game.testbed.get_packet_size()

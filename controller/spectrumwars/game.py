@@ -22,9 +22,14 @@ class Player(object):
 
 class PlayerResult(object):
 	def __init__(self):
+		# number of received packets in both directions
 		self.received_packets = 0
+		# number of transmitted packets in both directions
 		self.transmit_packets = 0
+		# whether the player's code raised an unhandled exception
 		self.crashed = False
+		# number of bytes transferred from transmitter to receiver
+		self.payload_bytes = 0
 
 class Game(object):
 

@@ -18,6 +18,9 @@ class TestbedBase(object):
 	def get_spectrum(self):
 		raise NotImplementedError
 
+	def get_packet_size(self):
+		raise NotImplementedError
+
 class RadioBase(object):
 	def send(self, data):
 		pass
