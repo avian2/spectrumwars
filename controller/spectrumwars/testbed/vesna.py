@@ -127,8 +127,7 @@ class Radio(RadioBase):
 		if data is None:
 			data = ''
 
-		if len(data) > self.DATA_LEN - 1:
-			data = data[:self.DATA_LEN-1]
+		assert len(data) <= self.DATA_LEN - 1
 
 		bindata =	[ len(data) ] + \
 				[ ord(c) for c in data ] + \

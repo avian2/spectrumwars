@@ -169,7 +169,7 @@ Class reference
 
       Note that the length is limited by the maximum packet size supported by
       the radio (as returned by ``get_packet_size()``). Longer strings will
-      raise an exception.
+      raise a ``RadioError`` exception.
 
       Upon successfull reception of the packet on the receiver side, ``n``
       bytes are counted towards the player's score, where ``n = packet_size -

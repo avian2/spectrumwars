@@ -200,6 +200,20 @@ class TestGame(unittest.TestCase):
 		self.assertEqual(cnt[0], foo)
 		self.assertEqual(result.payload_bytes, 0)
 
+	def test_too_long_packet_data(self):
+
+		foo = "x" * (self.testbed.get_packet_size() + 1)
+
+		class Transmitter(Transceiver):
+			def start(self):
+				self.send(foo)
+
+
+		log_exc_off()
+		result = self._run_game(Transceiver, Transmitter)
+		log_exc_on()
+		self.assertTrue(result.crashed)
+
 	def test_status(self):
 
 		cnt = [0]

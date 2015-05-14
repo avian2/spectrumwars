@@ -1,7 +1,7 @@
 import logging
 
 from spectrumwars.game import StopGame
-from spectrumwars.testbed import RadioTimeout
+from spectrumwars.testbed import RadioTimeout, RadioError
 
 log = logging.getLogger(__name__)
 
@@ -50,6 +50,9 @@ class Transceiver(object):
 		self._radio.set_configuration(frequency, bandwidth, power)
 
 	def send(self, data=None):
+		if data and len(data) > self.get_packet_size():
+			raise RadioError("packet too long")
+
 		self._game.log_event("send", i=self._i, role=self._role)
 		self._radio.send(data)
 
