@@ -34,7 +34,7 @@ the example above, ``example.out/player0.png`` should look something like
 this:
 
 .. image:: figures/example_game.png
-   :width: 50%
+   :width: 100%
    :align: center
 
 Red markers are events from the ``Receiver`` class. Circles show successfully
