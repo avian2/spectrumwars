@@ -28,13 +28,13 @@ class TestVESNAGame(unittest.TestCase):
 		foo = "x" * self.testbed.get_packet_size()
 
 		class Receiver(Transceiver):
-			def recv(self, data):
-				cnt[0] = data
+			def recv(self, packet):
+				cnt[0] = packet
 
 		class Transmitter(Transceiver):
 			def start(self):
 				self.send(foo)
 
 		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(cnt[0], foo)
+		self.assertEqual(cnt[0].data, foo)
 		self.assertEqual(result.payload_bytes, 0)

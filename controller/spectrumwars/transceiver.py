@@ -62,13 +62,13 @@ class Transceiver(object):
 			raise StopGame
 
 	def _recv(self, timeout):
-		for data in self.recv_loop(timeout):
+		for packet in self.recv_loop(timeout):
 			pass
 
 	def recv_loop(self, timeout=1.):
 		while True:
 			try:
-				data = self._radio.recv(timeout=timeout)
+				packet = self._radio.recv(timeout=timeout)
 			except RadioTimeout:
 				break
 
@@ -76,20 +76,20 @@ class Transceiver(object):
 
 			if self._role == 'rx':
 				payload_bytes = self.get_packet_size()
-				if data:
-					payload_bytes -= len(data)
+				if packet.data:
+					payload_bytes -= len(packet.data)
 				self._player.result.payload_bytes += payload_bytes
 
 			self._game.log_event("recv",  i=self._i, role=self._role)
 
-			self._safe_call(self.recv, data)
+			self._safe_call(self.recv, packet)
 
-			yield data
+			yield packet
 
 		if self._game.should_finish():
 			raise StopGame
 
-	def recv(self, data):
+	def recv(self, packet):
 		pass
 
 	def _stop(self):

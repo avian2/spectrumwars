@@ -29,11 +29,11 @@ class Receiver(Transceiver):
 				self.set_configuration(ch, 0, 0)
 
 				found = False
-				for data in self.recv_loop(timeout=.2):
+				for packet in self.recv_loop(timeout=.2):
 					found = True
 
-					if data:
-						ch = ord(data[0])
+					if packet.data:
+						ch = ord(packet.data[0])
 						self.set_configuration(ch, 0, 0)
 
 				if found:

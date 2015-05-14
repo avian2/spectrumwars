@@ -3,7 +3,7 @@ import unittest
 
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
-from spectrumwars.testbed import TestbedBase, RadioBase
+from spectrumwars.testbed import TestbedBase, RadioBase, RadioPacket
 
 level = logging.INFO
 logging.basicConfig(level=level)
@@ -59,7 +59,7 @@ class MockRadio(RadioBase):
 			self.testbed.clock += timeout
 			raise RadioTimeout
 		else:
-			return data
+			return RadioPacket(data)
 
 class TestGame(unittest.TestCase):
 
@@ -164,7 +164,7 @@ class TestGame(unittest.TestCase):
 			def start(self):
 				self.set_configuration(2.4e9, 0, 100e3)
 
-			def recv(self, data):
+			def recv(self, packet):
 				cnt[0] += 1
 
 		class Transmitter(Transceiver):
@@ -184,8 +184,8 @@ class TestGame(unittest.TestCase):
 			def start(self):
 				self.set_configuration(2.4e9, 0, 100e3)
 
-			def recv(self, data):
-				cnt[0] = data
+			def recv(self, packet):
+				cnt[0] = packet
 
 		class Transmitter(Transceiver):
 			def start(self):
@@ -193,7 +193,7 @@ class TestGame(unittest.TestCase):
 				self.send(foo)
 
 		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(cnt[0], foo)
+		self.assertEqual(cnt[0].data, foo)
 		self.assertEqual(result.payload_bytes, self.testbed.get_packet_size() - len(foo))
 
 	def test_max_length_packet_data(self):
@@ -202,15 +202,15 @@ class TestGame(unittest.TestCase):
 		foo = "x" * self.testbed.get_packet_size()
 
 		class Receiver(Transceiver):
-			def recv(self, data):
-				cnt[0] = data
+			def recv(self, packet):
+				cnt[0] = packet
 
 		class Transmitter(Transceiver):
 			def start(self):
 				self.send(foo)
 
 		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(cnt[0], foo)
+		self.assertEqual(cnt[0].data, foo)
 		self.assertEqual(result.payload_bytes, 0)
 
 	def test_too_long_packet_data(self):
@@ -253,7 +253,7 @@ class TestGame(unittest.TestCase):
 	def test_error_recv(self):
 
 		class Receiver(Transceiver):
-			def recv(self, data):
+			def recv(self, packet):
 				raise Exception
 
 		class Transmitter(Transceiver):
@@ -299,7 +299,7 @@ class TestGame(unittest.TestCase):
 
 				print "exit"
 
-			def recv(self, data):
+			def recv(self, packet):
 				cnt[0] += 1
 
 		class Transmitter(Transceiver):

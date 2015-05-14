@@ -73,7 +73,7 @@ Class reference
 
       If left unimplemented, this method does nothing.
 
-   .. py:method:: recv(data)
+   .. py:method:: recv(packet)
 
       Called by the game controller when the transceiver receives a packet
       (e.g. called on the receiver side when the transmitter side issued a
@@ -82,10 +82,10 @@ Class reference
       Note that you do not need to override this method for the received
       payload to be counted towards your score. Overriding is only useful when
       you want to respond to a successfull reception of a packet or you want
-      to do something with control data string sent by the transmitter.
+      to do something with the data in the packet sent by the transmitter.
 
-      ``data`` is a string that was passed to ``send()`` on the transmitting
-      side.
+      ``packet`` is a ``RadioPacket`` object containing the string that was
+      passed to ``send()`` on the transmitting side.
 
       If left unimplemented, this method does nothing.
 
@@ -164,8 +164,9 @@ Class reference
       method will be called upon the reception of the packet.
 
       ``data`` is an optional parameter that allows inclusion of an arbitrary
-      string into the packet. On the reception side, this string is passed as
-      to the ``recv()`` method in the ``data`` parameter.
+      string into the packet. On the reception side, this string is passed to
+      the ``recv()`` method in the ``data`` field of the ``RadioPacket``
+      object.
 
       Note that the length is limited by the maximum packet size supported by
       the radio (as returned by ``get_packet_size()``). Longer strings will
@@ -182,7 +183,7 @@ Class reference
    .. py:method: recv_loop(timeout=1.):
 
       Returns an iterator over the packets in the receive queue. Packets are
-      returned as strings that were passed to the ``send()`` methods.
+      returned as ``RadioPacket`` objects.
 
       ``timeout`` specifies the receive timeout. Iteration will stop if the
       queue is empty and no packets have been received for the specified
@@ -242,4 +243,12 @@ Class reference
          channels available through ``set_configuration()`` due to CPU load
          restrictions.
 
+.. py:class:: RadioPacket
 
+   A ``RadioPacket`` object is passed to the receiving transceiver for each
+   successfully received packet. The following attributes are defined:
+
+   .. py:attribute:: data
+
+      This attribute contains the string that was passed to the ``send()``
+      method on the transmitting side.

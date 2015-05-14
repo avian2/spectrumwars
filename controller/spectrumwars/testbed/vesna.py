@@ -5,7 +5,7 @@ import threading
 import time
 import Queue
 
-from spectrumwars.testbed import TestbedBase, RadioBase, RadioTimeout, RadioError, TestbedError
+from spectrumwars.testbed import TestbedBase, RadioBase, RadioTimeout, RadioError, TestbedError, RadioPacket
 from spectrumwars.testbed.usrp_sensing import SpectrumSensor
 
 log = logging.getLogger(__name__)
@@ -160,7 +160,7 @@ class Radio(RadioBase):
 		for i in xrange(1, n+1):
 			bindata.append(chr(int(strdata[i*2:i*2+2], 16)))
 
-		return ''.join(bindata)
+		return RadioPacket(''.join(bindata))
 
 	def stop(self):
 		self.raw.stop()

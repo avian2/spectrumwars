@@ -28,5 +28,5 @@ class Receiver(Transceiver):
 			for ch in chl[:5]:
 				self.set_configuration(ch, 0, 0)
 
-				for data in self.recv_loop(timeout=.2):
+				for packet in self.recv_loop(timeout=.2):
 					pass

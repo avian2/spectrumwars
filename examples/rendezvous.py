@@ -16,7 +16,7 @@ class Receiver(Transceiver):
 		while True:
 			self.set_configuration(ch, 3, 0)
 
-			for data in self.recv_loop(timeout=.5):
+			for packet in self.recv_loop(timeout=.5):
 				pass
 
 			ch = (ch + 1) % 40

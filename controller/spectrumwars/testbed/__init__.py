@@ -36,3 +36,7 @@ class RadioBase(object):
 
 	def stop(self):
 		pass
+
+class RadioPacket(object):
+	def __init__(self, data):
+		self.data = data
