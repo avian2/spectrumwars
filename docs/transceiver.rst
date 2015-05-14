@@ -168,7 +168,8 @@ Class reference
       to the ``recv()`` method in the ``data`` parameter.
 
       Note that the length is limited by the maximum packet size supported by
-      the radio (as returned by ``get_packet_size()``)
+      the radio (as returned by ``get_packet_size()``). Longer strings will
+      raise an exception.
 
       Upon successfull reception of the packet on the receiver side, ``n``
       bytes are counted towards the player's score, where ``n = packet_size -
@@ -209,8 +210,8 @@ Class reference
 
    .. py:method:: get_packet_size()
 
-      .. warning::
-         FIXME: currently unimplemented
+      Returns maximum number of bytes that can be passed to ``send()``.
+
 
 .. py:class:: GameStatus
 
