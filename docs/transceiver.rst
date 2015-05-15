@@ -28,7 +28,7 @@ This is how a simple procedural receiver looks like::
             status = self.get_status()
             ...
 
-            for data in self.recv_loop():
+            for packet in self.recv_loop():
                # do something with queued-up packet data
                ...
 
@@ -39,7 +39,7 @@ And this is how an identical event-based receiver looks like::
          # do some setup
          self.set_configuration(...)
 
-      def recv(self, data):
+      def recv(self, packet):
          # do something with received packet data
          ...
 
