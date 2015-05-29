@@ -34,14 +34,13 @@ class Transceiver(object):
 	def start(self):
 		pass
 
-	def _status_update(self, status):
-		self._safe_call(self.status_update, status)
-
 	def status_update(self, status):
 		pass
 
 	def get_status(self):
-		return self._game.get_status(self._i, self._role)
+		status = self._game.get_status(self._i, self._role)
+		self._safe_call(self.status_update, status)
+		return status
 
 	def set_configuration(self, frequency, bandwidth, power):
 		self._game.log_event("config", i=self._i, role=self._role,

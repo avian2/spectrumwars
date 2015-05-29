@@ -162,9 +162,7 @@ class GameController(object):
 
 				log.debug("%s status update (%d)" % (name, i))
 
-				status = game.get_status(transceiver._i, transceiver._role)
-
-				transceiver._status_update(status)
+				transceiver.get_status()
 
 				i += 1
 
