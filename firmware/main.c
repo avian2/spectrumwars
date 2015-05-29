@@ -235,10 +235,6 @@ static void radio_setup()
 /* Start of main */
 int main(void)
 {
-	/* Main local variables --------------------------------------------- */
-	USART_InitTypeDef USART_InitStructure;
-	/* End of main local variables -------------------------------------- */
-
 	/* Start of Main code ----------------------------------------------- */
 	/* Reset Clock configuration */
 	SystemInit();
@@ -249,18 +245,12 @@ int main(void)
 	/* Initialize SNC */
 	vsnSetup_initSnc();
 	/* Configure debug port at USART1, 115200 kbaud, 8 data bit, no parity, one stop bit, no flow control */
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	vsnUSART_init(USART1, &USART_InitStructure);
+	vsnUSART_init(USART_VCP, NULL);
 
 	/* Make stdout unbuffered, just in case */
 	setbuf(stdout, NULL);
 
-	printf("SNC Initialized\r\n");
-	printf("Debug port Open\r\n");
+	printf("boot\n");
 
 	/* Get ADC one bit value in volts, call as last init function */
 	vsnPM_mesureAdcBitVolt();
@@ -273,7 +263,7 @@ int main(void)
 	while(1)
 	{
 		char c;
-		if(vsnUSART_read(USART1, &c, 1)) {
+		if(vsnUSART_read(USART_VCP, &c, 1)) {
 			cmd_buff_input(c);
 		}
 		if(received_flag) {

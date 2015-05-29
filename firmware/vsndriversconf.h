@@ -14,6 +14,9 @@
 #ifndef VSNDRIVERSCONF_H_
 #define VSNDRIVERSCONF_H_
 
+#define STDOUT_USART USART_VCP
+#define STDIN_USART USART_VCP
+
 /* !YOU SHOULD NOT CHANGE THIS! Indicator led functions and power management rely on this settings */
 /* Set SysTick interrupt period = 1 second / SYS_TICK_DIV */
 #define SYS_TICK_DIV	1000    /* SysTick interrupt set to millisecond */
