@@ -176,11 +176,11 @@ Class reference
       bytes are counted towards the player's score, where ``n = packet_size -
       len(data)``.
 
-   .. py:method:: get_status():
+   .. py:method:: get_status()
 
       Returns the current state of the game in a ``GameStatus`` object.
 
-   .. py:method: recv_loop(timeout=1.):
+   .. py:method:: recv_loop(timeout=1.)
 
       Returns an iterator over the packets in the receive queue. Packets are
       returned as ``RadioPacket`` objects.
