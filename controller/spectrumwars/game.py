@@ -2,7 +2,8 @@ import copy
 import logging
 import threading
 import time
-from spectrumwars.testbed import TestbedError
+from spectrumwars.testbed import TestbedError, RadioTimeout
+from jsonrpc2_zeromq import RPCServer, RPCClient
 
 log = logging.getLogger(__name__)
 
@@ -18,6 +19,8 @@ class Player(object):
 
 		self.rx = self.rxcls(game, i, 'rx', rxradio)
 		self.tx = self.txcls(game, i, 'tx', txradio)
+
+		self.i = i
 
 		self.result = PlayerResult()
 
@@ -99,6 +102,20 @@ class GameStatus(object):
 	def __init__(self, spectrum):
 		self.spectrum = spectrum
 
+class GameRPCServer(RPCServer):
+
+	def handle_get_status_method(self, i, role):
+		return self.game.get_status(i, role)
+
+	def handle_send_method(self, data):
+		return self.radio.send(data)
+
+	def handle_recv_method(self, timeout):
+		try:
+			return self.radio.recv(timeout)
+		except RadioTimeout:
+			return None
+
 class GameController(object):
 	def __init__(self):
 		pass
@@ -111,19 +128,33 @@ class GameController(object):
 
 		transceivers = []
 		workers = []
+		servers = []
 
 		game.state = 'running'
 
 		game.start_time = game.testbed.time()
 
 		for player in game.players:
-			for transceiver in player.rx, player.tx:
+			for j, transceiver in enumerate((player.rx, player.tx)):
 				transceivers.append(transceiver)
 
 				worker = threading.Thread(target=self.worker, args=(game, transceiver))
-				worker.start()
-
 				workers.append(worker)
+
+				port = 50000 + player.i*10 + j
+				endpoint = "tcp://127.0.0.1:%d" % (port,)
+
+				server = GameRPCServer(endpoint, timeout=.5)
+				server.game = game
+				server.radio = transceiver._radio
+
+				server.start()
+				servers.append(server)
+
+				client = RPCClient(endpoint)
+				transceiver._client = client
+
+				worker.start()
 
 		for worker in workers:
 			worker.join()
@@ -138,6 +169,10 @@ class GameController(object):
 				transceiver._recv(timeout=0.1)
 			except StopGame:
 				pass
+
+		for server in servers:
+			server.stop()
+			server.join()
 
 		game.testbed.stop()
 		game.state = 'finished'

@@ -38,7 +38,7 @@ class Transceiver(object):
 		pass
 
 	def get_status(self):
-		status = self._game.get_status(self._i, self._role)
+		status = self._client.get_status(self._i, self._role)
 		self._safe_call(self.status_update, status)
 		return status
 
@@ -53,7 +53,8 @@ class Transceiver(object):
 			raise RadioError("packet too long")
 
 		self._game.log_event("send", i=self._i, role=self._role)
-		self._radio.send(data)
+
+		self._client.send(data)
 
 		self._player.result.transmit_packets += 1
 
@@ -66,9 +67,8 @@ class Transceiver(object):
 
 	def recv_loop(self, timeout=1.):
 		while True:
-			try:
-				packet = self._radio.recv(timeout=timeout)
-			except RadioTimeout:
+			packet = self._client.recv(timeout=timeout)
+			if packet is None:
 				break
 
 			self._player.result.received_packets += 1
