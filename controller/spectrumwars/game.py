@@ -180,8 +180,7 @@ class GameController(object):
 				servers.append(server)
 
 				client = RPCClient(server.endpoint)
-				transceiver._client = client
-				transceiver._start()
+				transceiver._start(client)
 
 		for transceiver in transceivers:
 			transceiver._join()

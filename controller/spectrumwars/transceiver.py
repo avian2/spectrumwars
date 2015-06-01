@@ -29,7 +29,9 @@ class Transceiver(object):
 			log.warning("%s crashed" % (self._name,), exc_info=True)
 			raise StopGame
 
-	def _start(self):
+	def _start(self, client):
+		self._client = client
+
 		self._thread = threading.Thread(target=self._event_loop)
 		self._thread.start()
 
