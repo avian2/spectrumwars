@@ -1,6 +1,5 @@
 import copy
 import logging
-import threading
 import time
 from spectrumwars.testbed import TestbedError, RadioTimeout
 from jsonrpc2_zeromq import RPCServer, RPCClient
@@ -166,7 +165,6 @@ class GameController(object):
 		game.testbed.start()
 
 		transceivers = []
-		workers = []
 		servers = []
 
 		game.state = 'running'
@@ -177,20 +175,16 @@ class GameController(object):
 			for j, transceiver in enumerate((player.rx, player.tx)):
 				transceivers.append(transceiver)
 
-				worker = threading.Thread(target=self.worker, args=(game, transceiver))
-				workers.append(worker)
-
 				server = GameRPCServer(game, player.i, transceiver._role, transceiver._radio)
 				server.start()
 				servers.append(server)
 
 				client = RPCClient(server.endpoint)
 				transceiver._client = client
+				transceiver._start()
 
-				worker.start()
-
-		for worker in workers:
-			worker.join()
+		for transceiver in transceivers:
+			transceiver._join()
 
 		game.end_time = game.testbed.time()
 
@@ -213,29 +207,3 @@ class GameController(object):
 		log.debug("Game concluded")
 
 		return [ player.result for player in game.players ]
-
-	def worker(self, game, transceiver):
-
-		name = "(%d %s)" % (transceiver._i, transceiver._role)
-
-		log.debug("%s worker started" % name)
-
-		try:
-			transceiver._start()
-
-			i = 0
-			while not game.should_finish():
-
-				transceiver._recv(timeout=game.update_interval)
-
-				log.debug("%s status update (%d)" % (name, i))
-
-				transceiver.get_status()
-
-				i += 1
-
-		except StopGame:
-			pass
-
-		log.debug("%s worker stopped" % name)
-		game.state = 'stopping'

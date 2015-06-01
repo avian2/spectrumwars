@@ -1,4 +1,5 @@
 import logging
+import threading
 
 from spectrumwars.game import StopGame
 from spectrumwars.testbed import RadioTimeout, RadioError
@@ -29,7 +30,11 @@ class Transceiver(object):
 			raise StopGame
 
 	def _start(self):
-		self._safe_call(self.start)
+		self._thread = threading.Thread(target=self._event_loop)
+		self._thread.start()
+
+	def _join(self):
+		self._thread.join()
 
 	def start(self):
 		pass
@@ -76,3 +81,27 @@ class Transceiver(object):
 
 	def get_packet_size(self):
 		return self._game.testbed.get_packet_size()
+
+	def _event_loop(self):
+
+		log.debug("%s worker started" % (self._name,))
+
+		try:
+			self._safe_call(self.start)
+
+			i = 0
+			while not self._game.should_finish():
+
+				self._recv(timeout=self._game.update_interval)
+
+				log.debug("%s status update (%d)" % (self._name, i))
+
+				self.get_status()
+
+				i += 1
+
+		except StopGame:
+			pass
+
+		log.debug("%s worker stopped" % self._name)
+		self._game.state = 'stopping'
