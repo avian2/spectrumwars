@@ -5,7 +5,7 @@ import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
 from spectrumwars.testbed import TestbedBase, RadioBase, RadioPacket
 
-level = logging.INFO
+level = logging.WARNING
 logging.basicConfig(level=level)
 
 def log_exc_off():
