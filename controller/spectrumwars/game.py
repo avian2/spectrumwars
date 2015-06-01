@@ -13,9 +13,8 @@ class PlayerInstance(object):
 		self.server = server
 
 class Player(object):
-	def __init__(self, rxcls, txcls):
-		self.rxcls = rxcls
-		self.txcls = txcls
+	def __init__(self, rx, tx):
+		self.transceivers = (rx, tx)
 
 		self.result = PlayerResult()
 		self.instances = []
@@ -25,8 +24,8 @@ class Player(object):
 
 		rxradio, txradio = game.testbed.get_radio_pair()
 
-		for role, radio, cls in zip(('rx', 'tx'), (rxradio, txradio), (self.rxcls, self.txcls)):
-			transceiver = cls(i, role, game.update_interval)
+		for role, radio, transceiver in zip(('rx', 'tx'), (rxradio, txradio), self.transceivers):
+			transceiver.init(i, role, game.update_interval)
 			server = GameRPCServer(game, i, role, radio)
 			server.start()
 
@@ -36,11 +35,11 @@ class Player(object):
 	def start(self):
 		for instance in self.instances:
 			client = RPCClient(instance.server.endpoint)
-			instance.transceiver._start(client)
+			instance.transceiver.start(client)
 
 	def join(self):
 		for instance in self.instances:
-			instance.transceiver._join()
+			instance.transceiver.join()
 
 			instance.server.stop()
 			instance.server.join()
