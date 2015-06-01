@@ -37,9 +37,9 @@ class PlayerResult(object):
 
 class Game(object):
 
-	def __init__(self, testbed, players, packet_limit=100, time_limit=None, payload_limit=None):
+	def __init__(self, testbed, sandbox, packet_limit=100, time_limit=None, payload_limit=None):
 		self.testbed = testbed
-		self.players = players
+		self.sandbox = sandbox
 		self.packet_limit = packet_limit
 		self.time_limit = time_limit
 		self.payload_limit = payload_limit
@@ -77,6 +77,8 @@ class Game(object):
 		return False
 
 	def instantiate(self):
+		self.players = self.sandbox.get_players()
+
 		for i, player in enumerate(self.players):
 			player.instantiate(self, i)
 

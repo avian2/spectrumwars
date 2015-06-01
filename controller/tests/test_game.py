@@ -61,6 +61,13 @@ class MockRadio(RadioBase):
 		else:
 			return RadioPacket(data)
 
+class MockSandbox(object):
+	def __init__(self, rxcls, txcls):
+		self.player = Player(rxcls, txcls)
+
+	def get_players(self):
+		return [self.player]
+
 class TestGame(unittest.TestCase):
 
 	PACKET_LIMIT = 50
@@ -72,8 +79,9 @@ class TestGame(unittest.TestCase):
 
 	def _run_game(self, rxcls, txcls, packet_limit=PACKET_LIMIT, payload_limit=PAYLOAD_LIMIT,
 			time_limit=TIME_LIMIT):
-		player = Player(rxcls, txcls)
-		game = Game(self.testbed, [player],
+
+		sandbox = MockSandbox(rxcls, txcls)
+		game = Game(self.testbed, sandbox,
 				packet_limit=packet_limit,
 				time_limit=time_limit,
 				payload_limit=payload_limit)
