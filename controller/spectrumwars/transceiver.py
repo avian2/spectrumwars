@@ -1,7 +1,7 @@
 import logging
 import threading
 
-from spectrumwars.testbed import RadioTimeout, RadioError
+from spectrumwars.testbed import RadioTimeout, RadioError, RadioPacket, GameStatus
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +46,9 @@ class Transceiver(object):
 		pass
 
 	def get_status(self):
-		status = self._client.get_status(self._i, self._role)
+		status_json = self._client.get_status(self._i, self._role)
+		status = GameStatus.from_json(status_json)
+
 		self._safe_call(self.status_update, status)
 		return status
 
@@ -68,9 +70,11 @@ class Transceiver(object):
 
 	def recv_loop(self, timeout=1.):
 		while True:
-			packet = self._client.recv(timeout=timeout)
-			if packet is None:
+			packet_json = self._client.recv(timeout=timeout)
+			if packet_json is None:
 				break
+
+			packet = RadioPacket.from_json(packet_json)
 
 			self._safe_call(self.recv, packet)
 

@@ -1,7 +1,7 @@
 import copy
 import logging
 import time
-from spectrumwars.testbed import TestbedError, RadioTimeout
+from spectrumwars.testbed import TestbedError, RadioTimeout, GameStatus
 from spectrumwars.transceiver import StopGame, TransceiverError
 from jsonrpc2_zeromq import RPCServer, RPCClient
 
@@ -98,10 +98,6 @@ class GameEvent(object):
 		self.timestamp = None
 		self.data = kwargs
 
-class GameStatus(object):
-	def __init__(self, spectrum):
-		self.spectrum = spectrum
-
 class GameRPCServer(RPCServer):
 
 	def __init__(self, game, i, role, radio):
@@ -121,7 +117,7 @@ class GameRPCServer(RPCServer):
 		RPCServer.__init__(self, self.endpoint, timeout=.5)
 
 	def handle_get_status_method(self, i, role):
-		return self.game.get_status(i, role)
+		return self.game.get_status(i, role).to_json()
 
 	def handle_send_method(self, data):
 		self.game.log_event("send", i=self.i, role=self.role)
@@ -143,7 +139,7 @@ class GameRPCServer(RPCServer):
 
 			self.game.log_event("recv",  i=self.i, role=self.role)
 
-			return packet
+			return packet.to_json()
 
 		except RadioTimeout:
 			return None
