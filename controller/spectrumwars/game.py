@@ -61,12 +61,12 @@ class Game(object):
 			if self.packet_limit is not None:
 				if player.result.received_packets >= self.packet_limit:
 					log.debug("game packet limit reached by player %d!" %
-							player.rx._i)
+							player.i)
 					return True
 			if self.payload_limit is not None:
 				if player.result.payload_bytes >= self.payload_limit:
 					log.debug("game payload limit reached by player %d!" %
-							player.rx._i)
+							player.i)
 					return True
 
 		if self.state != 'running':
