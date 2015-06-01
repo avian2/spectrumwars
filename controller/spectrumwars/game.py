@@ -2,11 +2,10 @@ import copy
 import logging
 import time
 from spectrumwars.testbed import TestbedError, RadioTimeout
+from spectrumwars.transceiver import StopGame, TransceiverError
 from jsonrpc2_zeromq import RPCServer, RPCClient
 
 log = logging.getLogger(__name__)
-
-class StopGame(Exception): pass
 
 class Player(object):
 	def __init__(self, rxcls, txcls):
@@ -157,6 +156,12 @@ class GameRPCServer(RPCServer):
 	def handle_get_packet_size_method(self):
 		return self.game.testbed.get_packet_size()
 
+	def handle_report_stop_method(self, crashed):
+		if crashed:
+			self.player.result.crashed = True
+
+		self.game.state = 'stopping'
+
 class GameController(object):
 	def __init__(self):
 		pass
@@ -197,6 +202,8 @@ class GameController(object):
 			try:
 				transceiver._recv(timeout=0.1)
 			except StopGame:
+				pass
+			except TransceiverError:
 				pass
 
 		for server in servers:
