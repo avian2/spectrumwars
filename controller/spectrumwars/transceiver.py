@@ -30,10 +30,10 @@ class Transceiver(object):
 			log.warning("%s crashed" % (self._name,), exc_info=True)
 			raise StopGame
 
-	def _start(self, client):
+	def _start(self, client, update_interval):
 		self._client = client
 
-		self._thread = threading.Thread(target=self._event_loop)
+		self._thread = threading.Thread(target=self._event_loop, args=(update_interval,))
 		self._thread.start()
 
 	def _join(self):
@@ -88,7 +88,7 @@ class Transceiver(object):
 
 		return self._packet_size
 
-	def _event_loop(self):
+	def _event_loop(self, update_interval):
 
 		log.debug("%s worker started" % (self._name,))
 
@@ -98,7 +98,7 @@ class Transceiver(object):
 			i = 0
 			while not self._game.should_finish():
 
-				self._recv(timeout=self._game.update_interval)
+				self._recv(timeout=update_interval)
 
 				log.debug("%s status update (%d)" % (self._name, i))
 
