@@ -43,20 +43,13 @@ class Transceiver(object):
 		return status
 
 	def set_configuration(self, frequency, bandwidth, power):
-		self._game.log_event("config", i=self._i, role=self._role,
-				frequency=frequency, bandwidth=bandwidth, power=power)
-
-		self._radio.set_configuration(frequency, bandwidth, power)
+		self._client.set_configuration(frequency, bandwidth, power)
 
 	def send(self, data=None):
 		if data and len(data) > self.get_packet_size():
 			raise RadioError("packet too long")
 
-		self._game.log_event("send", i=self._i, role=self._role)
-
 		self._client.send(data)
-
-		self._player.result.transmit_packets += 1
 
 		if self._game.should_finish():
 			raise StopGame
@@ -71,16 +64,6 @@ class Transceiver(object):
 			if packet is None:
 				break
 
-			self._player.result.received_packets += 1
-
-			if self._role == 'rx':
-				payload_bytes = self.get_packet_size()
-				if packet.data:
-					payload_bytes -= len(packet.data)
-				self._player.result.payload_bytes += payload_bytes
-
-			self._game.log_event("recv",  i=self._i, role=self._role)
-
 			self._safe_call(self.recv, packet)
 
 			yield packet
@@ -90,9 +73,6 @@ class Transceiver(object):
 
 	def recv(self, packet):
 		pass
-
-	def _stop(self):
-		self._radio.stop()
 
 	def get_packet_size(self):
 		return self._game.testbed.get_packet_size()

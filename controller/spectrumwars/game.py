@@ -104,17 +104,54 @@ class GameStatus(object):
 
 class GameRPCServer(RPCServer):
 
+	def __init__(self, game, i, role, radio):
+		self.game = game
+		self.player = game.players[i]
+		self.radio = radio
+
+		self.i = i
+		j = 1 if role == 'rx' else 0
+
+		self.role = role
+		self.xname = "(%d %s)" % (self.i, self.role)
+
+		port = 50000 + i*10 + j
+		self.endpoint = "tcp://127.0.0.1:%d" % (port,)
+
+		RPCServer.__init__(self, self.endpoint, timeout=.5)
+
 	def handle_get_status_method(self, i, role):
 		return self.game.get_status(i, role)
 
 	def handle_send_method(self, data):
+		self.game.log_event("send", i=self.i, role=self.role)
+		self.player.result.transmit_packets += 1
+
 		return self.radio.send(data)
 
 	def handle_recv_method(self, timeout):
 		try:
-			return self.radio.recv(timeout)
+			packet = self.radio.recv(timeout)
+
+			self.player.result.received_packets += 1
+
+			if self.role == 'rx':
+				payload_bytes = self.game.testbed.get_packet_size()
+				if packet.data:
+					payload_bytes -= len(packet.data)
+				self.player.result.payload_bytes += payload_bytes
+
+			self.game.log_event("recv",  i=self.i, role=self.role)
+
+			return packet
+
 		except RadioTimeout:
 			return None
+
+	def handle_set_configuration_method(self, frequency, bandwidth, power):
+		self.game.log_event("config", i=self.i, role=self.role,
+				frequency=frequency, bandwidth=bandwidth, power=power)
+		self.radio.set_configuration(frequency, bandwidth, power)
 
 class GameController(object):
 	def __init__(self):
@@ -141,17 +178,11 @@ class GameController(object):
 				worker = threading.Thread(target=self.worker, args=(game, transceiver))
 				workers.append(worker)
 
-				port = 50000 + player.i*10 + j
-				endpoint = "tcp://127.0.0.1:%d" % (port,)
-
-				server = GameRPCServer(endpoint, timeout=.5)
-				server.game = game
-				server.radio = transceiver._radio
-
+				server = GameRPCServer(game, player.i, transceiver._role, transceiver._radio)
 				server.start()
 				servers.append(server)
 
-				client = RPCClient(endpoint)
+				client = RPCClient(server.endpoint)
 				transceiver._client = client
 
 				worker.start()
