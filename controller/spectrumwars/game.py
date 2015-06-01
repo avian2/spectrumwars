@@ -7,20 +7,54 @@ from jsonrpc2_zeromq import RPCServer, RPCClient
 
 log = logging.getLogger(__name__)
 
+class PlayerInstance(object):
+	def __init__(self, transceiver, server):
+		self.transceiver = transceiver
+		self.server = server
+
 class Player(object):
 	def __init__(self, rxcls, txcls):
 		self.rxcls = rxcls
 		self.txcls = txcls
 
+		self.result = PlayerResult()
+		self.instances = []
+
 	def instantiate(self, game, i):
-		rxradio, txradio = game.testbed.get_radio_pair()
-
-		self.rx = self.rxcls(i, 'rx', rxradio)
-		self.tx = self.txcls(i, 'tx', txradio)
-
 		self.i = i
 
-		self.result = PlayerResult()
+		rxradio, txradio = game.testbed.get_radio_pair()
+
+		for role, radio, cls in zip(('rx', 'tx'), (rxradio, txradio), (self.rxcls, self.txcls)):
+			transceiver = cls(i, role, game.update_interval)
+			server = GameRPCServer(game, i, role, radio)
+			server.start()
+
+			instance = PlayerInstance(transceiver, server)
+			self.instances.append(instance)
+
+	def start(self):
+		for instance in self.instances:
+			client = RPCClient(instance.server.endpoint)
+			instance.transceiver._start(client)
+
+	def join(self):
+		for instance in self.instances:
+			instance.transceiver._join()
+
+	def stop(self):
+		for instance in self.instances:
+			try:
+				instance.transceiver._recv(timeout=0.1)
+			except StopGame:
+				pass
+			except TransceiverError:
+				pass
+
+			instance.server.stop()
+			instance.server.join()
+
+		self.instances = []
 
 class PlayerResult(object):
 	def __init__(self):
@@ -171,43 +205,23 @@ class GameController(object):
 		game.instantiate()
 		game.testbed.start()
 
-		transceivers = []
-		servers = []
-
 		game.state = 'running'
 
 		game.start_time = game.testbed.time()
 
 		for player in game.players:
-			for j, transceiver in enumerate((player.rx, player.tx)):
-				transceivers.append(transceiver)
+			player.start()
 
-				server = GameRPCServer(game, player.i, transceiver._role, transceiver._radio)
-				server.start()
-				servers.append(server)
-
-				client = RPCClient(server.endpoint)
-				transceiver._start(client, game.update_interval)
-
-		for transceiver in transceivers:
-			transceiver._join()
+		for player in game.players:
+			player.join()
 
 		game.end_time = game.testbed.time()
 
 		log.debug("Cleaning up transceivers")
 
 		# clean up any remaining packets in queues
-		for transceiver in transceivers:
-			try:
-				transceiver._recv(timeout=0.1)
-			except StopGame:
-				pass
-			except TransceiverError:
-				pass
-
-		for server in servers:
-			server.stop()
-			server.join()
+		for player in game.players:
+			player.stop()
 
 		game.testbed.stop()
 		game.state = 'finished'

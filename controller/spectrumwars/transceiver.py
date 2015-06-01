@@ -10,8 +10,8 @@ class StopGame(Exception): pass
 
 class Transceiver(object):
 
-	def __init__(self, i, role, radio):
-		self._radio = radio
+	def __init__(self, i, role, update_interval):
+		self._update_interval = update_interval
 
 		self._i = i
 		self._role = role
@@ -29,10 +29,10 @@ class Transceiver(object):
 			log.warning("%s crashed" % (self._name,), exc_info=True)
 			raise TransceiverError
 
-	def _start(self, client, update_interval):
+	def _start(self, client):
 		self._client = client
 
-		self._thread = threading.Thread(target=self._event_loop, args=(update_interval,))
+		self._thread = threading.Thread(target=self._event_loop)
 		self._thread.start()
 
 	def _join(self):
@@ -91,7 +91,7 @@ class Transceiver(object):
 
 		return self._packet_size
 
-	def _event_loop(self, update_interval):
+	def _event_loop(self):
 
 		log.debug("%s worker started" % (self._name,))
 
@@ -103,7 +103,7 @@ class Transceiver(object):
 			i = 0
 			while not self._client.should_finish():
 
-				self._recv(timeout=update_interval)
+				self._recv(timeout=self._update_interval)
 
 				log.debug("%s status update (%d)" % (self._name, i))
 
