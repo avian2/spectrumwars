@@ -10,8 +10,7 @@ class StopGame(Exception): pass
 
 class Transceiver(object):
 
-	def __init__(self, game, i, role, radio):
-		self._game = game
+	def __init__(self, i, role, radio):
 		self._radio = radio
 
 		self._i = i
@@ -61,7 +60,7 @@ class Transceiver(object):
 
 		self._client.send(data)
 
-		if self._game.should_finish():
+		if self._client.should_finish():
 			raise StopGame
 
 	def _recv(self, timeout):
@@ -80,7 +79,7 @@ class Transceiver(object):
 
 			yield packet
 
-		if self._game.should_finish():
+		if self._client.should_finish():
 			raise StopGame
 
 	def recv(self, packet):
@@ -102,7 +101,7 @@ class Transceiver(object):
 			self._safe_call(self.start)
 
 			i = 0
-			while not self._game.should_finish():
+			while not self._client.should_finish():
 
 				self._recv(timeout=update_interval)
 

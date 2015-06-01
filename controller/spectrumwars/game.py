@@ -15,8 +15,8 @@ class Player(object):
 	def instantiate(self, game, i):
 		rxradio, txradio = game.testbed.get_radio_pair()
 
-		self.rx = self.rxcls(game, i, 'rx', rxradio)
-		self.tx = self.txcls(game, i, 'tx', txradio)
+		self.rx = self.rxcls(i, 'rx', rxradio)
+		self.tx = self.txcls(i, 'tx', txradio)
 
 		self.i = i
 
@@ -157,6 +157,9 @@ class GameRPCServer(RPCServer):
 			self.player.result.crashed = True
 
 		self.game.state = 'stopping'
+
+	def handle_should_finish_method(self):
+		return self.game.should_finish()
 
 class GameController(object):
 	def __init__(self):
