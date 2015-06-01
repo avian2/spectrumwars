@@ -42,15 +42,6 @@ class Player(object):
 		for instance in self.instances:
 			instance.transceiver._join()
 
-	def stop(self):
-		for instance in self.instances:
-			try:
-				instance.transceiver._recv(timeout=0.1)
-			except StopGame:
-				pass
-			except TransceiverError:
-				pass
-
 			instance.server.stop()
 			instance.server.join()
 
@@ -217,11 +208,7 @@ class GameController(object):
 
 		game.end_time = game.testbed.time()
 
-		log.debug("Cleaning up transceivers")
-
-		# clean up any remaining packets in queues
-		for player in game.players:
-			player.stop()
+		log.debug("Cleaning up testbed")
 
 		game.testbed.stop()
 		game.state = 'finished'
