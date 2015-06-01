@@ -116,8 +116,8 @@ class GameRPCServer(RPCServer):
 
 		RPCServer.__init__(self, self.endpoint, timeout=.5)
 
-	def handle_get_status_method(self, i, role):
-		return self.game.get_status(i, role).to_json()
+	def handle_get_status_method(self):
+		return self.game.get_status(self.i, self.role).to_json()
 
 	def handle_send_method(self, data):
 		self.game.log_event("send", i=self.i, role=self.role)

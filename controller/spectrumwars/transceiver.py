@@ -45,7 +45,7 @@ class Transceiver(object):
 		pass
 
 	def get_status(self):
-		status_json = self._client.get_status(self._i, self._role)
+		status_json = self._client.get_status()
 		status = GameStatus.from_json(status_json)
 
 		self._safe_call(self.status_update, status)
