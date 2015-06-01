@@ -18,6 +18,7 @@ class Transceiver(object):
 		self._name = "(%d %s)" % (self._i, self._role)
 
 		self._settings = None
+		self._packet_size = None
 
 	def _safe_call(self, f, *args, **kwargs):
 		try:
@@ -82,7 +83,10 @@ class Transceiver(object):
 		pass
 
 	def get_packet_size(self):
-		return self._game.testbed.get_packet_size()
+		if self._packet_size is None:
+			self._packet_size = self._client.get_packet_size()
+
+		return self._packet_size
 
 	def _event_loop(self):
 
