@@ -62,16 +62,18 @@ class MockRadio(RadioBase):
 			return RadioPacket(data)
 
 class MockSandboxedPlayer(object):
-	def __init__(self, rx, tx):
+	def __init__(self, rx, tx, i):
 		self.rx = rx
 		self.tx = tx
+		self.i = i
 
 class MockSandboxedTransceiver(object):
-	def __init__(self, cls):
+	def __init__(self, cls, role):
 		self.cls = cls
+		self.role = role
 
-	def init(self, i, role, update_interval):
-		self.ins = self.cls(i, role, update_interval)
+	def init(self, i, update_interval):
+		self.ins = self.cls(i, self.role, update_interval)
 
 	def start(self, client):
 		self.ins._start(client)
@@ -82,8 +84,8 @@ class MockSandboxedTransceiver(object):
 class MockSandbox(object):
 	def __init__(self, rxcls, txcls):
 		self.player = MockSandboxedPlayer(
-				MockSandboxedTransceiver(rxcls),
-				MockSandboxedTransceiver(txcls))
+				MockSandboxedTransceiver(rxcls, 'rx'),
+				MockSandboxedTransceiver(txcls, 'tx'), 0)
 
 	def get_players(self):
 		return [self.player]

@@ -13,19 +13,18 @@ class PlayerInstance(object):
 		self.server = server
 
 class Player(object):
-	def __init__(self, sb_player, game, i):
+	def __init__(self, sb_player, game):
 
-		transceivers = (sb_player.rx, sb_player.tx)
-		self.i = i
+		self.i = sb_player.i
 
 		self.result = PlayerResult()
 		self.instances = []
 
 		rxradio, txradio = game.testbed.get_radio_pair()
 
-		for role, radio, transceiver in zip(('rx', 'tx'), (rxradio, txradio), transceivers):
-			transceiver.init(i, role, game.update_interval)
-			server = GameRPCServer(game, self, role, radio)
+		for radio, transceiver in zip((rxradio, txradio), (sb_player.rx, sb_player.tx)):
+			transceiver.init(self.i, game.update_interval)
+			server = GameRPCServer(game, self, transceiver.role, radio)
 			server.start()
 
 			instance = PlayerInstance(transceiver, server)
@@ -98,11 +97,9 @@ class Game(object):
 		return False
 
 	def instantiate(self):
-		sb_players = self.sandbox.get_players()
-
 		self.players = []
-		for i, sb_player in enumerate(sb_players):
-			player = Player(sb_player, self, i)
+		for sb_player in self.sandbox.get_players():
+			player = Player(sb_player, self)
 			self.players.append(player)
 
 	def log_event(self, type, **kwargs):
