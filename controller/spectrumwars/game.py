@@ -108,9 +108,8 @@ class Game(object):
 		event.results = [ copy.copy(player.result) for player in self.players ]
 		self.log.append(event)
 
-	def get_status(self, i, role):
+	def get_status(self):
 		status = GameStatus(self.testbed.get_spectrum())
-		self.log_event("status", i=i, role=role, status=status)
 
 		return status
 
@@ -139,7 +138,9 @@ class GameRPCServer(RPCServer):
 		RPCServer.__init__(self, self.endpoint, timeout=.5)
 
 	def handle_get_status_method(self):
-		return self.game.get_status(self.i, self.role).to_json()
+		status = self.game.get_status()
+		self.game.log_event("status", i=self.i, role=self.role, status=status)
+		return status.to_json()
 
 	def handle_send_method(self, data):
 		self.game.log_event("send", i=self.i, role=self.role)
