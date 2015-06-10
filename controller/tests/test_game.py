@@ -61,6 +61,11 @@ class MockRadio(RadioBase):
 		else:
 			return RadioPacket(data)
 
+class MockSandboxedPlayer(object):
+	def __init__(self, rx, tx):
+		self.rx = rx
+		self.tx = tx
+
 class MockSandboxedTransceiver(object):
 	def __init__(self, cls):
 		self.cls = cls
@@ -76,7 +81,7 @@ class MockSandboxedTransceiver(object):
 
 class MockSandbox(object):
 	def __init__(self, rxcls, txcls):
-		self.player = Player(
+		self.player = MockSandboxedPlayer(
 				MockSandboxedTransceiver(rxcls),
 				MockSandboxedTransceiver(txcls))
 

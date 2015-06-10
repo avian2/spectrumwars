@@ -13,20 +13,19 @@ class PlayerInstance(object):
 		self.server = server
 
 class Player(object):
-	def __init__(self, rx, tx):
-		self.transceivers = (rx, tx)
+	def __init__(self, sb_player, game, i):
+
+		transceivers = (sb_player.rx, sb_player.tx)
+		self.i = i
 
 		self.result = PlayerResult()
 		self.instances = []
 
-	def instantiate(self, game, i):
-		self.i = i
-
 		rxradio, txradio = game.testbed.get_radio_pair()
 
-		for role, radio, transceiver in zip(('rx', 'tx'), (rxradio, txradio), self.transceivers):
+		for role, radio, transceiver in zip(('rx', 'tx'), (rxradio, txradio), transceivers):
 			transceiver.init(i, role, game.update_interval)
-			server = GameRPCServer(game, i, role, radio)
+			server = GameRPCServer(game, self, role, radio)
 			server.start()
 
 			instance = PlayerInstance(transceiver, server)
@@ -99,10 +98,12 @@ class Game(object):
 		return False
 
 	def instantiate(self):
-		self.players = self.sandbox.get_players()
+		sb_players = self.sandbox.get_players()
 
-		for i, player in enumerate(self.players):
-			player.instantiate(self, i)
+		self.players = []
+		for i, sb_player in enumerate(sb_players):
+			player = Player(sb_player, self, i)
+			self.players.append(player)
 
 	def log_event(self, type, **kwargs):
 		event = GameEvent(type, **kwargs)
@@ -124,18 +125,18 @@ class GameEvent(object):
 
 class GameRPCServer(RPCServer):
 
-	def __init__(self, game, i, role, radio):
+	def __init__(self, game, player, role, radio):
 		self.game = game
-		self.player = game.players[i]
+		self.player = player
 		self.radio = radio
 
-		self.i = i
+		self.i = player.i
 		j = 1 if role == 'rx' else 0
 
 		self.role = role
 		self.xname = "(%d %s)" % (self.i, self.role)
 
-		port = 50000 + i*10 + j
+		port = 50000 + self.i*10 + j
 		self.endpoint = "tcp://127.0.0.1:%d" % (port,)
 
 		RPCServer.__init__(self, self.endpoint, timeout=.5)
