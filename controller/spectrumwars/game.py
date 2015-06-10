@@ -3,7 +3,7 @@ import logging
 import time
 from spectrumwars.testbed import TestbedError, RadioTimeout, GameStatus
 from spectrumwars.transceiver import StopGame, TransceiverError
-from jsonrpc2_zeromq import RPCServer, RPCClient
+from jsonrpc2_zeromq import RPCServer
 
 log = logging.getLogger(__name__)
 
@@ -32,8 +32,7 @@ class Player(object):
 
 	def start(self):
 		for instance in self.instances:
-			client = RPCClient(instance.server.endpoint)
-			instance.transceiver.start(client)
+			instance.transceiver.start(instance.server.endpoint)
 
 	def join(self):
 		for instance in self.instances:

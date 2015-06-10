@@ -1,5 +1,6 @@
 import logging
 import unittest
+from jsonrpc2_zeromq import RPCClient
 
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
@@ -75,7 +76,8 @@ class MockSandboxedTransceiver(object):
 	def init(self, i, update_interval):
 		self.ins = self.cls(i, self.role, update_interval)
 
-	def start(self, client):
+	def start(self, endpoint):
+		client = RPCClient(endpoint)
 		self.ins._start(client)
 
 	def join(self):
