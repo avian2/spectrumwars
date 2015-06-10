@@ -6,35 +6,20 @@ import sys
 import pickle
 import argparse
 
+from spectrumwars.sandbox import Sandbox
 from spectrumwars import Player, Game, GameController
 from spectrumwars.testbed.vesna import Testbed
 
 log = logging.getLogger(__name__)
 
-def get_players(paths):
-
-	players = []
-
-	for path in paths:
-		name = os.path.basename(path)
-		name = re.sub("\.py$", "", name)
-
-		mod = imp.load_source(name, path)
-
-		player = Player(mod.Receiver, mod.Transmitter)
-		players.append(player)
-
-	log.info("Loaded %d players" % (len(players),))
-
-	return players
-
 def run(args):
 	logging.basicConfig(level=logging.DEBUG)
+	logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
 
 	testbed = Testbed()
-	players = get_players(args.player_paths)
+	sandbox = Sandbox(args.player_paths)
 
-	game = Game(testbed, players, packet_limit=args.packet_limit, time_limit=args.time_limit)
+	game = Game(testbed, sandbox, packet_limit=args.packet_limit, time_limit=args.time_limit)
 	ctl = GameController()
 
 	log.info("Running game...")
