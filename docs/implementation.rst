@@ -3,6 +3,8 @@
 Implementation notes
 ====================
 
+.. image:: figures/classes.png
+
 * USRP spectrum sensing is inspired by a real-time signal analyzer. e.g. we do
   continuous end-to-end FFTs with no blind time for all received samples. The
   spectral density is then averaged over a window of 200 ms. This is the main
@@ -19,16 +21,25 @@ Implementation notes
   portion of the spectrum for this game. A single channel could in theory
   accomodate 10 players with very little interferrence.
 
-* Currently, it is very simple to cheat, since both of the player's transceiver
-  classes exist in the same Python interpreter (in fact, in the same Python
-  module). This makes it trivial to share state between the through global
-  variables. In the future, these two classes should be isolated in separate
-  processes and sand-boxed in some way.
+* Currently, ``spectrumwars_runner`` runs player's code in a separate
+  processes (provided by ``spectrumwars_sandbox`` executable). The processes
+  communicate through ZeroMQ JSON RPC. This provides some isolation between
+  players and the game controller. It prevents simple ways of cheating that
+  would be possible if code would share the same Python interpreter. It also
+  gracefully handles infinite loops and most accidental errors.
 
-* Similarly, there are very few protections against bugs in the player's code.
-  It is trivial to create a player that makes the game run indefinitely, crash
-  or worse. Current implementation is only a working demonstration of the class
-  interface that is exposed to players.
+  This is not, however, robust against more sophisticated malicious code.
+  There is currently nothing preventing one user from accessing the RPC
+  interface inteded for another user. There is also nothing preventing
+  player's code from accessing the network, filesystem or consuming excessive
+  amounts of memory. These limitations must be implemented on the operating
+  system level and current code makes no attempt to implement them.
+
+  In the future, more sophisticated sandbox methods might be implemented (e.g.
+  running player's code in a virtual host). Since all communication between
+  player's code in ``Transceiver`` class and the game controller already
+  occurs over RPC, this should not require further modifications to the game
+  controller.
 
 * I believe that in the final user interface for this game, it is crucial that
   both console log of the running game and the visualized timeline are

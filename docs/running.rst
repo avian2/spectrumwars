@@ -37,11 +37,16 @@ this:
    :width: 100%
    :align: center
 
-Red markers are events from the ``Receiver`` class. Circles show successfully
-received packets. Crosses show radio reconfigurations (i.e.
-``set_configuration()`` method calls). Horizontal lines show spectral scans. A
-scan is shown each time the class requests it using ``get_status()`` method or
-when the ``status_update()`` event happens.
+Left graph shows the progress of the game in a time-frequency diagram. Key
+events in the game are displayed in form of markers: Red markers show events
+from the ``Receiver`` class. Circles show successfully received packets.
+Crosses show radio reconfigurations (i.e.  ``set_configuration()`` method
+calls). Horizontal lines show spectral scans. A scan is shown each time the
+class requests it using ``get_status()`` method or when the
+``status_update()`` event happens. In a similar fashion, green markers show
+events from the ``Transmitter`` class. Crosses again show radio
+reconfigurations while exes show packet transmissions.
 
-Similarly, green markers are events from the ``Transmitter`` class. Crosses
-again show radio reconfigurations while exes show packet transmissions.
+Right graph shows progress of performance indicators: percentage of
+transferred payload required by the game and number of transmitted and
+received packets.

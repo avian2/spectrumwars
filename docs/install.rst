@@ -71,6 +71,8 @@ You need the following packages installed:
 
 * gr-specest - https://github.com/avian2/gr-specest
 
+* jsonrpc2-zeromq (``pip install jsonrpc2-zeromq --user``)
+
 * numpy (``apt-get install python-numpy``)
 * matplotlib (``apt-get install python-matplotlib``)
 
@@ -83,7 +85,11 @@ To run tests::
 
    $ python setup.py test
 
-(note that some tests expect that you have a USRP and two nodes connected)
+Note that some tests expect that you have a USRP and two nodes connected.
+
+.. note::
+   There are some unknown race condition issues related to RPC, so some tests
+   might fail occassionally with ``ZMQError: Address already in use``.
 
 Building HTML documentation
 ---------------------------
