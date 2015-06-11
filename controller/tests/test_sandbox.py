@@ -1,8 +1,9 @@
+import imp
+import os
+import re
 import unittest
 from tempfile import NamedTemporaryFile
 from jsonrpc2_zeromq import RPCServer, RPCClient
-
-from spectrumwars.sandbox import Sandbox
 
 class MockGameRPCServer(RPCServer):
 	def handle_report_stop_method(self, crashed):
@@ -11,7 +12,7 @@ class MockGameRPCServer(RPCServer):
 	def handle_should_finish_method(self):
 		return True
 
-class TestSandbox(unittest.TestCase):
+class BaseTestSandbox(unittest.TestCase):
 
 	def setUp(self):
 		self.endpoint = 'tcp://127.0.0.1:50000'
@@ -23,28 +24,26 @@ class TestSandbox(unittest.TestCase):
 		self.server.join()
 		del self.server
 
+from spectrumwars.sandbox import ThreadedSandbox
+
+class TestThreadedSandbox(BaseTestSandbox):
+
 	def test_empty(self):
-		sandbox = Sandbox([])
-
+		sandbox = ThreadedSandbox([])
 		players = sandbox.get_players()
-
 		self.assertEqual(players, [])
 
-
 	def test_simple(self):
-		f = NamedTemporaryFile(suffix='.py')
-		f.write("""from spectrumwars import Transceiver
 
-class Receiver(Transceiver):
-	pass
+		from spectrumwars import Transceiver
 
-class Transmitter(Transceiver):
-	pass
-""")
-		f.flush()
+		class Receiver(Transceiver):
+			pass
 
-		sandbox = Sandbox([f.name])
+		class Transmitter(Transceiver):
+			pass
 
+		sandbox = ThreadedSandbox([[Receiver, Transmitter]])
 		players = sandbox.get_players()
 
 		self.assertEqual(len(players), 1)
