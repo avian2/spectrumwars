@@ -37,12 +37,8 @@ class ThreadedSandboxInstance(object):
 		self.thread = threading.Thread(target=self.ins._start, args=(client,))
 		self.thread.start()
 
-	def kill(self):
-		raise NotImplemented
-
-	def join(self, timeout=None):
-		self.thread.join(timeout)
-		return self.thread.is_alive()
+	def join(self, deadline=None):
+		self.thread.join()
 
 class ThreadedSandbox(object):
 	def __init__(self, cls_list):
@@ -89,19 +85,20 @@ class SubprocessSandboxInstance(object):
 
 		self.p = subprocess.Popen(cmd)
 
-	def kill(self):
-		self.p.kill()
-
-	def join(self, timeout=None):
-		if timeout is None:
+	def join(self, deadline=None):
+		if deadline is None:
 			rc = self.p.wait()
 		else:
 			interval = .5
-			for n in xrange(max(1, timeout/interval)):
-				time.sleep(interval)
+			while True:
+				if time.time() >= deadline:
+					self.p.kill()
+					time.sleep(interval)
+
 				rc = self.p.poll()
 				if rc != None:
 					break
+				time.sleep(interval)
 			else:
 				return True
 		if rc != 0:

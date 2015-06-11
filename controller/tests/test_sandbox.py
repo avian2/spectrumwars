@@ -1,6 +1,7 @@
 import imp
 import os
 import re
+import time
 import unittest
 from tempfile import NamedTemporaryFile
 from jsonrpc2_zeromq import RPCServer, RPCClient
@@ -131,15 +132,11 @@ class Transmitter(Transceiver):
 		player.rx.start(self.endpoint)
 		player.tx.start(self.endpoint)
 
-		r = player.rx.join(.1)
-		self.assertEqual(r, True)
-		r = player.tx.join(.1)
-		self.assertEqual(r, False)
+		now = time.time()
+		deadline = now + 1
 
-		player.rx.kill()
-
-		r = player.rx.join(.1)
-		self.assertEqual(r, False)
+		player.rx.join(deadline=deadline)
+		player.tx.join(deadline=deadline)
 
 		self.assertEqual(self.server.crashed, 1)
 		self.assertEqual(self.server.stopped, 2)
