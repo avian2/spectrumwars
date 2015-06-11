@@ -1,11 +1,15 @@
 import logging
 import threading
+import traceback
 
 from spectrumwars.testbed import RadioTimeout, RadioError, RadioPacket, GameStatus
 
 log = logging.getLogger(__name__)
 
-class TransceiverError(Exception): pass
+class TransceiverError(Exception):
+	def __init__(self, desc):
+		self.desc = desc
+
 class StopGame(Exception): pass
 
 class Transceiver(object):
@@ -27,7 +31,7 @@ class Transceiver(object):
 			raise
 		except:
 			log.warning("%s crashed" % (self._name,), exc_info=True)
-			raise TransceiverError
+			raise TransceiverError(traceback.format_exc())
 
 	def _start(self, client):
 		self._client = client
@@ -91,6 +95,7 @@ class Transceiver(object):
 		log.debug("%s worker started" % (self._name,))
 
 		crashed = False
+		desc = None
 
 		try:
 			self._safe_call(self.start)
@@ -108,8 +113,10 @@ class Transceiver(object):
 
 		except StopGame:
 			pass
-		except TransceiverError:
+		except TransceiverError, e:
 			crashed = True
+			desc = e.desc
 
 		log.debug("%s worker stopped" % self._name)
-		self._client.report_stop(crashed)
+
+		self._client.report_stop(crashed, desc)

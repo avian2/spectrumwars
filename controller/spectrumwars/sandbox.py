@@ -7,6 +7,7 @@ import sys
 import re
 import threading
 import time
+import traceback
 from jsonrpc2_zeromq import RPCClient
 
 from spectrumwars import Player
@@ -106,7 +107,14 @@ class SubprocessSandboxInstance(object):
 				return True
 		if rc != 0:
 			client = RPCClient(self.endpoint)
-			client.report_stop(True)
+			if rc == -9:
+				desc = "Time limit reached"
+			else:
+				desc = "Sandbox exited with return code %d" % (rc,)
+			client.report_stop(True, desc)
+
+		# If sandbox instance exited normally, it should have reported
+		# the stop itself.
 
 		return False
 
@@ -126,15 +134,20 @@ class SubprocessSandboxInstance(object):
 		name = os.path.basename(args['path'])
 		name = re.sub("\.py$", "", name)
 
-		mod = imp.load_source(name, args['path'])
-
-		if args['role'] == 'rx':
-			cls = mod.Receiver
+		try:
+			mod = imp.load_source(name, args['path'])
+		except SyntaxError:
+			log.warning("(%d %s) syntax error" % (args['i'], args['role']))
+			desc = traceback.format_exc()
+			client.report_stop(True, desc)
 		else:
-			cls = mod.Transmitter
+			if args['role'] == 'rx':
+				cls = mod.Receiver
+			else:
+				cls = mod.Transmitter
 
-		ins = cls(args['i'], args['role'], args['update_interval'])
-		ins._start(client)
+			ins = cls(args['i'], args['role'], args['update_interval'])
+			ins._start(client)
 
 		log.info("(%d %s) sandbox stopping" % (args['i'], args['role']))
 

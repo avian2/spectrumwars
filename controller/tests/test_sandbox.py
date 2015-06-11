@@ -11,8 +11,10 @@ level = logging.WARNING
 logging.basicConfig(level=level)
 
 class MockGameRPCServer(RPCServer):
-	def handle_report_stop_method(self, crashed):
+	def handle_report_stop_method(self, crashed, crash_desc=None):
 		self.crashed += crashed
+		if crashed:
+			self.crash_desc.append(crash_desc)
 		self.stopped += 1
 
 	def handle_should_finish_method(self):
@@ -25,6 +27,7 @@ class BaseTestSandbox(unittest.TestCase):
 		self.server = MockGameRPCServer(timeout=.5, endpoint=self.endpoint)
 		self.server.stopped = 0
 		self.server.crashed = 0
+		self.server.crash_desc = []
 		self.server.start()
 
 	def tearDown(self):
@@ -110,7 +113,7 @@ class Transmitter(Transceiver):
 		self.assertEqual(self.server.stopped, 2)
 		self.assertEqual(self.server.crashed, 0)
 
-	def test_simple(self):
+	def test_loop(self):
 
 		f = self.write_temp_py("""from spectrumwars import Transceiver
 
@@ -144,3 +147,29 @@ class Transmitter(Transceiver):
 
 		self.assertEqual(self.server.crashed, 1)
 		self.assertEqual(self.server.stopped, 2)
+		self.assertEqual(len(self.server.crash_desc), 1)
+		self.assertTrue("Time" in self.server.crash_desc[0])
+
+	def test_syntax(self):
+
+		f = self.write_temp_py("(")
+		sandbox = SubprocessSandbox([f.name])
+		players = sandbox.get_players()
+
+		self.assertEqual(len(players), 1)
+
+		player = players[0]
+
+		player.rx.init(player.i, 1.)
+		player.tx.init(player.i, 1.)
+
+		player.rx.start(self.endpoint)
+		player.tx.start(self.endpoint)
+
+		player.rx.join()
+		player.tx.join()
+
+		self.assertEqual(self.server.crashed, 2)
+		self.assertEqual(self.server.stopped, 2)
+		self.assertEqual(len(self.server.crash_desc), 2)
+		self.assertTrue("SyntaxError" in self.server.crash_desc[0])

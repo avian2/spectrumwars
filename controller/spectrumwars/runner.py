@@ -28,12 +28,15 @@ def run(args):
 
 	log.info("Done.")
 
+	game_time = game.end_time - game.start_time
+
 	print "Results:"
 	for i, result in enumerate(results):
 
-		ratio = 100. * result.received_packets / result.transmit_packets
-
-		game_time = game.end_time - game.start_time
+		if result.transmit_packets > 0:
+			ratio = 100. * result.received_packets / result.transmit_packets
+		else:
+			ratio = 0.
 
 		print "Player %d:" % (i+1,)
 		print "    crashed             : %s" % (result.crashed,)
@@ -41,7 +44,14 @@ def run(args):
 		print "    received packets    : %d (%.0f%%)" % (result.received_packets, ratio)
 		print "    transferred payload : %d bytes (avg %.1f bytes/s)" % (
 				result.payload_bytes, result.payload_bytes / game_time)
-		print "Game time: %.1f seconds" % (game_time,)
+		print
+		if result.crashed:
+			print "   Crash reasons:"
+			for desc in result.crash_desc:
+				print desc
+			print
+
+	print "Game time: %.1f seconds" % (game_time,)
 
 	if args.log_path:
 		pickle.dump(game.log, open(args.log_path, "wb"))

@@ -56,6 +56,8 @@ class PlayerResult(object):
 		self.transmit_packets = 0
 		# whether the player's code raised an unhandled exception
 		self.crashed = False
+		# list of reasons why the player's code crashed
+		self.crash_desc = []
 		# number of bytes transferred from transmitter to receiver
 		self.payload_bytes = 0
 
@@ -180,9 +182,10 @@ class GameRPCServer(RPCServer):
 	def handle_get_packet_size_method(self):
 		return self.game.testbed.get_packet_size()
 
-	def handle_report_stop_method(self, crashed):
+	def handle_report_stop_method(self, crashed, crash_desc=None):
 		if crashed:
 			self.player.result.crashed = True
+			self.player.result.crash_desc.append(crash_desc)
 
 		self.game.state = 'stopping'
 
