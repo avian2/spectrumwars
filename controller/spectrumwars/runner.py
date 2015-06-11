@@ -6,35 +6,20 @@ import sys
 import pickle
 import argparse
 
+from spectrumwars.sandbox import SubprocessSandbox
 from spectrumwars import Player, Game, GameController
 from spectrumwars.testbed.vesna import Testbed
 
 log = logging.getLogger(__name__)
 
-def get_players(paths):
-
-	players = []
-
-	for path in paths:
-		name = os.path.basename(path)
-		name = re.sub("\.py$", "", name)
-
-		mod = imp.load_source(name, path)
-
-		player = Player(mod.Receiver, mod.Transmitter)
-		players.append(player)
-
-	log.info("Loaded %d players" % (len(players),))
-
-	return players
-
 def run(args):
 	logging.basicConfig(level=logging.DEBUG)
+	logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
 
 	testbed = Testbed()
-	players = get_players(args.player_paths)
+	sandbox = SubprocessSandbox(args.player_paths)
 
-	game = Game(testbed, players, packet_limit=args.packet_limit, time_limit=args.time_limit)
+	game = Game(testbed, sandbox, packet_limit=args.packet_limit, time_limit=args.time_limit)
 	ctl = GameController()
 
 	log.info("Running game...")
@@ -43,12 +28,15 @@ def run(args):
 
 	log.info("Done.")
 
+	game_time = game.end_time - game.start_time
+
 	print "Results:"
 	for i, result in enumerate(results):
 
-		ratio = 100. * result.received_packets / result.transmit_packets
-
-		game_time = game.end_time - game.start_time
+		if result.transmit_packets > 0:
+			ratio = 100. * result.received_packets / result.transmit_packets
+		else:
+			ratio = 0.
 
 		print "Player %d:" % (i+1,)
 		print "    crashed             : %s" % (result.crashed,)
@@ -56,7 +44,14 @@ def run(args):
 		print "    received packets    : %d (%.0f%%)" % (result.received_packets, ratio)
 		print "    transferred payload : %d bytes (avg %.1f bytes/s)" % (
 				result.payload_bytes, result.payload_bytes / game_time)
-		print "Game time: %.1f seconds" % (game_time,)
+		print
+		if result.crashed:
+			print "   Crash reasons:"
+			for desc in result.crash_desc:
+				print desc
+			print
+
+	print "Game time: %.1f seconds" % (game_time,)
 
 	if args.log_path:
 		pickle.dump(game.log, open(args.log_path, "wb"))

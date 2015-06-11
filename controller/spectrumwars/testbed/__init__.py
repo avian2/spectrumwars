@@ -40,3 +40,21 @@ class RadioBase(object):
 class RadioPacket(object):
 	def __init__(self, data):
 		self.data = data
+
+	def to_json(self):
+		return (self.data,)
+
+	@classmethod
+	def from_json(cls, json):
+		return cls(*json)
+
+class GameStatus(object):
+	def __init__(self, spectrum):
+		self.spectrum = spectrum
+
+	def to_json(self):
+		return (self.spectrum,)
+
+	@classmethod
+	def from_json(cls, json):
+		return cls(*json)

@@ -1,11 +1,13 @@
 import logging
 import unittest
+from jsonrpc2_zeromq import RPCClient
 
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
 from spectrumwars.testbed import TestbedBase, RadioBase, RadioPacket
+from spectrumwars.sandbox import ThreadedSandbox
 
-level = logging.INFO
+level = logging.WARNING
 logging.basicConfig(level=level)
 
 def log_exc_off():
@@ -72,8 +74,9 @@ class TestGame(unittest.TestCase):
 
 	def _run_game(self, rxcls, txcls, packet_limit=PACKET_LIMIT, payload_limit=PAYLOAD_LIMIT,
 			time_limit=TIME_LIMIT):
-		player = Player(rxcls, txcls)
-		game = Game(self.testbed, [player],
+
+		sandbox = ThreadedSandbox([[rxcls, txcls]])
+		game = Game(self.testbed, sandbox,
 				packet_limit=packet_limit,
 				time_limit=time_limit,
 				payload_limit=payload_limit)
@@ -144,7 +147,7 @@ class TestGame(unittest.TestCase):
 					self.send()
 
 		result = self._run_game(Receiver, Transmitter, payload_limit=None, time_limit=None)
-		self.assertGreater(result.received_packets, self.PACKET_LIMIT)
+		self.assertGreaterEqual(result.received_packets, self.PACKET_LIMIT)
 
 	def test_all_payload(self):
 
@@ -154,7 +157,7 @@ class TestGame(unittest.TestCase):
 					self.send()
 
 		result = self._run_game(Transceiver, Transmitter, packet_limit=None, time_limit=None)
-		self.assertGreater(result.payload_bytes, self.PAYLOAD_LIMIT)
+		self.assertGreaterEqual(result.payload_bytes, self.PAYLOAD_LIMIT)
 
 	def test_recv_packet(self):
 
@@ -265,6 +268,7 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transmitter)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
+		self.assertTrue("Traceback" in result.crash_desc[0])
 
 	def test_error_start(self):
 
@@ -276,6 +280,7 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transceiver)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
+		self.assertTrue("Traceback" in result.crash_desc[0])
 
 	def test_error_status_update(self):
 
@@ -287,6 +292,7 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transceiver)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
+		self.assertTrue("Traceback" in result.crash_desc[0])
 
 	def test_recv_in_start(self):
 
@@ -297,16 +303,14 @@ class TestGame(unittest.TestCase):
 				for data in self.recv_loop(timeout=2.):
 					cnt[1] += 1
 
-				print "exit"
-
 			def recv(self, packet):
 				cnt[0] += 1
 
 		class Transmitter(Transceiver):
 			def start(self):
 				while True:
-					self.send()
 					cnt[2] += 1
+					self.send()
 
 		result = self._run_game(Receiver, Transmitter, payload_limit=None)
 

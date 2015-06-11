@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='spectrumwars',
-    version='0.0.1',
+    version='0.0.2',
     description='A programming game where players compete for radio bandwidth.',
     license='GPL3',
     author='Tomaz Solc',
@@ -12,7 +12,8 @@ setup(name='spectrumwars',
     entry_points = {
         'console_scripts': [
             'spectrumwars_runner = spectrumwars.runner:main',
-            'spectrumwars_plot = spectrumwars.plotter:main'
+            'spectrumwars_plot = spectrumwars.plotter:main',
+	    'spectrumwars_sandbox = spectrumwars.sandbox:SubprocessSandboxInstance.run',
         ]
     },
 
