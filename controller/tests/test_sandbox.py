@@ -1,10 +1,14 @@
 import imp
+import logging
 import os
 import re
 import time
 import unittest
 from tempfile import NamedTemporaryFile
 from jsonrpc2_zeromq import RPCServer, RPCClient
+
+level = logging.WARNING
+logging.basicConfig(level=level)
 
 class MockGameRPCServer(RPCServer):
 	def handle_report_stop_method(self, crashed):

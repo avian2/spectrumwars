@@ -80,7 +80,8 @@ class SubprocessSandboxInstance(object):
 			'i': self.i,
 			'role': self.role,
 			'update_interval': self.update_interval,
-			'endpoint': endpoint})
+			'endpoint': endpoint,
+			'loglevel': logging.getLogger().getEffectiveLevel() })
 		cmd = (excpath, args_json)
 
 		self.p = subprocess.Popen(cmd)
@@ -111,13 +112,14 @@ class SubprocessSandboxInstance(object):
 
 	@classmethod
 	def run(cls):
-		logging.basicConfig(level=logging.DEBUG)
-		logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
-
 		args_json = sys.argv[1]
 		args = json.loads(args_json)
 
-		log.info("(%d %s) spectrumwars_sandbox starting" % (args['i'], args['role']))
+		logging.basicConfig(level=args['loglevel'],
+				format="<SB>%(levelname)s:%(name)s:%(message)s")
+		logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
+
+		log.info("(%d %s) sandbox starting" % (args['i'], args['role']))
 
 		client = RPCClient(args['endpoint'])
 
@@ -134,7 +136,7 @@ class SubprocessSandboxInstance(object):
 		ins = cls(args['i'], args['role'], args['update_interval'])
 		ins._start(client)
 
-		log.info("(%d %s) spectrumwars_sandbox stopping" % (args['i'], args['role']))
+		log.info("(%d %s) sandbox stopping" % (args['i'], args['role']))
 
 class SubprocessSandbox(object):
 	def __init__(self, paths):
