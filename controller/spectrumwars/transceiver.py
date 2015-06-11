@@ -31,12 +31,7 @@ class Transceiver(object):
 
 	def _start(self, client):
 		self._client = client
-
-		self._thread = threading.Thread(target=self._event_loop)
-		self._thread.start()
-
-	def _join(self):
-		self._thread.join()
+		self._event_loop()
 
 	def start(self):
 		pass

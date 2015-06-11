@@ -2,6 +2,7 @@ import imp
 import logging
 import os
 import re
+import threading
 from jsonrpc2_zeromq import RPCClient
 
 from spectrumwars import Player
@@ -14,7 +15,7 @@ class SandboxedPlayer(object):
 		self.tx = tx
 		self.i = i
 
-class SandboxInstance(object):
+class ThreadedSandboxInstance(object):
 	def __init__(self, cls, role):
 		self.cls = cls
 		self.role = role
@@ -24,10 +25,12 @@ class SandboxInstance(object):
 
 	def start(self, endpoint):
 		client = RPCClient(endpoint)
-		self.ins._start(client)
+
+		self.thread = threading.Thread(target=self.ins._start, args=(client,))
+		self.thread.start()
 
 	def join(self):
-		self.ins._join()
+		self.thread.join()
 
 class Sandbox(object):
 	def __init__(self, paths):
@@ -42,8 +45,8 @@ class Sandbox(object):
 
 			mod = imp.load_source(name, path)
 
-			sbrx = SandboxInstance(mod.Receiver, 'rx')
-			sbtx = SandboxInstance(mod.Transmitter, 'tx')
+			sbrx = ThreadedSandboxInstance(mod.Receiver, 'rx')
+			sbtx = ThreadedSandboxInstance(mod.Transmitter, 'tx')
 
 			player = SandboxedPlayer(sbrx, sbtx, i)
 			players.append(player)

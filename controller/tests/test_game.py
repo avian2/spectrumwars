@@ -5,7 +5,7 @@ from jsonrpc2_zeromq import RPCClient
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
 from spectrumwars.testbed import TestbedBase, RadioBase, RadioPacket
-from spectrumwars.sandbox import SandboxedPlayer
+from spectrumwars.sandbox import SandboxedPlayer, ThreadedSandboxInstance
 
 level = logging.WARNING
 logging.basicConfig(level=level)
@@ -63,26 +63,11 @@ class MockRadio(RadioBase):
 		else:
 			return RadioPacket(data)
 
-class MockSandboxedTransceiver(object):
-	def __init__(self, cls, role):
-		self.cls = cls
-		self.role = role
-
-	def init(self, i, update_interval):
-		self.ins = self.cls(i, self.role, update_interval)
-
-	def start(self, endpoint):
-		client = RPCClient(endpoint)
-		self.ins._start(client)
-
-	def join(self):
-		self.ins._join()
-
 class MockSandbox(object):
 	def __init__(self, rxcls, txcls):
 		self.player = SandboxedPlayer(
-				MockSandboxedTransceiver(rxcls, 'rx'),
-				MockSandboxedTransceiver(txcls, 'tx'), 0)
+				ThreadedSandboxInstance(rxcls, 'rx'),
+				ThreadedSandboxInstance(txcls, 'tx'), 0)
 
 	def get_players(self):
 		return [self.player]
