@@ -6,6 +6,7 @@ import subprocess
 import sys
 import re
 import threading
+import time
 from jsonrpc2_zeromq import RPCClient
 
 from spectrumwars import Player
@@ -36,8 +37,12 @@ class ThreadedSandboxInstance(object):
 		self.thread = threading.Thread(target=self.ins._start, args=(client,))
 		self.thread.start()
 
-	def join(self):
-		self.thread.join()
+	def kill(self):
+		raise NotImplemented
+
+	def join(self, timeout=None):
+		self.thread.join(timeout)
+		return self.thread.is_alive()
 
 class ThreadedSandbox(object):
 	def __init__(self, cls_list):
@@ -63,6 +68,8 @@ class SubprocessSandboxInstance(object):
 
 	def start(self, endpoint):
 
+		self.endpoint = endpoint
+
 		cmdname = 'spectrumwars_sandbox'
 
 		for dirname in os.environ['PATH'].split(':'):
@@ -82,13 +89,32 @@ class SubprocessSandboxInstance(object):
 
 		self.p = subprocess.Popen(cmd)
 
-	def join(self):
-		rc = self.p.wait()
+	def kill(self):
+		self.p.kill()
+
+	def join(self, timeout=None):
+		if timeout is None:
+			rc = self.p.wait()
+		else:
+			interval = .5
+			for n in xrange(max(1, timeout/interval)):
+				time.sleep(interval)
+				rc = self.p.poll()
+				if rc != None:
+					break
+			else:
+				return True
 		if rc != 0:
-			raise Exception
+			client = RPCClient(self.endpoint)
+			client.report_stop(True)
+
+		return False
 
 	@classmethod
 	def run(cls):
+		logging.basicConfig(level=logging.DEBUG)
+		logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
+
 		args_json = sys.argv[1]
 		args = json.loads(args_json)
 
