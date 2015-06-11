@@ -37,7 +37,7 @@ class ThreadedSandboxInstance(object):
 		self.thread = threading.Thread(target=self.ins._start, args=(client,))
 		self.thread.start()
 
-	def join(self, deadline=None):
+	def join(self, deadline=None, timefunc=time.time):
 		self.thread.join()
 
 class ThreadedSandbox(object):
@@ -85,19 +85,21 @@ class SubprocessSandboxInstance(object):
 
 		self.p = subprocess.Popen(cmd)
 
-	def join(self, deadline=None):
+	def join(self, deadline=None, timefunc=time.time):
 		if deadline is None:
 			rc = self.p.wait()
 		else:
 			interval = .5
 			while True:
-				if time.time() >= deadline:
-					self.p.kill()
-					time.sleep(interval)
-
 				rc = self.p.poll()
 				if rc != None:
 					break
+
+				if timefunc() >= deadline:
+					log.warning("(%d %s) sandbox killing instance due to deadline" %
+							(self.i, self.role))
+					self.p.kill()
+
 				time.sleep(interval)
 			else:
 				return True
@@ -115,6 +117,8 @@ class SubprocessSandboxInstance(object):
 		args_json = sys.argv[1]
 		args = json.loads(args_json)
 
+		log.info("(%d %s) spectrumwars_sandbox starting" % (args['i'], args['role']))
+
 		client = RPCClient(args['endpoint'])
 
 		name = os.path.basename(args['path'])
@@ -129,6 +133,8 @@ class SubprocessSandboxInstance(object):
 
 		ins = cls(args['i'], args['role'], args['update_interval'])
 		ins._start(client)
+
+		log.info("(%d %s) spectrumwars_sandbox stopping" % (args['i'], args['role']))
 
 class SubprocessSandbox(object):
 	def __init__(self, paths):

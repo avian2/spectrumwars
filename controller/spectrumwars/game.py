@@ -16,6 +16,7 @@ class Player(object):
 	def __init__(self, sb_player, game):
 
 		self.i = sb_player.i
+		self.game = game
 
 		self.result = PlayerResult()
 		self.instances = []
@@ -35,8 +36,12 @@ class Player(object):
 			instance.transceiver.start(instance.server.endpoint)
 
 	def join(self):
+		if self.game.hard_time_limit is None:
+			deadline = None
+		else:
+			deadline = self.game.start_time + self.game.hard_time_limit
 		for instance in self.instances:
-			instance.transceiver.join()
+			instance.transceiver.join(deadline, timefunc=self.game.testbed.time)
 
 			instance.server.stop()
 			instance.server.join()
@@ -60,7 +65,8 @@ class Game(object):
 		self.testbed = testbed
 		self.sandbox = sandbox
 		self.packet_limit = packet_limit
-		self.time_limit = time_limit
+		self.soft_time_limit = time_limit
+		self.hard_time_limit = time_limit + 10 if time_limit is not None else None
 		self.payload_limit = payload_limit
 
 		self.update_interval = 1
@@ -73,8 +79,8 @@ class Game(object):
 
 	def should_finish(self):
 
-		if self.time_limit is not None:
-			if self.testbed.time() - self.start_time > self.time_limit:
+		if self.soft_time_limit is not None:
+			if self.testbed.time() - self.start_time > self.soft_time_limit:
 				log.debug("game time limit reached!")
 				return True
 
