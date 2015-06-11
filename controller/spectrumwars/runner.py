@@ -6,7 +6,7 @@ import sys
 import pickle
 import argparse
 
-from spectrumwars.sandbox import Sandbox
+from spectrumwars.sandbox import SubprocessSandbox
 from spectrumwars import Player, Game, GameController
 from spectrumwars.testbed.vesna import Testbed
 
@@ -17,7 +17,7 @@ def run(args):
 	logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
 
 	testbed = Testbed()
-	sandbox = Sandbox(args.player_paths)
+	sandbox = SubprocessSandbox(args.player_paths)
 
 	game = Game(testbed, sandbox, packet_limit=args.packet_limit, time_limit=args.time_limit)
 	ctl = GameController()

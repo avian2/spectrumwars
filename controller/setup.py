@@ -12,7 +12,8 @@ setup(name='spectrumwars',
     entry_points = {
         'console_scripts': [
             'spectrumwars_runner = spectrumwars.runner:main',
-            'spectrumwars_plot = spectrumwars.plotter:main'
+            'spectrumwars_plot = spectrumwars.plotter:main',
+	    'spectrumwars_sandbox = spectrumwars.sandbox:SubprocessSandboxInstance.run',
         ]
     },
 

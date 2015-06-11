@@ -1,6 +1,9 @@
 import imp
+import json
 import logging
 import os
+import subprocess
+import sys
 import re
 import threading
 from jsonrpc2_zeromq import RPCClient
@@ -49,7 +52,62 @@ class ThreadedSandbox(object):
 	def get_players(self):
 		return self.players
 
-class Sandbox(object):
+class SubprocessSandboxInstance(object):
+	def __init__(self, path, role):
+		self.path = path
+		self.role = role
+
+	def init(self, i, update_interval):
+		self.i = i
+		self.update_interval = update_interval
+
+	def start(self, endpoint):
+
+		cmdname = 'spectrumwars_sandbox'
+
+		for dirname in os.environ['PATH'].split(':'):
+			excpath = os.path.join(dirname, cmdname)
+			if os.path.exists(excpath):
+				break
+		else:
+			raise SandboxError("Can't find %r in PATH" % (cmdname,))
+
+		args_json = json.dumps({
+			'path': self.path,
+			'i': self.i,
+			'role': self.role,
+			'update_interval': self.update_interval,
+			'endpoint': endpoint})
+		cmd = (excpath, args_json)
+
+		self.p = subprocess.Popen(cmd)
+
+	def join(self):
+		rc = self.p.wait()
+		if rc != 0:
+			raise Exception
+
+	@classmethod
+	def run(cls):
+		args_json = sys.argv[1]
+		args = json.loads(args_json)
+
+		client = RPCClient(args['endpoint'])
+
+		name = os.path.basename(args['path'])
+		name = re.sub("\.py$", "", name)
+
+		mod = imp.load_source(name, args['path'])
+
+		if args['role'] == 'rx':
+			cls = mod.Receiver
+		else:
+			cls = mod.Transmitter
+
+		ins = cls(args['i'], args['role'], args['update_interval'])
+		ins._start(client)
+
+class SubprocessSandbox(object):
 	def __init__(self, paths):
 		self.paths = paths
 
@@ -57,13 +115,8 @@ class Sandbox(object):
 		players = []
 
 		for i, path in enumerate(self.paths):
-			name = os.path.basename(path)
-			name = re.sub("\.py$", "", name)
-
-			mod = imp.load_source(name, path)
-
-			sbrx = ThreadedSandboxInstance(mod.Receiver, 'rx')
-			sbtx = ThreadedSandboxInstance(mod.Transmitter, 'tx')
+			sbrx = SubprocessSandboxInstance(path, 'rx')
+			sbtx = SubprocessSandboxInstance(path, 'tx')
 
 			player = SandboxPlayer(sbrx, sbtx, i)
 			players.append(player)
