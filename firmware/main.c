@@ -241,10 +241,24 @@ int main(void)
 	/* Turn on power manager */
 	vsnPM_init();
 	/* Set SysClock frequency */
-	vsnSetup_intClk(SNC_CLOCK_64MHZ);
+	/* USB only works with 48 or 72 MHz - vsnSetup_intClk doesn't currently
+	 * support 72 MHz */
+	vsnSetup_intClk(SNC_CLOCK_48MHZ);
 	/* Initialize SNC */
 	vsnSetup_initSnc();
 	/* Configure debug port at USART1, 115200 kbaud, 8 data bit, no parity, one stop bit, no flow control */
+	vsnSetup_calibHsi();
+
+	/* For some reason USART1 still needs to be initialized for USB to
+	 * work */
+	USART_InitTypeDef USART_InitStructure;
+	USART_InitStructure.USART_BaudRate = 115200;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+	vsnUSART_init(USART1, &USART_InitStructure);
+
 	vsnUSART_init(USART_VCP, NULL);
 
 	/* Make stdout unbuffered, just in case */
