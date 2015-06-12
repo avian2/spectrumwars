@@ -1,0 +1,10 @@
+2015-06-11	spectrumwars 0.0.2
+
+	* Rework interface between transceiver and game controller to be
+	  compatible with RPC.
+	* Add sandbox infrastructure.
+	* Subprocess sandboxing for player's code.
+
+2015-05-14	spectrumwars 0.0.1
+
+	* First release

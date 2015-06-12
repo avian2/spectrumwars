@@ -1,10 +1,12 @@
 import logging
 import unittest
+from jsonrpc2_zeromq import RPCClient
 
 from spectrumwars import Player, Game, GameController, Transceiver
 from spectrumwars.testbed.vesna import Testbed
+from spectrumwars.sandbox import ThreadedSandbox
 
-level = logging.INFO
+level = logging.WARNING
 logging.basicConfig(level=level)
 
 class TestVESNAGame(unittest.TestCase):
@@ -16,8 +18,8 @@ class TestVESNAGame(unittest.TestCase):
 		self.testbed = Testbed()
 
 	def _run_game(self, rxcls, txcls):
-		player = Player(rxcls, txcls)
-		game = Game(self.testbed, [player],
+		sandbox = ThreadedSandbox([[rxcls, txcls]])
+		game = Game(self.testbed, sandbox,
 				packet_limit=self.PACKET_LIMIT, time_limit=self.TIME_LIMIT)
 		ctl = GameController()
 		return ctl.run(game)[0]

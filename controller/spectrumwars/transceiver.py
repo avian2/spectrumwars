@@ -1,22 +1,28 @@
 import logging
+import threading
+import traceback
 
-from spectrumwars.game import StopGame
-from spectrumwars.testbed import RadioTimeout, RadioError
+from spectrumwars.testbed import RadioTimeout, RadioError, RadioPacket, GameStatus
 
 log = logging.getLogger(__name__)
 
+class TransceiverError(Exception):
+	def __init__(self, desc):
+		self.desc = desc
+
+class StopGame(Exception): pass
+
 class Transceiver(object):
 
-	def __init__(self, game, i, role, radio):
-		self._game = game
-		self._player = game.players[i]
-		self._radio = radio
+	def __init__(self, i, role, update_interval):
+		self._update_interval = update_interval
 
 		self._i = i
 		self._role = role
 		self._name = "(%d %s)" % (self._i, self._role)
 
 		self._settings = None
+		self._packet_size = None
 
 	def _safe_call(self, f, *args, **kwargs):
 		try:
@@ -24,41 +30,36 @@ class Transceiver(object):
 		except StopGame:
 			raise
 		except:
-			self._player.result.crashed = True
 			log.warning("%s crashed" % (self._name,), exc_info=True)
-			raise StopGame
+			raise TransceiverError(traceback.format_exc())
 
-	def _start(self):
-		self._safe_call(self.start)
+	def _start(self, client):
+		self._client = client
+		self._event_loop()
 
 	def start(self):
 		pass
-
-	def _status_update(self, status):
-		self._safe_call(self.status_update, status)
 
 	def status_update(self, status):
 		pass
 
 	def get_status(self):
-		return self._game.get_status(self._i, self._role)
+		status_json = self._client.get_status()
+		status = GameStatus.from_json(status_json)
+
+		self._safe_call(self.status_update, status)
+		return status
 
 	def set_configuration(self, frequency, bandwidth, power):
-		self._game.log_event("config", i=self._i, role=self._role,
-				frequency=frequency, bandwidth=bandwidth, power=power)
-
-		self._radio.set_configuration(frequency, bandwidth, power)
+		self._client.set_configuration(frequency, bandwidth, power)
 
 	def send(self, data=None):
 		if data and len(data) > self.get_packet_size():
 			raise RadioError("packet too long")
 
-		self._game.log_event("send", i=self._i, role=self._role)
-		self._radio.send(data)
+		self._client.send(data)
 
-		self._player.result.transmit_packets += 1
-
-		if self._game.should_finish():
+		if self._client.should_finish():
 			raise StopGame
 
 	def _recv(self, timeout):
@@ -67,33 +68,55 @@ class Transceiver(object):
 
 	def recv_loop(self, timeout=1.):
 		while True:
-			try:
-				packet = self._radio.recv(timeout=timeout)
-			except RadioTimeout:
+			packet_json = self._client.recv(timeout=timeout)
+			if packet_json is None:
 				break
 
-			self._player.result.received_packets += 1
-
-			if self._role == 'rx':
-				payload_bytes = self.get_packet_size()
-				if packet.data:
-					payload_bytes -= len(packet.data)
-				self._player.result.payload_bytes += payload_bytes
-
-			self._game.log_event("recv",  i=self._i, role=self._role)
+			packet = RadioPacket.from_json(packet_json)
 
 			self._safe_call(self.recv, packet)
 
 			yield packet
 
-		if self._game.should_finish():
+		if self._client.should_finish():
 			raise StopGame
 
 	def recv(self, packet):
 		pass
 
-	def _stop(self):
-		self._radio.stop()
-
 	def get_packet_size(self):
-		return self._game.testbed.get_packet_size()
+		if self._packet_size is None:
+			self._packet_size = self._client.get_packet_size()
+
+		return self._packet_size
+
+	def _event_loop(self):
+
+		log.debug("%s worker started" % (self._name,))
+
+		crashed = False
+		desc = None
+
+		try:
+			self._safe_call(self.start)
+
+			i = 0
+			while not self._client.should_finish():
+
+				self._recv(timeout=self._update_interval)
+
+				log.debug("%s status update (%d)" % (self._name, i))
+
+				self.get_status()
+
+				i += 1
+
+		except StopGame:
+			pass
+		except TransceiverError, e:
+			crashed = True
+			desc = e.desc
+
+		log.debug("%s worker stopped" % self._name)
+
+		self._client.report_stop(crashed, desc)
