@@ -48,7 +48,7 @@ class SyncRadio(RadioBase):
 
 class OnLineRadioTestCase(unittest.TestCase):
 
-	NODE_1_DEV = "/dev/ttyUSB0"
+	NODE_1_DEV = "/dev/ttyACM3"
 	NODE_2_DEV = "/dev/ttyUSB1"
 
 	@classmethod
