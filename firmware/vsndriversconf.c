@@ -31,7 +31,7 @@ void vsnDriversConf_nvic(void){
 		/* --------------- Start of interrupt channels used by VSNLib --------------- */
 		/* Enable the USB CAN RX Interrupt */
 		NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
-		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
 		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
 		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 		NVIC_Init(&NVIC_InitStructure);
