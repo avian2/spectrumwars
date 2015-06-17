@@ -43,6 +43,18 @@ static int cc2500_patable_len = sizeof(cc2500_patable)/sizeof(*cc2500_patable);
 /* Main function prototypes */
 void received();
 
+#define binlen_max 256
+#define ringlen 8
+
+struct packet {
+	char bindata[binlen_max];
+	int binlen;
+};
+
+static struct packet ring[ringlen];
+static int ring_read = 0, ring_write = 0;
+static int ring_overflows = 0;
+
 static void ok()
 {
 	printf("O\n");
@@ -165,19 +177,19 @@ static void cmd_config(int chan, int bw, int power)
 
 static void recv()
 {
-	const int binlen_max = 256;
-	char bindata[binlen_max];
-	int binlen = vsnCC1101_receive(bindata, binlen_max);
+	struct packet *p = &ring[ring_read];
 
-	assert(binlen >= 2);
+	assert(p->binlen >= 2);
 
 	printf("R ");
 
 	int i;
-	for(i = 1; i < binlen-2; i++) {
-		printf("%02x", bindata[i]);
+	for(i = 1; i < p->binlen-2; i++) {
+		printf("%02x", p->bindata[i]);
 	}
 	printf("\n");
+
+	ring_read = (ring_read + 1) % ringlen;
 }
 
 #define CMD_BUFF_SIZE	1024
@@ -276,15 +288,24 @@ int main(void)
 		if(vsnUSART_read(USART1, &c, 1)) {
 			cmd_buff_input(c);
 		}
-		if(received_flag) {
+		while(ring_write != ring_read) {
 			recv();
-			received_flag = 0;
-			vsnCC1101_setMode(RX);
 		}
 	}
 }
 /* End of main */
 
-void received(){
-    received_flag = 1;
+void received()
+{
+	int next_ring_write = (ring_write + 1) % ringlen;
+	if(next_ring_write != ring_read) {
+		struct packet *p = &ring[ring_write];
+		p->binlen = vsnCC1101_receive(p->bindata, binlen_max);
+		ring_write = next_ring_write;
+	} else {
+		ring_overflows++;
+
+	}
+
+	vsnCC1101_setMode(RX);
 }
