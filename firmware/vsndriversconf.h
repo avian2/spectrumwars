@@ -89,9 +89,9 @@ void vsnDriversConf_nvic(void);
  */
 #define VSNCCRADIO_868 1
 
-#define VSNCC1101_DEBUG 1 /* comment out this line for fewer messages */
+#define VSNCC1101_DEBUG 0 /* comment out this line for fewer messages */
 
-#define VSNCCRADIO_DEBUG 1 /* comment out this line for fewer messages */
+#define VSNCCRADIO_DEBUG 0 /* comment out this line for fewer messages */
 
 #define CC_RADIO_ON_RADIO_CONNECTOR 0
 #define CC_RADIO_ON_EXPANSION_CONNECTOR 1
