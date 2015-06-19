@@ -72,6 +72,7 @@ You need the following packages installed:
 * gr-specest - https://github.com/avian2/gr-specest
 
 * jsonrpc2-zeromq (``pip install jsonrpc2-zeromq --user``)
+* pyudev (``apt-get install python-pyudev``)
 
 * numpy (``apt-get install python-numpy``)
 * matplotlib (``apt-get install python-matplotlib``)

@@ -5,6 +5,7 @@ import Queue
 
 from spectrumwars.testbed import RadioBase, RadioError, RadioTimeout
 from spectrumwars.testbed.vesna import RadioRaw as AsyncRadio
+from spectrumwars.testbed.vesna import list_radio_devices
 
 class SyncRadio(RadioBase):
 	def __init__(self, device):
@@ -48,13 +49,12 @@ class SyncRadio(RadioBase):
 
 class OnLineRadioTestCase(unittest.TestCase):
 
-	NODE_1_DEV = "/dev/ttyACM3"
-	NODE_2_DEV = "/dev/ttyUSB1"
-
 	@classmethod
 	def setUpClass(cls):
-		cls.node1 = cls.RADIO_CLASS(cls.NODE_1_DEV)
-		cls.node2 = cls.RADIO_CLASS(cls.NODE_2_DEV)
+		l = list_radio_devices()
+
+		cls.node1 = cls.RADIO_CLASS(l.pop())
+		cls.node2 = cls.RADIO_CLASS(l.pop())
 
 		cls.node1.start()
 		cls.node2.start()

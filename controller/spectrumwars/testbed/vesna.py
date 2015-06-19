@@ -1,5 +1,6 @@
 import logging
 import os
+import pyudev
 import serial
 import threading
 import time
@@ -9,6 +10,15 @@ from spectrumwars.testbed import TestbedBase, RadioBase, RadioTimeout, RadioErro
 from spectrumwars.testbed.usrp_sensing import SpectrumSensor
 
 log = logging.getLogger(__name__)
+
+def list_radio_devices():
+	context = pyudev.Context()
+
+	l = []
+	for device in context.list_devices(subsystem='tty', ID_MODEL='VESNA_SpectrumWars_radio'):
+		l.append(device['DEVNAME'])
+
+	return l
 
 class RadioRaw(object):
 
@@ -171,20 +181,24 @@ class Testbed(TestbedBase):
 		self.n = 0
 		self.sensor = SpectrumSensor()
 
+		self.radio_devices = list_radio_devices()
+		log.debug("detected %d connected radios" % (len(self.radio_devices,)))
+
 		self.radios = []
 
 	def _get_radio(self):
-		for skipped in xrange(5):
-			path = "/dev/ttyUSB%d" % (self.n,)
-			self.n += 1
 
-			if os.path.exists(path):
-				radio = Radio(path, self.n)
-				self.radios.append(radio)
+		try:
+			path = self.radio_devices.pop()
+		except IndexError:
+			raise TestbedError("Can't get radio device" % (path,))
 
-				return radio
+		self.n += 1
 
-		raise TestbedError("Can't get radio device (last tried %s)" % (path,))
+		radio = Radio(path, self.n)
+		self.radios.append(radio)
+
+		return radio
 
 	def get_radio_pair(self):
 
