@@ -15,6 +15,7 @@
 #include "vsnpm.h"
 #include "vsncc1101.h"
 #include "vsnccradio.h"
+#include "vsntime.h"
 
 int received_flag;
 
@@ -38,10 +39,24 @@ static int cc2500_patable[] = {
 	0x00	// < -55
 };
 
+static const int send_retry = 10;
+
 static int cc2500_patable_len = sizeof(cc2500_patable)/sizeof(*cc2500_patable);
 
 /* Main function prototypes */
 void received();
+
+#define binlen_max 256
+#define ringlen 8
+
+struct packet {
+	char bindata[binlen_max];
+	int binlen;
+};
+
+static struct packet ring[ringlen];
+static int ring_read = 0, ring_write = 0;
+static int ring_overflows = 0;
 
 static void ok()
 {
@@ -99,7 +114,13 @@ static void cmd_transmit(int addr, char* data)
 		binlen += 1;
 	}
 
-	int resp = vsnCC1101_send(bindata, binlen);
+	int resp;
+	for(i = 0; i < send_retry; i++) {
+		resp = vsnCC1101_send(bindata, binlen);
+		if(resp >= 0) break;
+		vsnTime_delayMS(10);
+	}
+
 	if(resp < 0) {
 		error("error sending data");
 	} else if(resp != binlen) {
@@ -165,19 +186,19 @@ static void cmd_config(int chan, int bw, int power)
 
 static void recv()
 {
-	const int binlen_max = 256;
-	char bindata[binlen_max];
-	int binlen = vsnCC1101_receive(bindata, binlen_max);
+	struct packet *p = &ring[ring_read];
 
-	assert(binlen >= 2);
+	assert(p->binlen >= 2);
 
 	printf("R ");
 
 	int i;
-	for(i = 1; i < binlen-2; i++) {
-		printf("%02x", bindata[i]);
+	for(i = 1; i < p->binlen-2; i++) {
+		printf("%02x", p->bindata[i]);
 	}
 	printf("\n");
+
+	ring_read = (ring_read + 1) % ringlen;
 }
 
 #define CMD_BUFF_SIZE	1024
@@ -235,20 +256,23 @@ static void radio_setup()
 /* Start of main */
 int main(void)
 {
-	/* Main local variables --------------------------------------------- */
-	USART_InitTypeDef USART_InitStructure;
-	/* End of main local variables -------------------------------------- */
-
 	/* Start of Main code ----------------------------------------------- */
 	/* Reset Clock configuration */
 	SystemInit();
 	/* Turn on power manager */
 	vsnPM_init();
 	/* Set SysClock frequency */
-	vsnSetup_intClk(SNC_CLOCK_64MHZ);
+	/* USB only works with 48 or 72 MHz - vsnSetup_intClk doesn't currently
+	 * support 72 MHz */
+	vsnSetup_intClk(SNC_CLOCK_48MHZ);
 	/* Initialize SNC */
 	vsnSetup_initSnc();
 	/* Configure debug port at USART1, 115200 kbaud, 8 data bit, no parity, one stop bit, no flow control */
+	vsnSetup_calibHsi();
+
+	/* For some reason USART1 still needs to be initialized for USB to
+	 * work */
+	USART_InitTypeDef USART_InitStructure;
 	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
@@ -256,11 +280,14 @@ int main(void)
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	vsnUSART_init(USART1, &USART_InitStructure);
 
+#if USE_USB_CDC
+	vsnUSART_init(USART_VCP, NULL);
+#endif
+
 	/* Make stdout unbuffered, just in case */
 	setbuf(stdout, NULL);
 
-	printf("SNC Initialized\r\n");
-	printf("Debug port Open\r\n");
+	printf("boot\n");
 
 	/* Get ADC one bit value in volts, call as last init function */
 	vsnPM_mesureAdcBitVolt();
@@ -273,18 +300,27 @@ int main(void)
 	while(1)
 	{
 		char c;
-		if(vsnUSART_read(USART1, &c, 1)) {
+		if(vsnUSART_read(STDIN_USART, &c, 1)) {
 			cmd_buff_input(c);
 		}
-		if(received_flag) {
+		while(ring_write != ring_read) {
 			recv();
-			received_flag = 0;
-			vsnCC1101_setMode(RX);
 		}
 	}
 }
 /* End of main */
 
-void received(){
-    received_flag = 1;
+void received()
+{
+	int next_ring_write = (ring_write + 1) % ringlen;
+	if(next_ring_write != ring_read) {
+		struct packet *p = &ring[ring_write];
+		p->binlen = vsnCC1101_receive(p->bindata, binlen_max);
+		ring_write = next_ring_write;
+	} else {
+		ring_overflows++;
+
+	}
+
+	vsnCC1101_setMode(RX);
 }

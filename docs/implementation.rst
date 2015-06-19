@@ -41,6 +41,17 @@ Implementation notes
   occurs over RPC, this should not require further modifications to the game
   controller.
 
+* Using sensor nodes connected directly over USB (instead of using
+  serial-to-USB converters) greatly simplifies the setup - apart from a
+  powered USB hub, there is no need for having a converter plus a separate
+  power supply for each node.
+
+  However, USB CDC implementation on VESNA is still prone to occasional data
+  loss. This is visible as errors in communication between the game controller
+  and the radio (e.g. ``RadioTimeout`` exceptions or truncated packet
+  payload). At the moment this is rare enough for direct USB connection
+  to be considered usable in practice.
+
 * I believe that in the final user interface for this game, it is crucial that
   both console log of the running game and the visualized timeline are
   presented to each player. Without this kind of feedback it is very hard to

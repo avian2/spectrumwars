@@ -13,13 +13,14 @@ Required hardware
 
   Current setup uses SBX daughterboard, a 2.4 GHz antenna.
 
-* VESNA sensor nodes, USART1 connected over USB-to-serial converters. As many as you
-  need (two nodes per player).
+* VESNA sensor nodes, connected through a powered USB hub. As many as you need
+  (two nodes per player).
 
   Nodes should consist of a SNC core board and a SNE-ISMTV-2400 radio board.
 
   If you need to upload firmware, you will also need a SNE-PROTO board and a
-  Olimex ARM-USB-OCD programmer.
+  Olimex ARM-USB-OCD programmer. For debugging, a serial-to-USB converter
+  connected to VESNA's USART1 is recommended.
 
 
 Firmware compilation
@@ -53,13 +54,14 @@ the node and run::
 
    $ make install
 
-To test the firmware, connect two nodes (``/dev/ttyUSB0`` and
-``/dev/ttyUSB1``) using USB-to-serial converters and run::
+To test the firmware, connect two nodes using the mini-USB connector and run::
 
    $ cd ../controller
    $ python setup.py test -s tests.test_radio
 
-(Note that it might fail on the first pass)
+.. note::
+   In case of problems, there are some debugging options available on top of
+   ``vsndriversconf.h``. See also :doc:`firmware`.
 
 
 Installing game controller
@@ -72,6 +74,7 @@ You need the following packages installed:
 * gr-specest - https://github.com/avian2/gr-specest
 
 * jsonrpc2-zeromq (``pip install jsonrpc2-zeromq --user``)
+* pyudev (``apt-get install python-pyudev``)
 
 * numpy (``apt-get install python-numpy``)
 * matplotlib (``apt-get install python-matplotlib``)
