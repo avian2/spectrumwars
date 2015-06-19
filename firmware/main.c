@@ -280,7 +280,9 @@ int main(void)
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	vsnUSART_init(USART1, &USART_InitStructure);
 
+#if USE_USB_CDC
 	vsnUSART_init(USART_VCP, NULL);
+#endif
 
 	/* Make stdout unbuffered, just in case */
 	setbuf(stdout, NULL);
@@ -298,7 +300,7 @@ int main(void)
 	while(1)
 	{
 		char c;
-		if(vsnUSART_read(USART_VCP, &c, 1)) {
+		if(vsnUSART_read(STDIN_USART, &c, 1)) {
 			cmd_buff_input(c);
 		}
 		while(ring_write != ring_read) {

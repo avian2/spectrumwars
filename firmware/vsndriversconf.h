@@ -14,8 +14,30 @@
 #ifndef VSNDRIVERSCONF_H_
 #define VSNDRIVERSCONF_H_
 
-#define STDOUT_USART USART_VCP
-#define STDIN_USART USART_VCP
+/* --- SpectrumWars configuration --- */
+
+/* Set to 0 to use the USART1 serial port for the interface with the game
+ * controller. While USB CDC is quite reliable now, USART1 is less suspectible
+ * to buffer overruns. This is useful for debugging, especially if
+ * VSNCCRADIO_DEBUG or VSNCC1101_DEBUG are enabled. */
+#define USE_USB_CDC 1
+
+/* Set to 1 to emit radio driver debugging information. Game controller
+ * transparently passes this to Python logging at DEBUG level. Useful for
+ * debugging low-level problems with the vsncc1101.c driver. Otherwise
+ * decreases performance of the radio. */
+#define VSNCC1101_DEBUG 0
+#define VSNCCRADIO_DEBUG 0
+
+/* --- End SpectrumWars configuration --- */
+
+#if USE_USB_CDC
+#	define STDOUT_USART USART_VCP
+#	define STDIN_USART USART_VCP
+#else
+#	define STDOUT_USART USART1
+#	define STDIN_USART USART1
+#endif
 
 /* !YOU SHOULD NOT CHANGE THIS! Indicator led functions and power management rely on this settings */
 /* Set SysTick interrupt period = 1 second / SYS_TICK_DIV */
@@ -88,10 +110,6 @@ void vsnDriversConf_nvic(void);
  * Only 1 value has to be set to 1 from these:
  */
 #define VSNCCRADIO_868 1
-
-#define VSNCC1101_DEBUG 0 /* comment out this line for fewer messages */
-
-#define VSNCCRADIO_DEBUG 0 /* comment out this line for fewer messages */
 
 #define CC_RADIO_ON_RADIO_CONNECTOR 0
 #define CC_RADIO_ON_EXPANSION_CONNECTOR 1
