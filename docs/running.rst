@@ -8,9 +8,12 @@ To run a game with a single player that is specified by code in
 
    $ spectrumwars_runner -l example.log examples/better_cognitive.py
 
-``spectrumwars_runner`` automatically finds any connected nodes (it
-assumes that all USB-to-serial devices are in fact connected to VESNA nodes)
-and assigns them to players.
+``spectrumwars_runner`` automatically finds any USB-connected nodes and
+assigns them randomly to players.
+
+.. note::
+   As of 0.0.3, ``spectrumwars_runner`` no longer uses nodes connected over
+   serial-to-USB converters.
 
 In the end, it prints out some game statistics::
 

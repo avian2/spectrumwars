@@ -4,9 +4,19 @@ Firmware interface
 ==================
 
 In VESNA implementation of the SpectrumWars game, one or more sensor nodes are
-connected to the game controller (e.g. a Linux running computer) with a
-RS-232 serial line (USART1 interface on the sensor node, set to 115200 baud).
-Typically a serial-to-USB converter is employed.
+connected to the game controller (e.g. a Linux running computer) over the USB.
+
+USB carries a simulated serial line. Normally, the SpectrumWars firmware uses
+VESNA's mini-USB interface to expose a standard USB CDC endpoint identified by
+product string "VESNA SpectrumWars radio" (Linux typically associates a device file named
+``/dev/ttyACMx`` with these endpoints).
+
+Alternatively, a setting in ``vsndriversconf.h`` allows compilation of
+firmware that uses RS-232 serial line instead of USB CDC. In this case, the
+firmware's interface is exposed on VESNA's USART1 connector (115200 baud, 8
+data bits, 1 stop bit, no parity). A serial-to-USB converter can be used to
+connect such a node to the game controller. Serial-to-USB converters are
+usually associated with ``/dev/ttyUSBx`` device files on Linux.
 
 The testbed controller controls the sensor node using a terse, ASCII base
 protocol. Commands are kept short to keep the protocol reasonably fast even
@@ -108,7 +118,8 @@ R *<data>*
    passed to the corresponding *t* command.
 
 Any messages not conforming to this response format should be ignored by the
-controller.
+controller. In practice, nodes can emit additional debugging information over
+this channel (see settings in ``vsndriversconf.h``)
 
 By default, the node’s radio is kept in receive mode. Receive mode is
 temporarily turned off during reconfiguration. After receiving a transmit
