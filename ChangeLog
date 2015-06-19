@@ -1,3 +1,8 @@
+2015-06-19	spectrumwars 0.0.3
+
+	* Use USB CDC connection with VESNA nodes instead of serial-to-USB
+	  converters.
+
 2015-06-11	spectrumwars 0.0.2
 
 	* Rework interface between transceiver and game controller to be
