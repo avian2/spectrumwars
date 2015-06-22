@@ -123,6 +123,8 @@ Class reference
 
       See :doc:`testbeds` for interpretations of these values.
 
+      Invalid values will raise a ``RadioError`` exception.
+
       .. note::
          While specific meanings of these settings are hardware specific, you
          can assume that your receiver and transmitter will only be able to
@@ -212,8 +214,8 @@ Class reference
 
          ``send()`` radio transmissions typically occupy several radio
          channels around the specified central frequency specified by
-         ``set_configuration()``. Number of occupied channels is determined by
-         the specified bitrate.
+         ``set_configuration()``. Number of occupied channels depends on the
+         specified bitrate.
 
 .. py:class:: RadioPacket
 
