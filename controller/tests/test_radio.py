@@ -83,6 +83,15 @@ class TestRadioInterface(OnLineRadioTestCase):
 	def test_send_invalid_3(self):
 		self.assertRaises(RadioError, self.node1.cmd, "t 02 " + "01" * 254)
 
+	def test_config_invalid_1(self):
+		self.assertRaises(RadioError, self.node1.cmd, "c 300 0 0")
+
+	def test_config_invalid_2(self):
+		self.assertRaises(RadioError, self.node1.cmd, "c 0 5 0")
+
+	def test_config_invalid_3(self):
+		self.assertRaises(RadioError, self.node1.cmd, "c 0 5 17")
+
 class TestRadio(OnLineRadioTestCase):
 
 	RADIO_CLASS = SyncRadio
