@@ -111,6 +111,7 @@ class Radio(RadioBase):
 
 		self.raw = RadioRaw(path)
 		self.addr = addr
+		self.config = (0, 0, 0)
 
 		self.neighbor = None
 
@@ -150,7 +151,12 @@ class Radio(RadioBase):
 		self._cmd("t %02x %s" % (self.neighbor, strdata))
 
 	def set_configuration(self, frequency, bandwidth, power):
-		self._cmd("c %x %x %x" % (frequency, bandwidth, power))
+		config = (frequency, bandwidth, power)
+		self._cmd("c %x %x %x" % config)
+		self.config = config
+
+	def get_configuration(self):
+		return self.config
 
 	def recv(self, timeout=1.):
 		data = self.raw.recv(timeout=timeout)

@@ -179,6 +179,9 @@ class GameRPCServer(RPCServer):
 				frequency=frequency, bandwidth=bandwidth, power=power)
 		self.radio.set_configuration(frequency, bandwidth, power)
 
+	def handle_get_configuration_method(self):
+		return self.radio.get_configuration()
+
 	def handle_get_packet_size_method(self):
 		return self.game.testbed.get_packet_size()
 

@@ -54,6 +54,9 @@ class MockRadio(RadioBase):
 	def set_configuration(self, frequency, power, bandwidth):
 		self.settings = (frequency, power, bandwidth)
 
+	def get_configuration(self):
+		return self.settings
+
 	def recv(self, timeout=None):
 		try:
 			data = self.rx_queue.get(timeout=.01)
@@ -331,6 +334,18 @@ class TestGame(unittest.TestCase):
 
 		for s in sl:
 			self.assertTrue(s.spectrum)
+
+	def test_get_configuration(self):
+
+		sl = []
+
+		class Receiver(Transceiver):
+			def start(self):
+				self.set_configuration(0, 1, 2)
+				sl.append(self.get_configuration())
+
+		self._run_game(Receiver, Transceiver)
+		self.assertEqual([0, 1, 2], sl[0])
 
 if __name__ == '__main__':
 	unittest.main()

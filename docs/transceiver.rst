@@ -155,9 +155,6 @@ Class reference
       Returns a ``(frequency, bandwidth, power)`` tuple containing the current
       transmission or reception configuration.
 
-      .. warning::
-         FIXME: currently unimplemented
-
    .. py:method:: send(data=None)
 
       Send a data packet over the air. On the reception side, the ``recv()``

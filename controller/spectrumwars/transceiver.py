@@ -21,7 +21,6 @@ class Transceiver(object):
 		self._role = role
 		self._name = "(%d %s)" % (self._i, self._role)
 
-		self._settings = None
 		self._packet_size = None
 
 	def _safe_call(self, f, *args, **kwargs):
@@ -52,6 +51,9 @@ class Transceiver(object):
 
 	def set_configuration(self, frequency, bandwidth, power):
 		self._client.set_configuration(frequency, bandwidth, power)
+
+	def get_configuration(self):
+		return self._client.get_configuration()
 
 	def send(self, data=None):
 		if data and len(data) > self.get_packet_size():
