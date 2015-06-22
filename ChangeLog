@@ -2,6 +2,10 @@
 
 	* Use USB CDC connection with VESNA nodes instead of serial-to-USB
 	  converters.
+	* Node now waits for packet transmission to conclude before returning
+	  from "t" commmand.
+	* Implement missing query methods (get_configuration,
+	  get_frequency_range, etc.)
 
 2015-06-11	spectrumwars 0.0.2
 
