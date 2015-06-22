@@ -15,7 +15,6 @@
 #include "vsnpm.h"
 #include "vsncc1101.h"
 #include "vsnccradio.h"
-#include "vsntime.h"
 
 static int cc2500_patable[] = {
 	0xfe,	//     0 dBm
@@ -36,8 +35,6 @@ static int cc2500_patable[] = {
 	0x50,	//   -30
 	0x00	// < -55
 };
-
-static const int send_retry = 10;
 
 static int cc2500_patable_len = sizeof(cc2500_patable)/sizeof(*cc2500_patable);
 
@@ -112,18 +109,16 @@ static void cmd_transmit(int addr, char* data)
 		binlen += 1;
 	}
 
-	int resp;
-	for(i = 0; i < send_retry; i++) {
-		resp = vsnCC1101_send(bindata, binlen);
-		if(resp >= 0) break;
-		vsnTime_delayMS(10);
-	}
+	int resp = vsnCC1101_send(bindata, binlen);
 
 	if(resp < 0) {
 		error("error sending data");
 	} else if(resp != binlen) {
 		error("not all data bytes sent");
 	} else {
+		/* wait for the transmission to finish before returning
+		 * a response */
+		while(vsnCC1101_isSending());
 		ok();
 	}
 }

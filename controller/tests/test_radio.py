@@ -102,6 +102,14 @@ class TestRadio(OnLineRadioTestCase):
 		self.assertRaises(RadioTimeout, self._send_one, addr=2)
 		self.node2.cmd("a 00")
 
+	def test_set_channel_1(self):
+		self.node2.cmd("c 0 0 0")
+		self._send_one()
+
+	def test_set_channel_2(self):
+		self.node2.cmd("c 1 0 0")
+		self.assertRaises(RadioTimeout, self._send_one)
+
 	def _send_one(self, addr=0, n=20):
 		data = "cd" * n
 		self.node1.cmd("t %x %s" % (addr, data))
@@ -183,6 +191,28 @@ class TestAsyncRadio(OnLineRadioTestCase):
 			resp = self.node2.recv()
 			self.assertEqual(resp, expected)
 
+	def test_fast_change_channel(self):
+		data = "42"
+		N = 10
+
+		for n in xrange(N):
+			self.node1.cmd("t 0 %s" % (data,))
+			self.node1.cmd("c 1 0 0")
+			self.node1.cmd("t 0 12")
+			self.node1.cmd("c 0 0 0")
+
+		expected = "R %s" % (data,)
+		n = 0
+		while True:
+			try:
+				resp = self.node2.recv()
+			except RadioTimeout:
+				break
+
+			self.assertEqual(resp, expected)
+			n += 1
+
+		self.assertEqual(n, N)
 
 if __name__ == "__main__":
 	unittest.main()
