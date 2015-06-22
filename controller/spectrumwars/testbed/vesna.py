@@ -197,7 +197,7 @@ class Testbed(TestbedBase):
 		try:
 			path = self.radio_devices.pop()
 		except IndexError:
-			raise TestbedError("Can't get radio device" % (path,))
+			raise TestbedError("Can't get radio device")
 
 		self.n += 1
 
