@@ -3,7 +3,7 @@ import random
 
 class Transmitter(Transceiver):
 	def start(self):
-		ch = random.randint(0, 40)
+		ch = random.randint(0, self.get_frequency_range()-1)
 		self.set_configuration(ch, 3, 0)
 
 		while True:
