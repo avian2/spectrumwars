@@ -16,6 +16,7 @@ class Transmitter(Transceiver):
 			self.set_configuration(ch, 0, 0)
 			for n in xrange(20):
 				self.send()
+				time.sleep(.05)
 
 class Receiver(Transceiver):
 	def start(self):
