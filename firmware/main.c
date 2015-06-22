@@ -17,8 +17,6 @@
 #include "vsnccradio.h"
 #include "vsntime.h"
 
-int received_flag;
-
 static int cc2500_patable[] = {
 	0xfe,	//     0 dBm
 	0xbb,	//    -2
@@ -294,8 +292,6 @@ int main(void)
 
 	/* Init functions for sensors, actuators,... */
 	radio_setup();
-
-	received_flag = 0;
 
 	while(1)
 	{
