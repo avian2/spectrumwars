@@ -199,6 +199,12 @@ class GameRPCServer(RPCServer):
 	def handle_get_packet_size_method(self):
 		return self.game.testbed.get_packet_size()
 
+	def handle_get_ranges_method(self):
+		ranges = (	self.game.testbed.get_frequency_range(),
+				self.game.testbed.get_bandwidth_range(),
+				self.game.testbed.get_power_range())
+		return ranges
+
 	def handle_report_stop_method(self, crashed, crash_desc=None):
 		if crashed:
 			self.player.result.crashed = True

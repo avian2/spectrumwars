@@ -238,5 +238,14 @@ class Testbed(TestbedBase):
 	def get_packet_size(self):
 		return Radio.DATA_LEN - 1
 
+	def get_frequency_range(self):
+		return min(self.sensor.fft_size, 256)
+
+	def get_bandwidth_range(self):
+		return 4
+
+	def get_power_range(self):
+		return 17
+
 	def time(self):
 		return time.time()

@@ -33,6 +33,7 @@ Contents:
    install
    running
    transceiver
+   testbeds
    firmware
    implementation
 

@@ -2,7 +2,7 @@ import logging
 import unittest
 from jsonrpc2_zeromq import RPCClient
 
-from spectrumwars import Player, Game, GameController, Transceiver
+from spectrumwars import Player, Game, GameController, Transceiver, RadioError
 from spectrumwars.testbed.vesna import Testbed
 from spectrumwars.sandbox import ThreadedSandbox
 
@@ -40,3 +40,19 @@ class TestVESNAGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transmitter)
 		self.assertEqual(cnt[0].data, foo)
 		self.assertEqual(result.payload_bytes, 0)
+
+	def test_config_error(self):
+
+		cnt = [0]
+
+		class Receiver(Transceiver):
+			def start(self):
+				try:
+					self.set_configuration(self.get_frequency_range(), 0, 0)
+				except RadioError:
+					cnt[0] += 1
+
+		result = self._run_game(Receiver, Transceiver)
+
+		self.assertEqual(cnt[0], 1)
+		self.assertFalse(result.crashed)

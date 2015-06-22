@@ -106,49 +106,29 @@ Class reference
       Set up the transceiver for transmission or reception of packets on the
       specified central frequency, power and bandwidth.
 
-      .. warning::
-         FIXME: this is very hardware specific.
-
-      At the moment, ``frequency`` is specified as channel number from 0 to
-      255.
-
-      ``bandwidth`` is specified as an integer specifying the radio bitrate:
+      ``frequency`` is specified as channel number from 0 to N-1, where N is
+      the value returned by the ``get_frequency_range()`` method. Central
+      frequencies of channels are hardware dependent.
       
-      =============  =======
-      ``bandwidth``  bitrate
-      =============  =======
-      0              50 kbps
-      1              100 kbps
-      2              200 kbps
-      3              400 kbps
-      =============  =======
+      ``bandwidth`` is specified as an integer specifying the radio bitrate
+      and channel bandwidth in the interval from 0 to N-1, where N is the
+      value returned by the ``get_bandwidth_range()`` method. Exact
+      interpretation of this value is hardware dependent. Higher values always
+      mean higher bitrates and wider channel bandwidths.
 
-      Note that higher bitrates consume more radio spectrum.
+      ``power`` is specified as an integer specifying the transmission power
+      in the interval from 0 to N-1, where N is the value returned by the
+      ``get_power_range()`` method. Exact interpretation of this value is
+      hardware dependent. Higher values always mean **lower** power.
 
-      ``power`` is specified as an integer specifying the transmission power:
+      See :doc:`testbeds` for interpretations of these values.
 
-      =========  =====
-      ``power``  dBm
-      =========  =====
-      0          0
-      1          -2
-      2          -4
-      3          -6
-      4          -8
-      5          -10
-      6          -12
-      7          -14
-      8          -16
-      9          -18
-      10         -20
-      11         -22
-      12         -24
-      13         -26
-      14         -28
-      15         -30
-      16         < -55
-      =========  =====
-
+      .. note::
+         While specific meanings of these settings are hardware specific, you
+         can assume that your receiver and transmitter will only be able to
+         communicate successfully if both use the same ``frequency`` and
+         ``bandwidth`` settings. The ``power`` setting is less critical, but
+         higher power will usually lead to more reliable communication.
 
    .. py:method:: get_configuration()
 
@@ -189,22 +169,19 @@ Class reference
    The following methods can be used to query the capabilities of the testbed.
    You can use them if your want to automatically adapt your algorithm to the
    testbed it is running on. If you are targeting just one testbed, you can
-   ignore this part.
+   ignore this part and look at the :doc:`testbeds`.
 
    .. py:method:: get_frequency_range()
 
-      .. warning::
-         FIXME: currently unimplemented
-
-   .. py:method:: get_power_range()
-
-      .. warning::
-         FIXME: currently unimplemented
+      Returns the number of available frequency channels.
 
    .. py:method:: get_bandwidth_range()
 
-      .. warning::
-         FIXME: currently unimplemented
+      Returns the number of available bandwidth settings.
+
+   .. py:method:: get_power_range()
+
+      Returns the number of available transmission power settings.
 
    .. py:method:: get_packet_size()
 
@@ -223,22 +200,20 @@ Class reference
       ``spectrum`` is a list of floating point values. Each value is received
       power in a frequency channel in decibels, as seen at the antenna of the
       spectrum sensor observing the game. Frequency channels are the same as
-      ones used by ``set_configuration()``. Reported power levels are
+      ones used by ``set_configuration()``. Length of the list is equal to the
+      value returned by ``get_frequency_range()``. Reported power levels are
       relative.
 
       For example, if ``spectrum[10] == -60``, that means that -60 dB of power
       have been seen by the sensor on the radio channel obtained by
       ``set_configuration(10, x, y)``.
 
-      Note ``send()`` radio transmissions typically occupy several radio channels
-      around the specified central frequency specified by
-      ``set_configuration()``. Number of occupied channels is
-      determined by the specified bitrate.
+      .. note::
 
-      .. warning::
-         This is very hardware specific. Also, it does not currently cover all
-         channels available through ``set_configuration()`` due to CPU load
-         restrictions.
+         ``send()`` radio transmissions typically occupy several radio
+         channels around the specified central frequency specified by
+         ``set_configuration()``. Number of occupied channels is determined by
+         the specified bitrate.
 
 .. py:class:: RadioPacket
 

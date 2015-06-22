@@ -34,6 +34,11 @@ class Transceiver(object):
 
 	def _start(self, client):
 		self._client = client
+
+		self._frequency_range, \
+				self._bandwidth_range, \
+				self._power_range = self._client.get_ranges()
+
 		self._event_loop()
 
 	def start(self):
@@ -50,10 +55,29 @@ class Transceiver(object):
 		return status
 
 	def set_configuration(self, frequency, bandwidth, power):
+		if frequency < 0 or frequency >= self._frequency_range:
+			raise RadioError("invalid frequency (%d not in range 0-%d)" % (
+				frequency, self._frequency_range))
+		if bandwidth < 0 or bandwidth >= self._bandwidth_range:
+			raise RadioError("invalid bandwidth (%d not in range 0-%d)" % (
+				bandwidth, self._bandwidth_range))
+		if power < 0 or power >= self._power_range:
+			raise RadioError("invalid power (%d not in range 0-%d)" % (
+				power, self._power_range))
+
 		self._client.set_configuration(frequency, bandwidth, power)
 
 	def get_configuration(self):
 		return self._client.get_configuration()
+
+	def get_frequency_range(self):
+		return self._frequency_range
+
+	def get_bandwidth_range(self):
+		return self._bandwidth_range
+
+	def get_power_range(self):
+		return self._power_range
 
 	def send(self, data=None):
 		if data and len(data) > self.get_packet_size():

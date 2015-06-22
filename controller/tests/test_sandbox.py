@@ -20,6 +20,9 @@ class MockGameRPCServer(RPCServer):
 	def handle_should_finish_method(self):
 		return True
 
+	def handle_get_ranges_method(self):
+		return (0, 0, 0)
+
 class BaseTestSandbox(unittest.TestCase):
 
 	def setUp(self):

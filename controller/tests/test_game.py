@@ -3,7 +3,7 @@ import unittest
 from jsonrpc2_zeromq import RPCClient
 
 import Queue
-from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout
+from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout, RadioError
 from spectrumwars.testbed import TestbedBase, RadioBase, RadioPacket
 from spectrumwars.sandbox import ThreadedSandbox
 
@@ -35,6 +35,15 @@ class MockTestbed(TestbedBase):
 
 	def get_spectrum(self):
 		return True
+
+	def get_frequency_range(self):
+		return 10
+
+	def get_bandwidth_range(self):
+		return 11
+
+	def get_power_range(self):
+		return 12
 
 	def get_packet_size(self):
 		return 200
@@ -101,11 +110,11 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 				self.send()
 
 		result = self._run_game(Receiver, Transmitter)
@@ -126,11 +135,11 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.set_configuration(2.5e9, 0, 100e3)
+				self.set_configuration(1, 0, 0)
 				self.send()
 
 		result = self._run_game(Receiver, Transmitter)
@@ -140,11 +149,11 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 
 				while True:
 					self.send()
@@ -168,14 +177,14 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 
 			def recv(self, packet):
 				cnt[0] += 1
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 				self.send()
 
 		result = self._run_game(Receiver, Transmitter)
@@ -188,14 +197,14 @@ class TestGame(unittest.TestCase):
 
 		class Receiver(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 
 			def recv(self, packet):
 				cnt[0] = packet
 
 		class Transmitter(Transceiver):
 			def start(self):
-				self.set_configuration(2.4e9, 0, 100e3)
+				self.set_configuration(0, 0, 0)
 				self.send(foo)
 
 		result = self._run_game(Receiver, Transmitter)
@@ -336,7 +345,6 @@ class TestGame(unittest.TestCase):
 			self.assertTrue(s.spectrum)
 
 	def test_get_configuration(self):
-
 		sl = []
 
 		class Receiver(Transceiver):
@@ -346,6 +354,49 @@ class TestGame(unittest.TestCase):
 
 		self._run_game(Receiver, Transceiver)
 		self.assertEqual([0, 1, 2], sl[0])
+
+	def test_get_frequency_range(self):
+		sl = []
+
+		class Receiver(Transceiver):
+			def start(self):
+				sl.append(self.get_frequency_range())
+
+		self._run_game(Receiver, Transceiver)
+		self.assertEqual(10, sl[0])
+
+	def test_get_bandwidth_range(self):
+		sl = []
+
+		class Receiver(Transceiver):
+			def start(self):
+				sl.append(self.get_bandwidth_range())
+
+		self._run_game(Receiver, Transceiver)
+		self.assertEqual(11, sl[0])
+
+	def test_get_power_range(self):
+		sl = []
+
+		class Receiver(Transceiver):
+			def start(self):
+				sl.append(self.get_power_range())
+
+		self._run_game(Receiver, Transceiver)
+		self.assertEqual(12, sl[0])
+
+	def test_set_configuration_error(self):
+		cnt = [0]
+
+		class Receiver(Transceiver):
+			def start(self):
+				try:
+					self.set_configuration(self.get_frequency_range(), 0, 0)
+				except RadioError:
+					cnt[0] += 1
+
+		self._run_game(Receiver, Transceiver)
+		self.assertEqual(cnt[0], 1)
 
 if __name__ == '__main__':
 	unittest.main()
