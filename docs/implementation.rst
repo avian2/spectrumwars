@@ -17,7 +17,7 @@ Implementation notes
   mostly appear empty. Hence the need to take a moving average if sensing is to
   be useful for detecting transmissions.
 
-* The corrolary of the above is that even 64 channels is a very generous
+* The corrollary of the above is that even 64 channels is a very generous
   portion of the spectrum for this game. A single channel could in theory
   accomodate 10 players with very little interferrence.
 
