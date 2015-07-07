@@ -69,7 +69,7 @@ Installing game controller
 
 You need the following packages installed:
 
-* GNURadio with UHD (version 4.7.2 is known to work) - http://gnuradio.org
+* GNU Radio with UHD (GNU Radio version 3.7.5.1 is known to work) - http://gnuradio.org
 
 * gr-specest - https://github.com/avian2/gr-specest
 
