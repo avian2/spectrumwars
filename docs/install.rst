@@ -79,6 +79,8 @@ You need the following packages installed:
 * numpy (``apt-get install python-numpy``)
 * matplotlib (``apt-get install python-matplotlib``)
 
+* Sphinx (only required for building documentation; ``apt-get install python-sphinx``)
+
 To install, run::
 
    $ cd controller
