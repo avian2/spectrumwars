@@ -53,6 +53,9 @@ class OnLineRadioTestCase(unittest.TestCase):
 	def setUpClass(cls):
 		l = list_radio_devices()
 
+		if len(l) < 2:
+			raise unittest.SkipTest("less than two VESNA nodes connected")
+
 		cls.node1 = cls.RADIO_CLASS(l.pop())
 		cls.node2 = cls.RADIO_CLASS(l.pop())
 
