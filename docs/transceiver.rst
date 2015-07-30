@@ -89,7 +89,7 @@ Class reference
 
       If left unimplemented, this method does nothing.
 
-   .. py:method:: status_update(status):
+   .. py:method:: status_update(status)
 
       Called by the game controller periodically with updates on the state of
       the game.
@@ -121,7 +121,7 @@ Class reference
       ``get_power_range()`` method. Exact interpretation of this value is
       hardware dependent. Higher values always mean **lower** power.
 
-      See :doc:`testbeds` for interpretations of these values.
+      See :doc:`reference` for interpretations of these values.
 
       Invalid values will raise a ``RadioError`` exception.
 
@@ -171,7 +171,7 @@ Class reference
    The following methods can be used to query the capabilities of the testbed.
    You can use them if your want to automatically adapt your algorithm to the
    testbed it is running on. If you are targeting just one testbed, you can
-   ignore this part and look at the :doc:`testbeds`.
+   ignore this part and look at the :doc:`reference`.
 
    .. py:method:: get_frequency_range()
 
