@@ -13,6 +13,8 @@ class TestUSRP(unittest.TestCase):
 		except RuntimeError, e:
 			if 'No devices found' in str(e):
 				raise unittest.SkipTest("USRP not connected")
+			else:
+				raise
 
 	@classmethod
 	def tearDownClass(cls):
