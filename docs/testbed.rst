@@ -67,7 +67,8 @@ Class reference
       Returns the current state of the radio spectrum as a list of floating
       point values.
 
-      The value returned by this method gets assigned to :py:attr:`GameStatus.spectrum`.
+      The value returned by this method gets assigned to
+      :py:attr:`GameStatus.spectrum`.
 
    .. py:method:: time()
 
@@ -77,7 +78,6 @@ Class reference
 
       By default it returns ``time.time()``, which should be sufficient for
       most testbeds.
-
 
 .. py:class:: RadioBase
 
@@ -99,3 +99,49 @@ Class reference
 
    .. py:method:: recv(timeout=None)
 
+.. py:class:: usrp_sensing.SpectrumSensor(base_hz, step_hz, nchannels, time_window=200e-3, gain=10)
+
+   ``usrp_sensing.SpectrumSensor`` is a simple, reusable spectrum sensor
+   implementation using a USRP device.
+
+   `base_hz` is the lower bound of the frequency band used in the game in
+   hertz. `step_hz` is the width of each channel. `nchannels` is the number of
+   channels used in the game::
+
+      -------------------------------> frequency (Hz)
+
+      +---+---+     +---+
+      | 0 | 1 | ... | n | (channels used in the game)
+      +---+---+     +---+
+
+      |---| <- step_hz
+
+      |-----------------| <- step_hz * nchannels
+
+      ^
+      |
+
+      base_hz
+
+
+   `time_window` defines the length of the moving average filter in seconds.
+   The value depends on how often players can look up the current state of the
+   spectrum. In most cases it should be longer than the period of
+   :py:meth:`Transceiver.status_update` events in the event-based model.
+
+   .. py:method:: start()
+
+      Start the worker thread. Should be called before first call to
+      :py:meth:`get_spectrum`
+
+   .. py:method:: stop()
+
+      Stop the worker thread.
+
+   .. py:method:: get_spectrum()
+
+      Returns the current state of the radio spectrum as a list of floating
+      point values. Length of the list is equal to `nchannels`.
+
+      The value returned by this method can be directly used as the return value of
+      :py:meth:`TestbedBase.get_spectrum`.

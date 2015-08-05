@@ -8,12 +8,14 @@ import time
 from math import log10
 
 class SpectrumSensor:
-	def __init__(self):
-		self.fft_size = 64
+	def __init__(self, base_hz, step_hz, nchannels, time_window=200e-3, gain=10):
 
-	        self.samp_rate = 6.4e6
+		self.samp_rate = step_hz*nchannels
+		self.fft_size = nchannels
+		self.center_freq = base_hz + self.samp_rate/2.
 
-		self.time_window = 200e-3 # s
+		self.time_window = time_window # s
+		self.gain = gain
 
 	def start(self):
 		self.setup_top_block()
@@ -42,8 +44,8 @@ class SpectrumSensor:
 			),
 		)
 		uhd_usrp_source.set_samp_rate(self.samp_rate)
-		uhd_usrp_source.set_center_freq(2400e6 + self.samp_rate/2., 0)
-		uhd_usrp_source.set_gain(10, 0)
+		uhd_usrp_source.set_center_freq(self.center_freq, 0)
+		uhd_usrp_source.set_gain(self.gain, 0)
 
 		blocks_stream_to_vector = blocks.stream_to_vector(gr.sizeof_gr_complex, self.fft_size)
 

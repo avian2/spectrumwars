@@ -185,7 +185,7 @@ class Testbed(TestbedBase):
 
 	def __init__(self):
 		self.n = 0
-		self.sensor = SpectrumSensor()
+		self.sensor = SpectrumSensor(base_hz=2.4e9, step_hz=100e3, nchannels=64)
 
 		self.radio_devices = list_radio_devices()
 		log.debug("detected %d connected radios" % (len(self.radio_devices,)))
