@@ -229,8 +229,25 @@ static void cmd_buff_input(char c)
 
 #include "rfstudio/cc2500_50kbps.h"
 
+/* at86rfxx chip is also on the sne-ismtv board. If we don't set its inputs
+ * to low-Z (chip select, etc), it might interfere with our communication with
+ * the CC2500, which shares the same SPI bus. */
+static void disable_at86rf(void)
+{
+	uint16_t pins = GPIO_Pin_0 | GPIO_Pin_13 | GPIO_Pin_15;
+
+	GPIO_InitTypeDef i = {
+		.GPIO_Pin = pins,
+		.GPIO_Speed = GPIO_Speed_10MHz,
+		.GPIO_Mode = GPIO_Mode_Out_PP
+	};
+	GPIO_Init(GPIOA, &i);
+	GPIO_SetBits(GPIOA, pins);
+}
+
 static void radio_setup()
 {
+	disable_at86rf();
 	vsnCC1101_init();
 	vsnCC1101_setReceiveInterrupt(received);
 	vsnCC1101_setMode(IDLE);
