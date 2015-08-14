@@ -7,6 +7,8 @@ from spectrumwars.testbed import TestbedBase, RadioBase, RadioTimeout, RadioErro
 log = logging.getLogger(__name__)
 
 class Radio(RadioBase):
+	RECEIVE_TIMEOUT = 2.
+
 	def __init__(self, addr, dispatcher):
 		self.addr = addr
 		self.neighbor = None
@@ -25,8 +27,11 @@ class Radio(RadioBase):
 		self.dispatcher(self.neighbor, data, self.settings)
 
 	def recv(self, timeout=None):
+		if timeout is None:
+			timeout = self.RECEIVE_TIMEOUT
+
 		try:
-			data = self.q.get(timeout)
+			data = self.q.get(True, timeout)
 		except Queue.Empty:
 			raise RadioTimeout
 		else:
