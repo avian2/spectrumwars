@@ -1,6 +1,7 @@
 import logging
 import Queue
 import random
+import time
 
 from spectrumwars.testbed import TestbedBase, RadioBase, RadioTimeout, RadioError, TestbedError, RadioPacket
 
@@ -25,6 +26,7 @@ class Radio(RadioBase):
 
 	def send(self, data):
 		self.dispatcher(self.neighbor, data, self.settings)
+		time.sleep(.1)
 
 	def recv(self, timeout=None):
 		if timeout is None:
