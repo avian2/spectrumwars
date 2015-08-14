@@ -6,7 +6,7 @@ Running examples
 To run a game with a single player that is specified by code in
 ``examples/better_cognitive.py``::
 
-   $ spectrumwars_runner -l example.log examples/better_cognitive.py
+   $ spectrumwars_runner -t vesna -l example.log examples/better_cognitive.py
 
 ``spectrumwars_runner`` automatically finds any USB-connected nodes and
 assigns them randomly to players.

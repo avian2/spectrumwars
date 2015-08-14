@@ -1,4 +1,5 @@
 import imp
+import importlib
 import logging
 import os
 import re
@@ -8,15 +9,18 @@ import argparse
 
 from spectrumwars.sandbox import SubprocessSandbox
 from spectrumwars import Player, Game, GameController
-from spectrumwars.testbed.vesna import Testbed
 
 log = logging.getLogger(__name__)
+
+def get_testbed(name):
+	mod = importlib.import_module("spectrumwars.testbed." + name)
+	return mod.Testbed()
 
 def run(args):
 	logging.basicConfig(level=logging.DEBUG)
 	logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
 
-	testbed = Testbed()
+	testbed = get_testbed(args.testbed)
 	sandbox = SubprocessSandbox(args.player_paths)
 
 	game = Game(testbed, sandbox, packet_limit=args.packet_limit, time_limit=args.time_limit)
@@ -69,6 +73,9 @@ def main():
 
 	parser.add_argument('-l', '--log', metavar='PATH', dest='log_path',
 			help='path to save binary game log to')
+
+	parser.add_argument('-t', '--testbed', metavar='TESTBED', dest='testbed', default='simulation',
+			help='testbed to use (default: simulation)')
 
 	args = parser.parse_args()
 
