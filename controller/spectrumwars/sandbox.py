@@ -8,7 +8,7 @@ import re
 import threading
 import time
 import traceback
-from jsonrpc2_zeromq import RPCClient
+from spectrumwars.rpc import RPCClient
 
 from spectrumwars import Player
 

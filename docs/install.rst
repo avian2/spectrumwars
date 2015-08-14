@@ -92,10 +92,6 @@ To run tests::
 
 Note that some tests expect that you have a USRP and two nodes connected.
 
-.. note::
-   There are some unknown race condition issues related to RPC, so some tests
-   might fail occassionally with ``ZMQError: Address already in use``.
-
 Building HTML documentation
 ---------------------------
 

@@ -1,10 +1,9 @@
 import copy
 import logging
-import zmq
 import time
 from spectrumwars.testbed import TestbedError, RadioTimeout, GameStatus
 from spectrumwars.transceiver import StopGame, TransceiverError
-from jsonrpc2_zeromq import RPCServer
+from spectrumwars.rpc import RPCServer
 
 log = logging.getLogger(__name__)
 
@@ -129,8 +128,6 @@ class GameEvent(object):
 
 class GameRPCServer(RPCServer):
 
-	RETRY_PORT = 10
-
 	def __init__(self, game, player, role, radio):
 		self.game = game
 		self.player = player
@@ -145,18 +142,7 @@ class GameRPCServer(RPCServer):
 		port = 50000 + self.i*10 + j
 		self.endpoint = "tcp://127.0.0.1:%d" % (port,)
 
-		# This is a bit of a hack, but for some unknown reason it
-		# sometimes throws "Address already in use" even though
-		# previous RPCServer instance has been destroyed.
-		for i in xrange(self.RETRY_PORT):
-			try:
-				RPCServer.__init__(self, self.endpoint, timeout=.5)
-			except zmq.ZMQError, e:
-				time.sleep(.1)
-			else:
-				break
-		else:
-			raise e
+		super(GameRPCServer, self).__init__(self.endpoint, timeout=.5)
 
 	def handle_get_status_method(self):
 		status = self.game.get_status()

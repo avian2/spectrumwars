@@ -1,6 +1,5 @@
 import logging
 import unittest
-from jsonrpc2_zeromq import RPCClient
 
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout, RadioError

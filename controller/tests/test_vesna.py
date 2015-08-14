@@ -1,6 +1,5 @@
 import logging
 import unittest
-from jsonrpc2_zeromq import RPCClient
 
 from spectrumwars import Player, Game, GameController, Transceiver, RadioError
 from spectrumwars.testbed.vesna import Testbed, list_radio_devices

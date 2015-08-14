@@ -5,7 +5,7 @@ import re
 import time
 import unittest
 from tempfile import NamedTemporaryFile
-from jsonrpc2_zeromq import RPCServer, RPCClient
+from spectrumwars.rpc import RPCServer, RPCClient
 
 level = logging.WARNING
 logging.basicConfig(level=level)
