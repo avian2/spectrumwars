@@ -43,6 +43,7 @@ class Testbed(TestbedBase):
 
 	def __init__(self):
 		self.radios = []
+		self.channels = [0] * self.get_frequency_range()
 		self.i = 0
 
 	def _get_radio(self):
@@ -54,6 +55,8 @@ class Testbed(TestbedBase):
 		return r
 
 	def _dispatcher(self, addr, data, settings):
+		self.channels[settings[0]] = self.time()
+
 		for radio in self.radios:
 			radio._recv(addr, data, settings)
 
@@ -67,7 +70,18 @@ class Testbed(TestbedBase):
 		return rx, tx
 
 	def get_spectrum(self):
-		spectrum = [ random.randint(-90, -20) for n in xrange(self.get_frequency_range()) ]
+
+		spectrum = []
+		now = self.time()
+
+		for time in self.channels:
+			if now - time < .5:
+				p = random.randint(-40, -20)
+			else:
+				p = random.randint(-90, -80)
+
+			spectrum.append(p)
+
 		return tuple(spectrum)
 
 	def get_frequency_range(self):
