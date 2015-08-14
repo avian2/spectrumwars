@@ -1,3 +1,5 @@
+import time
+
 class TestbedError(Exception): pass
 class RadioError(Exception): pass
 class RadioTimeout(Exception): pass
@@ -7,7 +9,7 @@ class TestbedBase(object):
 		raise NotImplementedError
 
 	def time(self):
-		raise NotImplementedError
+		return time.time()
 
 	def start(self):
 		pass

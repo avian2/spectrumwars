@@ -246,6 +246,3 @@ class Testbed(TestbedBase):
 
 	def get_power_range(self):
 		return 17
-
-	def time(self):
-		return time.time()
