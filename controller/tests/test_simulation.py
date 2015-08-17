@@ -37,6 +37,20 @@ class TestSimulation(unittest.TestCase):
 		self.r1.send("foo")
 		self.assertRaises(RadioTimeout, self.r2.recv, .1)
 
+	def test_send_invalid_2(self):
+		self.r1.set_configuration(0, 0, 0)
+		self.r2.set_configuration(0, 1, 0)
+
+		self.r1.send("foo")
+		self.assertRaises(RadioTimeout, self.r2.recv, .1)
+
+	def test_power_ignored(self):
+		self.r1.set_configuration(0, 0, 0)
+		self.r2.set_configuration(0, 0, 1)
+
+		self.r1.send("foo")
+		self.assertEqual(self.r2.recv().data, "foo")
+
 	def test_get_spectrum(self):
 		s = self.t.get_spectrum()
 

@@ -15,19 +15,22 @@ class Radio(RadioBase):
 		self.neighbor = None
 		self.dispatcher = dispatcher
 		self.q = Queue.Queue()
-		self.settings = (0, 0, 0)
+
+		self.frequency = 0
+		self.bandwidth = 0
 
 		self.send_delay = send_delay
 
-	def _recv(self, addr, data, settings):
-		if self.settings == settings and self.addr == addr:
+	def _recv(self, addr, data, frequency, bandwidth):
+		if self.frequency == frequency and self.bandwidth == bandwidth and self.addr == addr:
 			self.q.put(data)
 
-	def set_configuration(self, frequency, power, bandwidth):
-		self.settings = (frequency, power, bandwidth)
+	def set_configuration(self, frequency, bandwidth, power):
+		self.frequency = frequency
+		self.bandwidth = bandwidth
 
 	def send(self, data):
-		self.dispatcher(self.neighbor, data, self.settings)
+		self.dispatcher(self.neighbor, data, self.frequency, self.bandwidth)
 		time.sleep(self.send_delay)
 
 	def recv(self, timeout=None):
@@ -67,12 +70,11 @@ class Testbed(TestbedBase):
 
 		return r
 
-	def _dispatcher(self, addr, data, settings):
-		ch = settings[0]
+	def _dispatcher(self, addr, data, frequency, bandwidth):
 		now = self.time()
 
-		has_collision = (now - self.channels[ch]) > self.send_delay
-		self.channels[ch] = now
+		has_collision = (now - self.channels[frequency]) > self.send_delay
+		self.channels[frequency] = now
 
 		if has_collision:
 			# note that when packets collide, the first one goes
@@ -80,9 +82,9 @@ class Testbed(TestbedBase):
 			# than in reality: all should fail. But this would
 			# be complicated to implement in practice.
 			for radio in self.radios:
-				radio._recv(addr, data, settings)
+				radio._recv(addr, data, frequency, bandwidth)
 		else:
-			log.debug("packet collision detected on channel %d" % (ch,))
+			log.debug("packet collision detected on channel %d" % (frequency,))
 
 	def get_radio_pair(self):
 		rx = self._get_radio()

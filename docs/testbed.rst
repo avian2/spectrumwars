@@ -106,7 +106,7 @@ Class reference
    transceiver. Unless stated otherwise, subclasses should override all of the
    methods described below.
 
-   .. py:method:: set_configuration(frequency, power, bandwidth)
+   .. py:method:: set_configuration(frequency, bandwidth, power)
 
       Set up the transceiver for transmission or reception of packets on the
       specified central frequency, power and bandwidth.
