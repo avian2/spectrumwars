@@ -101,4 +101,4 @@ Note that the simulation of the radio environment is greatly simplified:
  * Spectrum sensing shows higher received power on channels with recent
    packet transmissions.
 
-  * Transmission power setting is ignored.
+ * Transmission power setting is ignored.
