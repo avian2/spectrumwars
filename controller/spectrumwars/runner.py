@@ -12,15 +12,32 @@ from spectrumwars import Player, Game, GameController
 
 log = logging.getLogger(__name__)
 
-def get_testbed(name):
+def get_testbed_kwargs(options):
+	kwargs = {}
+	if options:
+		for option in options:
+			f = option.split('=', 1)
+			if len(f) != 2:
+				log.error("Invalid testbed option %r: should be in key=value format" %
+						(option,))
+				continue
+
+			key, value = f
+			kwargs[key] = value
+
+	return kwargs
+
+def get_testbed(name, options):
 	mod = importlib.import_module("spectrumwars.testbed." + name)
-	return mod.Testbed()
+
+	kwargs = get_testbed_kwargs(options)
+	return mod.Testbed(**kwargs)
 
 def run(args):
 	logging.basicConfig(level=logging.DEBUG)
 	logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
 
-	testbed = get_testbed(args.testbed)
+	testbed = get_testbed(args.testbed, args.testbed_options)
 	sandbox = SubprocessSandbox(args.player_paths)
 
 	game = Game(testbed, sandbox, packet_limit=args.packet_limit, time_limit=args.time_limit)
@@ -76,6 +93,9 @@ def main():
 
 	parser.add_argument('-t', '--testbed', metavar='TESTBED', dest='testbed', default='simulation',
 			help='testbed to use (default: simulation)')
+
+	parser.add_argument('-O', '--testbed-option', metavar='KEY=VALUE', nargs='*', dest='testbed_options',
+			help='testbed options')
 
 	args = parser.parse_args()
 

@@ -30,6 +30,10 @@ Class reference
    game. Unless stated otherwise, subclasses should override all of the
    methods described below.
 
+   The class constructor can take optional string-typed keyword arguments.
+   These can be specified in ``spectrumwars_runner`` using the ``-O``
+   arguments.
+
    .. py:method:: get_radio_pair()
 
       Returns a ``rxradio, txradio`` tuple. ``rxradio`` and ``txradio`` should
