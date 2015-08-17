@@ -18,7 +18,7 @@ controlled version of the game that was demonstrated at various conferences
 `Net Futures 2015 <https://www.youtube.com/watch?v=m-Js5pwuVFA>`_). The aim is
 to replace a joystick-wielding human with a short, fun to write Python script.
 
-This Python implementation for VESNA sensor nodes was written by Tomaz Solc
+This Python implementation for VESNA sensor nodes was written by Tomaž Šolc
 (tomaz.solc@ijs.si)
 
 *This work has been partially funded by the European

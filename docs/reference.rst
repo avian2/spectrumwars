@@ -78,13 +78,13 @@ arguments (use ``-Okeyword=value`` to modify their values from default):
 
 ===============  =====================================  =======  =====
 keyword          meaning                                default  unit
-======================================================  =======  =====
+===============  =====================================  =======  =====
 packet_size      Maximum packet length	                 1024     bytes
 frequency_range  Number of frequency channels           64
 bandwidth_range  Number of bandwidth settings           10
 power_range      Number of transmission power settings  10
 send_delay       Time for sending one packet            0.100    s
-=====================================  ===============  =======  =====
+===============  =====================================  =======  =====
 
 Note that the simulation of the radio environment is greatly simplified:
 
