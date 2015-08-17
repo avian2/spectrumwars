@@ -13,13 +13,14 @@ class TestSimulation(unittest.TestCase):
 	def setUp(self):
 		self.t = Testbed()
 		self.r1, self.r2 = self.t.get_radio_pair()
+		self.r3, self.r4 = self.t.get_radio_pair()
 
 	def test_send(self):
 		self.r1.set_configuration(0, 0, 0)
 		self.r2.set_configuration(0, 0, 0)
 
 		self.r1.send("foo")
-		d = self.r2.recv()
+		d = self.r2.recv(.1)
 
 		self.assertEqual(d.data, "foo")
 
@@ -27,19 +28,59 @@ class TestSimulation(unittest.TestCase):
 		self.r1.set_configuration(0, 0, 0)
 
 		self.r1.send("foo")
-		self.assertRaises(RadioTimeout, self.r1.recv)
+		self.assertRaises(RadioTimeout, self.r1.recv, .1)
 
 	def test_send_invalid(self):
 		self.r1.set_configuration(0, 0, 0)
 		self.r2.set_configuration(1, 0, 0)
 
 		self.r1.send("foo")
-		self.assertRaises(RadioTimeout, self.r2.recv)
+		self.assertRaises(RadioTimeout, self.r2.recv, .1)
 
 	def test_get_spectrum(self):
 		s = self.t.get_spectrum()
 
 		self.assertEqual(len(s), self.t.get_frequency_range())
+
+	def test_simultaneous(self):
+		self.r1.set_configuration(0, 0, 0)
+		self.r2.set_configuration(0, 0, 0)
+
+		self.r3.set_configuration(10, 0, 0)
+		self.r4.set_configuration(10, 0, 0)
+
+		sd = self.r1.send_delay
+		self.r1.send_delay = 0
+		self.r3.send_delay = 0
+
+		self.r1.send("foo")
+		self.r3.send("bar")
+
+		self.assertEqual(self.r2.recv().data, "foo")
+		self.assertEqual(self.r4.recv().data, "bar")
+
+		self.r1.send_delay = sd
+		self.r3.send_delay = sd
+
+	def test_collision(self):
+		self.r1.set_configuration(0, 0, 0)
+		self.r2.set_configuration(0, 0, 0)
+
+		self.r3.set_configuration(0, 0, 0)
+		self.r4.set_configuration(0, 0, 0)
+
+		sd = self.r1.send_delay
+		self.r1.send_delay = 0
+		self.r3.send_delay = 0
+
+		self.r1.send("foo")
+		self.r3.send("bar")
+
+		self.assertEqual(self.r2.recv().data, "foo")
+		self.assertRaises(RadioTimeout, self.r4.recv, .1)
+
+		self.r1.send_delay = sd
+		self.r3.send_delay = sd
 
 class TestSimulationGame(unittest.TestCase):
 

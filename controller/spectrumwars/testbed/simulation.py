@@ -51,7 +51,12 @@ class Testbed(TestbedBase):
 		self.packet_size = int(packet_size)
 
 		self.radios = []
+
+		# for each channel, we keep the timestamp of the last
+		# transmission. we use this for simulated spectrum sensing and
+		# for detecting collisions.
 		self.channels = [0] * self.frequency_range
+
 		self.i = 0
 
 	def _get_radio(self):
@@ -63,10 +68,21 @@ class Testbed(TestbedBase):
 		return r
 
 	def _dispatcher(self, addr, data, settings):
-		self.channels[settings[0]] = self.time()
+		ch = settings[0]
+		now = self.time()
 
-		for radio in self.radios:
-			radio._recv(addr, data, settings)
+		has_collision = (now - self.channels[ch]) > self.send_delay
+		self.channels[ch] = now
+
+		if has_collision:
+			# note that when packets collide, the first one goes
+			# through while the later ones fail. this is different
+			# than in reality: all should fail. But this would
+			# be complicated to implement in practice.
+			for radio in self.radios:
+				radio._recv(addr, data, settings)
+		else:
+			log.debug("packet collision detected on channel %d" % (ch,))
 
 	def get_radio_pair(self):
 		rx = self._get_radio()
