@@ -31,6 +31,7 @@ Contents:
    :maxdepth: 2
 
    install
+   installtestbed
    running
    transceiver
    reference

@@ -18,7 +18,8 @@ Add testbed specific unit tests
    hardware is not connected (e.g. raise the ``unittest.SkipTest`` exception)
 
 Add testbed documentation
-   Add testbed documentation to ``docs/reference.rst``
+   Add testbed documentation for players to ``docs/reference.rst``. Add any
+   testbed-specific installation instructions to ``docs/installtestbed.rst``.
 
 
 Class reference
