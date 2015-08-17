@@ -6,16 +6,27 @@ Running examples
 To run a game with a single player that is specified by code in
 ``examples/better_cognitive.py``::
 
+   $ spectrumwars_runner -l example.log examples/better_cognitive.py
+
+You can add more players to the game by specifying more Python files to the
+command line.
+
+By default ``spectrumwars_runner`` uses a simulated testbed that does not
+require any special hardware. You can specify the testbed to use using the
+``-t`` command line argument. For example, to run the game using the VESNA
+testbed, use::
+
    $ spectrumwars_runner -t vesna -l example.log examples/better_cognitive.py
 
-``spectrumwars_runner`` automatically finds any USB-connected nodes and
-assigns them randomly to players.
+In this case, ``spectrumwars_runner`` automatically finds any USB-connected
+VESNA nodes and assigns them randomly to players.
 
 .. note::
-   As of 0.0.3, ``spectrumwars_runner`` no longer uses nodes connected over
-   serial-to-USB converters.
+   As of 0.0.3, ``spectrumwars_runner`` no longer uses VESNA nodes connected
+   over serial-to-USB converters.
 
-In the end, it prints out some game statistics::
+While the game is running, you will see some debugging information on the
+console. In the end, some game statistics are printed out::
 
    Results:
    Player 1:
@@ -25,10 +36,10 @@ In the end, it prints out some game statistics::
        transferred payload : 12801 bytes (avg 1099.6 bytes/s)
    Game time: 11.6 seconds
 
-It also saves a binary log file to ``example.log``. In addition to the ASCII
-log that is printed on the console, the binary log contains useful debugging
-information about events that occurred during the game. You can visualize the
-log by running::
+The game also saves a binary log file to ``example.log``. In addition to the
+ASCII log that is printed on the console, the binary log contains useful
+debugging information about events that occurred during the game. You can
+visualize the log by running::
 
    $ spectrumwars_plot -o example.out example.log
 

@@ -9,6 +9,8 @@ VESNA
 VESNA testbed uses VESNA sensor nodes with narrow-band radios as transceivers
 in the 2.4 GHz band. An Ettus Research USRP N200 is used as a spectrum sensor.
 
+Use ``-t vesna`` to with ``spectrumwars_runner`` to use this testbed.
+
 =====================================  ===================
 parameter                              value
 =====================================  ===================
@@ -61,3 +63,42 @@ Central frequency of a channel can be calculated using the following formula::
    16         < -55
    =========  =====
 
+
+Simulated testbed
+-----------------
+
+Simulated testbed uses a software simulation to run the game. No special
+hardware is required. This is useful when developing player code.
+
+This testbed is used by default by ``spectrumwars_runner``, if no ``-t``
+argument is specified.
+
+Capabilities of this testbed can be customized using the following keyword
+arguments (use ``-Okeyword=value`` to modify their values from default):
+
+===============  =====================================  =======  =====
+keyword          meaning                                default  unit
+======================================================  =======  =====
+packet_size      Maximum packet length	                 1024     bytes
+frequency_range  Number of frequency channels           64
+bandwidth_range  Number of bandwidth settings           10
+power_range      Number of transmission power settings  10
+send_delay       Time for sending one packet            0.100    s
+=====================================  ===============  =======  =====
+
+Note that the simulation of the radio environment is greatly simplified:
+
+ * A packet occupies only the channel it is sent on.
+
+ * Sending of all packets takes the same amount of time (``send_delay``),
+   regardless of ``bandwidth`` setting.
+
+ * Only very simple collision detection is implemented. If transmission of
+   two packets commences within the ``send_delay`` of each other, the first
+   packet will be successfully delivered to its recepient, while the second
+   will be discarded.
+
+ * Spectrum sensing shows higher received power on channels with recent
+   packet transmissions.
+
+  * Transmission power setting is ignored.
