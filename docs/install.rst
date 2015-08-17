@@ -41,6 +41,21 @@ To run tests::
 Note that to run the testbed-specific tests, you need to have the hardware
 connected at this point.
 
+Installing web interface
+------------------------
+
+Requirements:
+
+ * virtualenv (``apt-get install python-virtualenv``)
+
+To setup a local development instance of the web interface:
+
+   $ cd web
+   $ virtualenv .virtualenv
+   $ . .virtualenv/bin/activate
+   $ pip install -r requirements.txt
+   $ python manage.py runserver
+
 Building HTML documentation
 ---------------------------
 
