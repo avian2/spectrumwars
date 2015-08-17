@@ -1,7 +1,12 @@
+import logging
 import unittest
 
-from spectrumwars import RadioTimeout
+from spectrumwars import Player, Game, GameController, Transceiver, RadioTimeout, RadioError
 from spectrumwars.testbed.simulation import Testbed
+from spectrumwars.sandbox import ThreadedSandbox
+
+level = logging.WARNING
+logging.basicConfig(level=level)
 
 class TestSimulation(unittest.TestCase):
 
@@ -36,3 +41,32 @@ class TestSimulation(unittest.TestCase):
 
 		self.assertEqual(len(s), self.t.get_frequency_range())
 
+class TestSimulationGame(unittest.TestCase):
+
+	PACKET_LIMIT = 1
+	TIME_LIMIT = 1
+
+	def setUp(self):
+		self.testbed = Testbed()
+
+	def _run_game(self, rxcls, txcls):
+		sandbox = ThreadedSandbox([[rxcls, txcls]])
+		game = Game(self.testbed, sandbox,
+				packet_limit=self.PACKET_LIMIT, time_limit=self.TIME_LIMIT)
+		ctl = GameController()
+		return ctl.run(game)[0]
+
+	def test_send_recv(self):
+
+		cnt = [0]
+
+		class Receiver(Transceiver):
+			def recv(self, packet):
+				cnt[0] += 1
+
+		class Transmitter(Transceiver):
+			def start(self):
+				self.send()
+
+		result = self._run_game(Receiver, Transmitter)
+		self.assertEqual(cnt[0], 1)
