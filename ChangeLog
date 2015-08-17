@@ -1,3 +1,14 @@
+2015-08-17	spectrumwars 0.0.4
+
+	* Add "--testbed" parameter to spectrumwars_runner for specifying the
+	  testbed to be used.
+	* Add a testbed simulation class for developing player code without
+	  access to real hardware.
+	* Make usrp_sensing.SpectrumSensor class usable in different testbed.
+	* Add documentation for developing testbed-specific classes.
+	* Automatically skip tests for hardware that is not currently
+	  connected.
+
 2015-06-19	spectrumwars 0.0.3
 
 	* Use USB CDC connection with VESNA nodes instead of serial-to-USB
