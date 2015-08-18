@@ -16,7 +16,7 @@
 <td>{{ result.received_ratio }} %</td>
 <td>{{ result.crashed }}</td>
 <td><a href="{% url 'result' result.id %}">log</a></td>
-<td><a>timeline</a></td>
+<td><a href="{{ result.timeline.url }}">timeline</a></td>
 </tr>
 {% endfor %}
 </table>

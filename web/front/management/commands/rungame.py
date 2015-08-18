@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.core.files import File
 
 from front import models
 
@@ -7,8 +8,10 @@ import logging
 from spectrumwars.testbed.simulation import Testbed
 from spectrumwars.sandbox import SubprocessSandbox
 from spectrumwars import Game, GameController
+from spectrumwars.plotter import plot_player
 
 import tempfile
+import StringIO
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +40,7 @@ def run_game(code):
 
 	f.close()
 
-	return results[0]
+	return game.log, results[0]
 
 class Command(BaseCommand):
 	help = 'Runs some games'
@@ -45,7 +48,7 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		player_list = models.Player.objects.all()
 		for player in player_list:
-			result = run_game(player.code)
+			game_log, result = run_game(player.code)
 
 			game = models.Game()
 			game.save()
@@ -70,3 +73,8 @@ class Command(BaseCommand):
 				timeline=None
 			)
 			robj.save()
+
+			timeline_img = StringIO.StringIO()
+			plot_player(game_log, 0, timeline_img)
+
+			robj.timeline.save("timeline_%d.png" % (robj.id,), File(timeline_img))

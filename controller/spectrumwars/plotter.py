@@ -134,7 +134,7 @@ def plot_player(log, i, out_path):
 	pyplot.legend(loc='lower right')
 	pyplot.grid()
 
-	pyplot.savefig(out_path, dpi=120)
+	pyplot.savefig(out_path, dpi=120, format='png')
 
 def plot(args):
 	log = pickle.load(open(args.log_path[0], "rb"))
