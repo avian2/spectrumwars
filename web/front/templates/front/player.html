@@ -8,13 +8,21 @@
 <h2>Results</h2>
 
 <table>
-<tr><th>ratio rx/tx<br/>packets</th>
+<tr>
 <th>crashed?</th>
+<th>RX packets</th><th>TX packets</th><th>ratio</th>
+<th>payload bytes</th>
 <th></th><th></th></tr>
 {% for result in result_list %}
 <tr>
-<td>{{ result.received_ratio }} %</td>
+
 <td>{{ result.crashed }}</td>
+
+<td>{{ result.received_packets }}</td>
+<td>{{ result.transmit_packets }}</td>
+<td>{{ result.received_ratio }} %</td>
+<td>{{ result.payload_bytes }}</td>
+
 <td><a href="{% url 'result' result.id %}">log</a></td>
 <td><a href="{{ result.timeline.url }}">timeline</a></td>
 </tr>

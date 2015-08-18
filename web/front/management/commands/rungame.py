@@ -35,12 +35,9 @@ def run_game(code):
 
 	log.info("Done.")
 
-	game_time = game.end_time - game.start_time
-	print "Game time: %.1f seconds" % (game_time,)
-
 	f.close()
 
-	return game.log, results[0]
+	return game, results[0]
 
 class Command(BaseCommand):
 	help = 'Runs some games'
@@ -48,9 +45,11 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		player_list = models.Player.objects.all()
 		for player in player_list:
-			game_log, result = run_game(player.code)
+			gameo, result = run_game(player.code)
 
-			game = models.Game()
+			duration = gameo.end_time - gameo.start_time
+
+			game = models.Game(duration=duration)
 			game.save()
 
 			if result.crashed:
@@ -67,6 +66,11 @@ class Command(BaseCommand):
 			robj = models.PlayerResult(
 				game=game,
 				player=player,
+
+				transmit_packets=result.transmit_packets,
+				received_packets=result.received_packets,
+				payload_bytes=result.payload_bytes,
+
 				received_ratio=ratio,
 				crashed=result.crashed,
 				log=crash_log,
@@ -75,6 +79,6 @@ class Command(BaseCommand):
 			robj.save()
 
 			timeline_img = StringIO.StringIO()
-			plot_player(game_log, 0, timeline_img)
+			plot_player(gameo.log, 0, timeline_img)
 
 			robj.timeline.save("timeline_%d.png" % (robj.id,), File(timeline_img))

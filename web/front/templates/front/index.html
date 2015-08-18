@@ -10,12 +10,13 @@ Hello {{ user }}!
 
 <table>
 <tr>
-<th>name</th><th>crash<br/>ratio</th><th>average<br/>rx/tx ratio</th>
+<th>name</th><th>crash<br/>ratio</th><th>average<br/>rx/tx ratio</th><th>created</th>
 {% for player in player_list %}
 <tr>
 <td><a href="/front/player/{{ player.id}}">{{ player.name }}</a></td>
 <td>{{ player.crash_ratio }}</td>
 <td>{{ player.packet_ratio }}</td>
+<td>{{ player.created }}</td>
 </tr>
 {% endfor %}
 </table>
