@@ -1,31 +1,31 @@
 {% extends "base.html" %}
 
 {% block title %}
-{{ player.name }} by {{ user }}
+"{{ player.name }}" by {{ user }}
 {% endblock %}
 
 {% block content %}
-<h2>Code</h2>
-
-<pre>
-{{ player.code }}
-</pre>
-
 <h2>Results</h2>
 
 <table>
-<tr><th>Ratio rx/tx<br/>packets</th>
-<th>Crashed?</th>
+<tr><th>ratio rx/tx<br/>packets</th>
+<th>crashed?</th>
 <th></th><th></th></tr>
 {% for result in result_list %}
 <tr>
-<td>{{ result.received_ratio }}</td>
+<td>{{ result.received_ratio }} %</td>
 <td>{{ result.crashed }}</td>
 <td><a href="{% url 'result' result.id %}">log</a></td>
 <td><a>timeline</a></td>
 </tr>
 {% endfor %}
 </table>
+
+<h2>Code</h2>
+
+<pre>
+{{ player.code }}
+</pre>
 
 <a href="{% url 'index' %}">back</a>
 <form action="{% url 'player_del' player.id %}" method="post">

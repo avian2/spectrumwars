@@ -16,6 +16,26 @@ class PlayerForm(forms.ModelForm):
 def index(request):
 	player_list = Player.objects.all()
 
+	for player in player_list:
+		result_list = PlayerResult.objects.filter(player=player)
+
+		alln = 0
+		crashn = 0
+
+		avgratio = 0.
+		for result in result_list:
+			if result.crashed:
+				crashn += 1
+			alln += 1
+
+			avgratio += result.received_ratio
+
+		avgratio /= alln
+		crashratio = float(crashn)/alln
+
+		player.crash_ratio = crashratio
+		player.packet_ratio = avgratio
+
 	context = {
 		'user': request.user,
 		'player_list': player_list,
