@@ -51,7 +51,12 @@ Requirements:
 To setup a local development instance of the web interface:
 
    $ cd web
-   $ virtualenv .virtualenv
+   $ virtualenv --system-site-packages .virtualenv
+
+Note ``--system-site-packages`` is needed so that GNU Radio and the
+``spectrumwars`` module is available inside virtualenv. You can instead
+install those into virtualenv, but this way is easier.
+
    $ . .virtualenv/bin/activate
    $ pip install -r requirements.txt
    $ python manage.py runserver
