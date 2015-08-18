@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ player.name }} by {{ user }}
+{% endblock %}
+
+{% block content %}
+<pre>
+{{ player.code }}
+</pre>
+
+<a href="{% url 'index' %}">back</a>
+<form action="{% url 'player_del' player.id %}" method="post">
+	{% csrf_token %}
+	<input type="submit" value="delete"/>
+</form>
+{% endblock %}
