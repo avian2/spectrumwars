@@ -5,9 +5,27 @@
 {% endblock %}
 
 {% block content %}
+<h2>Code</h2>
+
 <pre>
 {{ player.code }}
 </pre>
+
+<h2>Results</h2>
+
+<table>
+<tr><th>Ratio rx/tx<br/>packets</th>
+<th>Crashed?</th>
+<th></th><th></th></tr>
+{% for result in result_list %}
+<tr>
+<td>{{ result.received_ratio }}</td>
+<td>{{ result.crashed }}</td>
+<td><a>log</a></td>
+<td><a>timeline</a></td>
+</tr>
+{% endfor %}
+</table>
 
 <a href="{% url 'index' %}">back</a>
 <form action="{% url 'player_del' player.id %}" method="post">

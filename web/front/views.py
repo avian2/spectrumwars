@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django import forms
 
 
-from front.models import Player
+from front.models import Player, PlayerResult
 
 class PlayerForm(forms.ModelForm):
 	class Meta:
@@ -46,8 +46,11 @@ def player_add(request):
 def player(request, id):
 	player = get_object_or_404(Player, pk=id)
 
+	result_list = PlayerResult.objects.filter(player=player)
+
 	context = {
 		'player': player,
+		'result_list': result_list,
 		'user': request.user,
 	}
 
