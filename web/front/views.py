@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django import forms
-
+from django.core.exceptions import PermissionDenied
 
 from front.models import Player, PlayerResult
 
@@ -14,7 +14,7 @@ class PlayerForm(forms.ModelForm):
 
 @login_required
 def index(request):
-	player_list = Player.objects.all()
+	player_list = Player.objects.filter(user=request.user)
 
 	for player in player_list:
 		result_list = PlayerResult.objects.filter(player=player)
@@ -66,6 +66,9 @@ def player_add(request):
 def player(request, id):
 	player = get_object_or_404(Player, pk=id)
 
+	if player.user != request.user:
+		raise PermissionDenied
+
 	result_list = PlayerResult.objects.filter(player=player)
 
 	context = {
@@ -80,6 +83,9 @@ def player(request, id):
 def player_del(request, id):
 	player = get_object_or_404(Player, pk=id)
 
+	if player.user != request.user:
+		raise PermissionDenied
+
 	if request.method == 'POST':
 		player.delete()
 
@@ -88,6 +94,9 @@ def player_del(request, id):
 @login_required
 def result(request, id):
 	result = get_object_or_404(PlayerResult, pk=id)
+
+	if result.player.user != request.user:
+		raise PermissionDenied
 
 	context = {
 		'result': result,
