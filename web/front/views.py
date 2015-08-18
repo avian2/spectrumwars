@@ -64,3 +64,13 @@ def player_del(request, id):
 		player.delete()
 
 	return HttpResponseRedirect(reverse('index'))
+
+@login_required
+def result(request, id):
+	result = get_object_or_404(PlayerResult, pk=id)
+
+	context = {
+		'result': result,
+	}
+
+	return render(request, 'front/result.html', context)

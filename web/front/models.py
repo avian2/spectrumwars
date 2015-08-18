@@ -6,6 +6,9 @@ class Player(models.Model):
 	name = models.CharField(max_length=255)
 	code = models.TextField()
 
+	def __unicode__(self):
+		return self.name
+
 class Game(models.Model):
 	pass
 

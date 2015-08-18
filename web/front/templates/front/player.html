@@ -21,7 +21,7 @@
 <tr>
 <td>{{ result.received_ratio }}</td>
 <td>{{ result.crashed }}</td>
-<td><a>log</a></td>
+<td><a href="{% url 'result' result.id %}">log</a></td>
 <td><a>timeline</a></td>
 </tr>
 {% endfor %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}
+Result {{ result.id }} for {{ result.player }} by {{ user }}
+{% endblock %}
+
+{% block content %}
+<h2>Log</h2>
+
+<pre>
+{{ result.log }}
+</pre>
+{% endblock %}

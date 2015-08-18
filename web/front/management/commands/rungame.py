@@ -44,19 +44,23 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		player_list = models.Player.objects.all()
-		player = player_list[0]
+		for player in player_list:
+			result = run_game(player.code)
 
-		result = run_game(player.code)
+			game = models.Game()
+			game.save()
 
-		game = models.Game()
-		game.save()
+			if result.crashed:
+				crash_log = ''.join(result.crash_desc)
+			else:
+				crash_log = ''
 
-		robj = models.PlayerResult(
-			game=game,
-			player=player,
-			received_ratio=0,
-			crashed=result.crashed,
-			log=result.crash_desc if result.crashed else '',
-			timeline=None
-		)
-		robj.save()
+			robj = models.PlayerResult(
+				game=game,
+				player=player,
+				received_ratio=0,
+				crashed=result.crashed,
+				log=crash_log,
+				timeline=None
+			)
+			robj.save()
