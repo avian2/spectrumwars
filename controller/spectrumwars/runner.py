@@ -68,8 +68,8 @@ def run(args):
 				result.payload_bytes, result.payload_bytes / game_time)
 		print
 		if result.crashed:
-			print "   Crash reasons:"
-			for desc in result.crash_desc:
+			print "   Crash reports:"
+			for desc in result.crash_report:
 				print desc
 			print
 

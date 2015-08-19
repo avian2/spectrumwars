@@ -279,10 +279,10 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transmitter)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
-		self.assertEqual(len(result.crash_desc), 1)
-		self.assertTrue("Traceback" in result.crash_desc[0])
-		self.assertTrue("Receiver" in result.crash_desc[0])
-		self.assertTrue("Transmitter" not in result.crash_desc[0])
+		self.assertEqual(len(result.crash_report), 1)
+		self.assertTrue("Traceback" in result.crash_report[0])
+		self.assertTrue("Receiver" in result.crash_report[0])
+		self.assertTrue("Transmitter" not in result.crash_report[0])
 
 	def test_error_start(self):
 
@@ -294,10 +294,10 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transceiver)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
-		self.assertEqual(len(result.crash_desc), 1)
-		self.assertTrue("Traceback" in result.crash_desc[0])
-		self.assertTrue("Receiver" in result.crash_desc[0])
-		self.assertTrue("Transmitter" not in result.crash_desc[0])
+		self.assertEqual(len(result.crash_report), 1)
+		self.assertTrue("Traceback" in result.crash_report[0])
+		self.assertTrue("Receiver" in result.crash_report[0])
+		self.assertTrue("Transmitter" not in result.crash_report[0])
 
 	def test_error_status_update(self):
 
@@ -309,10 +309,10 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Receiver, Transceiver)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
-		self.assertEqual(len(result.crash_desc), 1)
-		self.assertTrue("Traceback" in result.crash_desc[0])
-		self.assertTrue("Receiver" in result.crash_desc[0])
-		self.assertTrue("Transmitter" not in result.crash_desc[0])
+		self.assertEqual(len(result.crash_report), 1)
+		self.assertTrue("Traceback" in result.crash_report[0])
+		self.assertTrue("Receiver" in result.crash_report[0])
+		self.assertTrue("Transmitter" not in result.crash_report[0])
 
 	def test_recv_in_start(self):
 
