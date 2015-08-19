@@ -24,7 +24,7 @@
 <td>{{ result.payload_bytes }}</td>
 
 <td><a href="{% url 'result' result.id %}">log</a></td>
-<td><a href="{{ result.timeline.url }}">timeline</a></td>
+<td>{% if result.timeline %}<a href="{{ result.timeline.url }}">timeline</a>{% endif %}</td>
 </tr>
 {% endfor %}
 </table>

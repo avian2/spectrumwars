@@ -30,8 +30,12 @@ def index(request):
 
 			avgratio += result.received_ratio
 
-		avgratio /= alln
-		crashratio = float(crashn)/alln
+		if alln > 0:
+			avgratio /= alln
+			crashratio = float(crashn)/alln
+		else:
+			avgratio = float("NaN")
+			crashratio = float("NaN")
 
 		player.crash_ratio = crashratio
 		player.packet_ratio = avgratio
@@ -103,3 +107,41 @@ def result(request, id):
 	}
 
 	return render(request, 'front/result.html', context)
+
+def halloffame(request):
+
+	player_list = Player.objects.all()
+
+	for player in player_list:
+
+		n = 0
+		avg_ratio = 0.
+		avg_throughput = 0.
+
+		for result in PlayerResult.objects.filter(player=player):
+			ratio = result.received_ratio
+			throughput = result.payload_bytes / result.game.duration
+
+			avg_ratio += ratio
+			avg_throughput += throughput
+
+			n += 1
+
+		if n > 0:
+			player.avg_ratio = avg_ratio / n
+			player.avg_throughput = avg_throughput / n
+		else:
+			player.avg_ratio = float("NaN")
+			player.avg_throughput = float("NaN")
+
+	limit = 10
+
+	most_reliable = sorted(player_list, key=lambda x:x.avg_ratio, reverse=True)[:limit]
+	fastest = sorted(player_list, key=lambda x:x.avg_throughput, reverse=True)[:limit]
+
+	context = {
+		'most_reliable': most_reliable,
+		'fastest': fastest,
+	}
+
+	return render(request, 'front/halloffame.html', context)

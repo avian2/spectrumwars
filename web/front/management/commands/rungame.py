@@ -78,7 +78,8 @@ class Command(BaseCommand):
 			)
 			robj.save()
 
-			timeline_img = StringIO.StringIO()
-			plot_player(gameo.log, 0, timeline_img)
+			if gameo.log:
+				timeline_img = StringIO.StringIO()
+				plot_player(gameo.log, 0, timeline_img)
 
-			robj.timeline.save("timeline_%d.png" % (robj.id,), File(timeline_img))
+				robj.timeline.save("timeline_%d.png" % (robj.id,), File(timeline_img))

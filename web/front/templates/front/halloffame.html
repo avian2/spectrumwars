@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}
+Hall of fame
+{% endblock %}
+
+{% block content %}
+<h2>Most reliable</h2>
+
+<table>
+<tr>
+<th>Name</th>
+<th>Author</th>
+<th>Average packet ratio</th>
+</tr>
+{% for player in most_reliable %}
+<tr>
+<td>"{{ player }}"</td>
+<td>{{ player.user }}</td>
+<td>{{ player.avg_ratio }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Fastest</h2>
+
+<table>
+<tr>
+<th>Name</th>
+<th>Author</th>
+<th>Average throughput [bytes/s]</th>
+</tr>
+{% for player in fastest %}
+<tr>
+<td>"{{ player }}"</td>
+<td>{{ player.user }}</td>
+<td>{{ player.avg_throughput }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
