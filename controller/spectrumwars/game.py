@@ -194,7 +194,13 @@ class GameRPCServer(RPCServer):
 	def handle_report_stop_method(self, crashed, crash_desc=None):
 		if crashed:
 			self.player.result.crashed = True
-			self.player.result.crash_desc.append(crash_desc)
+
+			if self.role == 'rx':
+				header = "Receiver crash report:\n\n"
+			else:
+				header = "Transmitter crash report:\n\n"
+
+			self.player.result.crash_desc.append(header + crash_desc)
 
 		self.game.state = 'stopping'
 
