@@ -55,14 +55,15 @@ def run(args):
 	for i, result in enumerate(results):
 
 		if result.transmit_packets > 0:
-			ratio = 100. * result.received_packets / result.transmit_packets
+			packet_loss = 100. * (result.transmit_packets - result.received_packets) / result.transmit_packets
+			packet_loss_str = "(%.0f%% packet loss)" % (packet_loss,)
 		else:
-			ratio = 0.
+			packet_loss_str = ""
 
 		print "Player %d:" % (i+1,)
 		print "    crashed             : %s" % (result.crashed,)
 		print "    transmitted packets : %d" % (result.transmit_packets,)
-		print "    received packets    : %d (%.0f%%)" % (result.received_packets, ratio)
+		print "    received packets    : %d" % (result.received_packets,), packet_loss_str
 		print "    transferred payload : %d bytes (avg %.1f bytes/s)" % (
 				result.payload_bytes, result.payload_bytes / game_time)
 		print
