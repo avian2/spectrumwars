@@ -60,7 +60,7 @@ def record_game(player_list):
 		player = player_list[i]
 
 		if result.crashed:
-			crash_log = ''.join(result.crash_desc)
+			crash_log = '\n'.join(result.crash_report)
 		else:
 			crash_log = ''
 
