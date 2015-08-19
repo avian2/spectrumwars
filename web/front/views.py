@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django import forms
 from django.core.exceptions import PermissionDenied
 
-from front.models import Player, PlayerResult, Round
+from front.models import Player, PlayerResult, Round, Game
 import math
 
 class PlayerForm(forms.ModelForm):
@@ -120,9 +120,12 @@ def get_mean(x):
 		return None
 
 def round(request, id):
+	round = get_object_or_404(Round, pk=id)
+	game_list = Game.objects.filter(round=round)
 
 	player_list = Player.objects.all()
 
+	player_list2 = []
 	for player in player_list:
 
 		packet_loss = []
@@ -131,7 +134,11 @@ def round(request, id):
 		game_packet_loss = []
 		other_packet_loss = []
 
-		for result in PlayerResult.objects.filter(player=player):
+		in_round = False
+
+		for result in PlayerResult.objects.filter(player=player, game__in=game_list):
+
+			in_round = True
 
 			had_crash = False
 			for result2 in PlayerResult.objects.filter(game=result.game):
@@ -156,8 +163,11 @@ def round(request, id):
 		player.game_packet_loss = get_mean(game_packet_loss)
 		player.other_packet_loss = get_mean(other_packet_loss)
 
+		if in_round:
+			player_list2.append(player)
+
 	def do_sort(key, reverse=False):
-		a = list(player_list)
+		a = list(player_list2)
 		a.sort(key=lambda x:getattr(x, key), reverse=reverse)
 		a.sort(key=lambda x:getattr(x, key) == None)
 
