@@ -64,11 +64,6 @@ def record_game(player_list):
 		else:
 			crash_log = ''
 
-		if result.transmit_packets > 0:
-			ratio = 100. * result.received_packets / result.transmit_packets
-		else:
-			ratio = 0.
-
 		robj = models.PlayerResult(
 			game=game,
 			player=player,
@@ -77,7 +72,6 @@ def record_game(player_list):
 			received_packets=result.received_packets,
 			payload_bytes=result.payload_bytes,
 
-			received_ratio=ratio,
 			crashed=result.crashed,
 			log=crash_log,
 			timeline=None

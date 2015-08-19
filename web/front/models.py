@@ -23,8 +23,6 @@ class PlayerResult(models.Model):
 
 	payload_bytes = models.IntegerField()
 
-	received_ratio = models.FloatField()
-
 	crashed = models.BooleanField()
 	log = models.TextField()
 	timeline = models.FileField(upload_to="timeline")
