@@ -11,10 +11,10 @@ level = logging.WARNING
 logging.basicConfig(level=level)
 
 class MockGameRPCServer(RPCServer):
-	def handle_report_stop_method(self, crashed, crash_desc=None):
+	def handle_report_stop_method(self, crashed, crash_report=None):
 		self.crashed += crashed
 		if crashed:
-			self.crash_desc.append(crash_desc)
+			self.crash_report.append(crash_report)
 		self.stopped += 1
 
 	def handle_should_finish_method(self):
@@ -30,7 +30,7 @@ class BaseTestSandbox(unittest.TestCase):
 		self.server = MockGameRPCServer(timeout=.5, endpoint=self.endpoint)
 		self.server.stopped = 0
 		self.server.crashed = 0
-		self.server.crash_desc = []
+		self.server.crash_report = []
 		self.server.start()
 
 	def tearDown(self):
@@ -150,8 +150,8 @@ class Transmitter(Transceiver):
 
 		self.assertEqual(self.server.crashed, 1)
 		self.assertEqual(self.server.stopped, 2)
-		self.assertEqual(len(self.server.crash_desc), 1)
-		self.assertTrue("Time" in self.server.crash_desc[0])
+		self.assertEqual(len(self.server.crash_report), 1)
+		self.assertTrue("Time" in self.server.crash_report[0])
 
 	def _test_exception_on_import(self, code):
 		f = self.write_temp_py(code)
@@ -173,8 +173,8 @@ class Transmitter(Transceiver):
 
 		self.assertEqual(self.server.crashed, 2)
 		self.assertEqual(self.server.stopped, 2)
-		self.assertEqual(len(self.server.crash_desc), 2)
-		self.assertTrue("Traceback" in self.server.crash_desc[0])
+		self.assertEqual(len(self.server.crash_report), 2)
+		self.assertTrue("Traceback" in self.server.crash_report[0])
 
 	def test_syntax_error(self):
 		self._test_exception_on_import('(')
