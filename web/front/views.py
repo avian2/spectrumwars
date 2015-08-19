@@ -124,21 +124,22 @@ def halloffame(request):
 		for result in PlayerResult.objects.filter(player=player):
 
 			had_crash = False
-
 			for result2 in PlayerResult.objects.filter(game=result.game):
-
 				if result2.crashed:
 					had_crash = True
 					break
+			if had_crash:
+				continue
+
+			for result2 in PlayerResult.objects.filter(game=result.game):
 
 				game_packet_loss.append(result2.get_packet_loss())
 
 				if result2.id != result.id:
 					other_packet_loss.append(result2.get_packet_loss())
 
-			if not had_crash:
-				packet_loss.append(result.get_packet_loss())
-				throughput.append(result.get_throughput())
+			packet_loss.append(result.get_packet_loss())
+			throughput.append(result.get_throughput())
 
 		player.avg_packet_loss = get_mean(packet_loss)
 		player.avg_throughput = get_mean(throughput)
