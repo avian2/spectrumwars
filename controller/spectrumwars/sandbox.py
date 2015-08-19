@@ -136,8 +136,8 @@ class SubprocessSandboxInstance(object):
 
 		try:
 			mod = imp.load_source(name, args['path'])
-		except SyntaxError:
-			log.warning("(%d %s) syntax error" % (args['i'], args['role']))
+		except:
+			log.warning("(%d %s) exception on import" % (args['i'], args['role']))
 			desc = traceback.format_exc()
 			client.report_stop(True, desc)
 		else:

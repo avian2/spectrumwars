@@ -153,9 +153,8 @@ class Transmitter(Transceiver):
 		self.assertEqual(len(self.server.crash_desc), 1)
 		self.assertTrue("Time" in self.server.crash_desc[0])
 
-	def test_syntax(self):
-
-		f = self.write_temp_py("(")
+	def _test_exception_on_import(self, code):
+		f = self.write_temp_py(code)
 		sandbox = SubprocessSandbox([f.name])
 		players = sandbox.get_players()
 
@@ -175,4 +174,10 @@ class Transmitter(Transceiver):
 		self.assertEqual(self.server.crashed, 2)
 		self.assertEqual(self.server.stopped, 2)
 		self.assertEqual(len(self.server.crash_desc), 2)
-		self.assertTrue("SyntaxError" in self.server.crash_desc[0])
+		self.assertTrue("Traceback" in self.server.crash_desc[0])
+
+	def test_syntax_error(self):
+		self._test_exception_on_import('(')
+
+	def test_name_error(self):
+		self._test_exception_on_import('(')
