@@ -3,6 +3,7 @@ from django.core.files import File
 
 from front import models
 
+import itertools
 import logging
 
 from spectrumwars.testbed.simulation import Testbed
@@ -15,71 +16,84 @@ import StringIO
 
 log = logging.getLogger(__name__)
 
-def run_game(code):
+def run_game(code_list):
 	logging.basicConfig(level=logging.DEBUG)
 	logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
 
-	f = tempfile.NamedTemporaryFile(suffix='.py', delete=True)
-	f.write(code)
-	f.flush()
+	file_list = []
+
+	for code in code_list:
+		f = tempfile.NamedTemporaryFile(suffix='.py', delete=True)
+		f.write(code)
+		f.flush()
+
+		file_list.append(f)
 
 	testbed = Testbed()
-	sandbox = SubprocessSandbox([f.name])
+	sandbox = SubprocessSandbox([f.name for f in file_list])
 
 	game = Game(testbed, sandbox, packet_limit=50, time_limit=30)
 	ctl = GameController()
 
 	log.info("Running game...")
 
-	results = ctl.run(game)
+	result_list = ctl.run(game)
 
 	log.info("Done.")
 
-	f.close()
+	for f in file_list:
+		f.close()
 
-	return game, results[0]
+	return game, result_list
+
+def record_game(player_list):
+
+	gameo, result_list = run_game([player.code for player in player_list])
+
+	duration = gameo.end_time - gameo.start_time
+
+	game = models.Game(duration=duration)
+	game.save()
+
+	for i, result in enumerate(result_list):
+
+		player = player_list[i]
+
+		if result.crashed:
+			crash_log = ''.join(result.crash_desc)
+		else:
+			crash_log = ''
+
+		if result.transmit_packets > 0:
+			ratio = 100. * result.received_packets / result.transmit_packets
+		else:
+			ratio = 0.
+
+		robj = models.PlayerResult(
+			game=game,
+			player=player,
+
+			transmit_packets=result.transmit_packets,
+			received_packets=result.received_packets,
+			payload_bytes=result.payload_bytes,
+
+			received_ratio=ratio,
+			crashed=result.crashed,
+			log=crash_log,
+			timeline=None
+		)
+		robj.save()
+
+		if gameo.log:
+			timeline_img = StringIO.StringIO()
+			plot_player(gameo.log, i, timeline_img)
+
+			robj.timeline.save("timeline_%d.png" % (robj.id,), File(timeline_img))
 
 class Command(BaseCommand):
 	help = 'Runs some games'
 
 	def handle(self, *args, **options):
-		player_list = models.Player.objects.all()
-		for player in player_list:
-			gameo, result = run_game(player.code)
-
-			duration = gameo.end_time - gameo.start_time
-
-			game = models.Game(duration=duration)
-			game.save()
-
-			if result.crashed:
-				crash_log = ''.join(result.crash_desc)
-			else:
-				crash_log = ''
-
-			if result.transmit_packets > 0:
-				ratio = 100. * result.received_packets / result.transmit_packets
-			else:
-				ratio = 0.
-
-
-			robj = models.PlayerResult(
-				game=game,
-				player=player,
-
-				transmit_packets=result.transmit_packets,
-				received_packets=result.received_packets,
-				payload_bytes=result.payload_bytes,
-
-				received_ratio=ratio,
-				crashed=result.crashed,
-				log=crash_log,
-				timeline=None
-			)
-			robj.save()
-
-			if gameo.log:
-				timeline_img = StringIO.StringIO()
-				plot_player(gameo.log, 0, timeline_img)
-
-				robj.timeline.save("timeline_%d.png" % (robj.id,), File(timeline_img))
+		all_player_list = models.Player.objects.all()
+		for player_list in itertools.combinations(all_player_list, 2):
+			record_game(player_list)

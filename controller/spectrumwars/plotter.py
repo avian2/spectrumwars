@@ -110,20 +110,23 @@ def plot_player(log, i, out_path):
 
 	payload = np.array(payload)
 	payloadn = np.array(payload)
-	payloadn[:,0] = 100. * payload[:,0] / max(payload[:,0])
+	if len(payloadn):
+		payloadn[:,0] = 100. * payload[:,0] / np.max(payload[:,0])
 
 	pkt_recv = np.array(pkt_recv)
 	pkt_sent = np.array(pkt_sent)
 
 	pkt_recvn = np.array(pkt_recv)
-	pkt_recvn[:,0] = 100. * pkt_recv[:,0] / max(pkt_sent[:,0])
+	if len(pkt_recvn):
+		pkt_recvn[:,0] = 100. * pkt_recv[:,0] / max(pkt_sent[:,0])
 
 	pkt_sentn = np.array(pkt_sent)
-	pkt_sentn[:,0] = 100. * pkt_sent[:,0] / max(pkt_sent[:,0])
+	if len(pkt_sentn):
+		pkt_sentn[:,0] = 100. * pkt_sent[:,0] / max(pkt_sent[:,0])
 
 	def plot(l, **kwargs):
-		l = np.array(l)
-		ax.plot(l[:,0], l[:,1], '.-', **kwargs)
+		if len(l):
+			ax.plot(l[:,0], l[:,1], '.-', **kwargs)
 
 	plot(payloadn, label='payload', color='b')
 	plot(pkt_recvn, label='packets recv', color='r')
