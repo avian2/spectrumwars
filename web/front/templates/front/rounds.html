@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+Spectrum Wars
+{% endblock %}
+
+{% block content %}
+
+<h2>Rounds</h2>
+
+<table>
+<tr>
+<th>id</th><th>created</th><th>state</th><th></th>
+{% for round in round_list %}
+<tr>
+<td>{{ round.id }}</a></td>
+<td>{{ round.started }}</td>
+<td>{{ round.state }}</td>
+<td>{% if round.state == "finished" %}<a href="{% url "round" round.id %}">results</a>{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% if user.is_authenticated %}
+<p><a href="{% url "index" %}">Your dashboard</a></p>
+{% else %}
+<p><a href="{% url "auth_login" %}">Log in</a></p>
+{% endif %}
+
+{% endblock %}

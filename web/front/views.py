@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django import forms
 from django.core.exceptions import PermissionDenied
 
-from front.models import Player, PlayerResult
+from front.models import Player, PlayerResult, Round
 import math
 
 class PlayerForm(forms.ModelForm):
@@ -34,9 +34,11 @@ def index(request):
 		player.crash_ratio = get_mean(crash)*100.
 		player.packet_loss = get_mean(packet_loss)
 
+	player_list_sorted = sorted(player_list, key=lambda x:(x.crash_ratio, x.packet_loss))
+
 	context = {
 		'user': request.user,
-		'player_list': sorted(player_list, key=lambda x:x.packet_loss, reverse=True),
+		'player_list': player_list_sorted,
 	}
 
 	return render(request, 'front/index.html', context)
@@ -102,6 +104,14 @@ def result(request, id):
 
 	return render(request, 'front/result.html', context)
 
+def rounds(request):
+
+	context = {
+		'round_list': Round.objects.all()
+	}
+
+	return render(request, 'front/rounds.html', context)
+
 def get_mean(x):
 
 	if len(x) > 0:
@@ -109,7 +119,7 @@ def get_mean(x):
 	else:
 		return None
 
-def halloffame(request):
+def round(request, id):
 
 	player_list = Player.objects.all()
 

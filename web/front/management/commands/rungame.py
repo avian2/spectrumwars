@@ -46,13 +46,13 @@ def run_game(code_list):
 
 	return game, result_list
 
-def record_game(player_list):
+def record_game(round, player_list):
 
 	gameo, result_list = run_game([player.code for player in player_list])
 
 	duration = gameo.end_time - gameo.start_time
 
-	game = models.Game(duration=duration)
+	game = models.Game(round=round, duration=duration)
 	game.save()
 
 	for i, result in enumerate(result_list):
@@ -88,6 +88,15 @@ class Command(BaseCommand):
 	help = 'Runs some games'
 
 	def handle(self, *args, **options):
+
+		N = 2
+
+		round = models.Round(nplayers=N, state='started')
+		round.save()
+
 		all_player_list = models.Player.objects.all()
-		for player_list in itertools.combinations(all_player_list, 2):
-			record_game(player_list)
+		for player_list in itertools.combinations(all_player_list, N):
+			record_game(round, player_list)
+
+		round.state = 'finished'
+		round.save()

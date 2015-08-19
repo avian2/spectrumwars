@@ -8,5 +8,6 @@ urlpatterns = [
     url(r'^player/(?P<id>[0-9]+)/$', views.player, name='player'),
     url(r'^result/(?P<id>[0-9]+)/$', views.result, name='result'),
     url(r'^player/(?P<id>[0-9]+)/del/$', views.player_del, name='player_del'),
-    url(r'^halloffame/$', views.halloffame, name='halloffame'),
+    url(r'^round/(?P<id>[0-9]+)/$', views.round, name='round'),
+    url(r'^rounds/$', views.rounds, name='rounds'),
 ]

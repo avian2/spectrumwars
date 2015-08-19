@@ -10,9 +10,15 @@ class Player(models.Model):
 	def __unicode__(self):
 		return self.name
 
+class Round(models.Model):
+	started = models.DateTimeField(auto_now_add=True)
+	nplayers = models.IntegerField()
+	state = models.CharField(max_length=255)
+
 class Game(models.Model):
 	duration = models.FloatField()
 	ran = models.DateTimeField(auto_now_add=True)
+	round = models.ForeignKey(Round)
 
 class PlayerResult(models.Model):
 	game = models.ForeignKey(Game)
