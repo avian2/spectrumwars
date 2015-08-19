@@ -6,6 +6,7 @@ from django import forms
 from django.core.exceptions import PermissionDenied
 
 from front.models import Player, PlayerResult
+import math
 
 class PlayerForm(forms.ModelForm):
 	class Meta:
@@ -19,30 +20,23 @@ def index(request):
 	for player in player_list:
 		result_list = PlayerResult.objects.filter(player=player)
 
-		alln = 0
-		crashn = 0
+		packet_loss = []
+		crash = []
 
-		avgratio = 0.
 		for result in result_list:
-			if result.crashed:
-				crashn += 1
-			alln += 1
+			crash.append(result.crashed)
 
-			avgratio += result.received_ratio
+			pl = result.get_packet_loss()
 
-		if alln > 0:
-			avgratio /= alln
-			crashratio = float(crashn)/alln
-		else:
-			avgratio = float("NaN")
-			crashratio = float("NaN")
+			if not math.isnan(pl):
+				packet_loss.append(pl)
 
-		player.crash_ratio = crashratio
-		player.packet_ratio = avgratio
+		player.crash_ratio = get_mean(crash)*100.
+		player.packet_loss = get_mean(packet_loss)
 
 	context = {
 		'user': request.user,
-		'player_list': player_list,
+		'player_list': sorted(player_list, key=lambda x:x.packet_loss, reverse=True),
 	}
 
 	return render(request, 'front/index.html', context)
@@ -108,56 +102,60 @@ def result(request, id):
 
 	return render(request, 'front/result.html', context)
 
+def get_mean(x):
+
+	if len(x) > 0:
+		return float(sum(x))/len(x)
+	else:
+		return None
+
 def halloffame(request):
 
 	player_list = Player.objects.all()
 
 	for player in player_list:
 
-		n = 0
-		avg_ratio = 0.
-		avg_throughput = 0.
+		packet_loss = []
+		throughput = []
 
-		n2 = 0
-		avg_ratio_combined = 0.
-		max_ratio_others = 0.
+		game_packet_loss = []
+		other_packet_loss = []
 
 		for result in PlayerResult.objects.filter(player=player):
-			ratio = result.received_ratio
-			throughput = result.payload_bytes / result.game.duration
 
-			avg_ratio += ratio
-			avg_throughput += throughput
-
-			n += 1
+			had_crash = False
 
 			for result2 in PlayerResult.objects.filter(game=result.game):
-				avg_ratio_combined += result2.received_ratio
-				n2 += 1
+
+				if result2.crashed:
+					had_crash = True
+					break
+
+				game_packet_loss.append(result2.get_packet_loss())
 
 				if result2.id != result.id:
-					max_ratio_others = max(max_ratio_others, result2.received_ratio)
+					other_packet_loss.append(result2.get_packet_loss())
 
-		if n > 0:
-			player.avg_ratio = avg_ratio / n
-			player.avg_throughput = avg_throughput / n
-		else:
-			player.avg_ratio = float("NaN")
-			player.avg_throughput = float("NaN")
+			if not had_crash:
+				packet_loss.append(result.get_packet_loss())
+				throughput.append(result.get_throughput())
 
-		if n2 > 0:
-			player.avg_ratio_combined = avg_ratio / n2
-		else:
-			player.avg_ratio_combined = float("NaN")
+		player.avg_packet_loss = get_mean(packet_loss)
+		player.avg_throughput = get_mean(throughput)
+		player.game_packet_loss = get_mean(game_packet_loss)
+		player.other_packet_loss = get_mean(other_packet_loss)
 
-		player.max_ratio_others = max_ratio_others
+	def do_sort(key, reverse=False):
+		a = list(player_list)
+		a.sort(key=lambda x:getattr(x, key), reverse=reverse)
+		a.sort(key=lambda x:getattr(x, key) == None)
 
-	limit = 10
+		return a
 
-	most_reliable = sorted(player_list, key=lambda x:x.avg_ratio, reverse=True)[:limit]
-	fastest = sorted(player_list, key=lambda x:x.avg_throughput, reverse=True)[:limit]
-	most_cooperative = sorted(player_list, key=lambda x:x.avg_ratio_combined, reverse=True)[:limit]
-	best_interferer = sorted(player_list, key=lambda x:x.max_ratio_others)[:limit]
+	most_reliable = do_sort('avg_packet_loss')
+	fastest = do_sort('avg_throughput', reverse=True)
+	most_cooperative = do_sort('game_packet_loss')
+	best_interferer = do_sort('other_packet_loss', reverse=True)
 
 	context = {
 		'most_reliable': most_reliable,

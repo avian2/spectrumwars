@@ -28,3 +28,18 @@ class PlayerResult(models.Model):
 	crashed = models.BooleanField()
 	log = models.TextField()
 	timeline = models.FileField(upload_to="timeline")
+
+	def get_packet_loss(self):
+
+		if self.transmit_packets > 0.:
+			return 100. * (self.transmit_packets - self.received_packets) / self.transmit_packets
+		else:
+			return float("NaN")
+
+	def get_throughput(self):
+
+		duration = self.game.duration
+		if duration > 0.:
+			return self.payload_bytes / duration
+		else:
+			return float("NaN")

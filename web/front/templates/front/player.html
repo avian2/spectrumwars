@@ -10,8 +10,8 @@
 <table>
 <tr>
 <th>crashed?</th>
-<th>RX packets</th><th>TX packets</th><th>ratio</th>
-<th>payload bytes</th>
+<th>RX packets</th><th>TX packets</th><th>Packet loss</th>
+<th>Payload</th>
 <th></th><th></th></tr>
 {% for result in result_list %}
 <tr>
@@ -20,8 +20,8 @@
 
 <td>{{ result.received_packets }}</td>
 <td>{{ result.transmit_packets }}</td>
-<td>{{ result.received_ratio }} %</td>
-<td>{{ result.payload_bytes }}</td>
+<td>{{ result.get_packet_loss|floatformat:"1" }} %</td>
+<td>{{ result.payload_bytes }} bytes</td>
 
 <td><a href="{% url 'result' result.id %}">log</a></td>
 <td>{% if result.timeline %}<a href="{{ result.timeline.url }}">timeline</a>{% endif %}</td>

@@ -11,13 +11,13 @@ Hall of fame
 <tr>
 <th>Name</th>
 <th>Author</th>
-<th>Average packet ratio</th>
+<th>Packet loss</th>
 </tr>
 {% for player in most_reliable %}
 <tr>
 <td>"{{ player }}"</td>
 <td>{{ player.user }}</td>
-<td>{{ player.avg_ratio }}</td>
+<td>{% if player.avg_packet_loss != None %}{{ player.avg_packet_loss|floatformat:"1" }} %{% endif %}</td>
 </tr>
 {% endfor %}
 </table>
@@ -28,13 +28,13 @@ Hall of fame
 <tr>
 <th>Name</th>
 <th>Author</th>
-<th>Average throughput [bytes/s]</th>
+<th>Throughput</th>
 </tr>
 {% for player in fastest %}
 <tr>
 <td>"{{ player }}"</td>
 <td>{{ player.user }}</td>
-<td>{{ player.avg_throughput }}</td>
+<td>{% if player.avg_throughput != None %}{{ player.avg_throughput|floatformat:"1" }} bytes/s{% endif %}</td>
 </tr>
 {% endfor %}
 </table>
@@ -45,13 +45,13 @@ Hall of fame
 <tr>
 <th>Name</th>
 <th>Author</th>
-<th>Combined ratio</th>
+<th>Coop. packet loss</th>
 </tr>
 {% for player in most_cooperative %}
 <tr>
 <td>"{{ player }}"</td>
 <td>{{ player.user }}</td>
-<td>{{ player.avg_ratio_combined }}</td>
+<td>{% if player.game_packet_loss != None %}{{ player.game_packet_loss|floatformat:"1" }} %{% endif %}</td>
 </tr>
 {% endfor %}
 </table>
@@ -62,13 +62,13 @@ Hall of fame
 <tr>
 <th>Name</th>
 <th>Author</th>
-<th>Max ratio</th>
+<th>Packet loss of others</th>
 </tr>
 {% for player in best_interferer %}
 <tr>
 <td>"{{ player }}"</td>
 <td>{{ player.user }}</td>
-<td>{{ player.max_ratio_others }}</td>
+<td>{% if player.other_packet_loss != None %}{{ player.other_packet_loss|floatformat:"1" }} %{% endif %}</td>
 </tr>
 {% endfor %}
 </table>
