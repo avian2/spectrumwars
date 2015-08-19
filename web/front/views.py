@@ -118,6 +118,10 @@ def halloffame(request):
 		avg_ratio = 0.
 		avg_throughput = 0.
 
+		n2 = 0
+		avg_ratio_combined = 0.
+		max_ratio_others = 0.
+
 		for result in PlayerResult.objects.filter(player=player):
 			ratio = result.received_ratio
 			throughput = result.payload_bytes / result.game.duration
@@ -127,6 +131,13 @@ def halloffame(request):
 
 			n += 1
 
+			for result2 in PlayerResult.objects.filter(game=result.game):
+				avg_ratio_combined += result2.received_ratio
+				n2 += 1
+
+				if result2.id != result.id:
+					max_ratio_others = max(max_ratio_others, result2.received_ratio)
+
 		if n > 0:
 			player.avg_ratio = avg_ratio / n
 			player.avg_throughput = avg_throughput / n
@@ -134,14 +145,25 @@ def halloffame(request):
 			player.avg_ratio = float("NaN")
 			player.avg_throughput = float("NaN")
 
+		if n2 > 0:
+			player.avg_ratio_combined = avg_ratio / n2
+		else:
+			player.avg_ratio_combined = float("NaN")
+
+		player.max_ratio_others = max_ratio_others
+
 	limit = 10
 
 	most_reliable = sorted(player_list, key=lambda x:x.avg_ratio, reverse=True)[:limit]
 	fastest = sorted(player_list, key=lambda x:x.avg_throughput, reverse=True)[:limit]
+	most_cooperative = sorted(player_list, key=lambda x:x.avg_ratio_combined, reverse=True)[:limit]
+	best_interferer = sorted(player_list, key=lambda x:x.max_ratio_others)[:limit]
 
 	context = {
 		'most_reliable': most_reliable,
 		'fastest': fastest,
+		'most_cooperative': most_cooperative,
+		'best_interferer': best_interferer,
 	}
 
 	return render(request, 'front/halloffame.html', context)

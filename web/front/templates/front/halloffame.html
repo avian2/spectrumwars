@@ -38,4 +38,38 @@ Hall of fame
 </tr>
 {% endfor %}
 </table>
+
+<h2>Most cooperative</h2>
+
+<table>
+<tr>
+<th>Name</th>
+<th>Author</th>
+<th>Combined ratio</th>
+</tr>
+{% for player in most_cooperative %}
+<tr>
+<td>"{{ player }}"</td>
+<td>{{ player.user }}</td>
+<td>{{ player.avg_ratio_combined }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Best interferer</h2>
+
+<table>
+<tr>
+<th>Name</th>
+<th>Author</th>
+<th>Max ratio</th>
+</tr>
+{% for player in best_interferer %}
+<tr>
+<td>"{{ player }}"</td>
+<td>{{ player.user }}</td>
+<td>{{ player.max_ratio_others }}</td>
+</tr>
+{% endfor %}
+</table>
 {% endblock %}
