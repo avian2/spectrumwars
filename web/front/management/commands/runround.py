@@ -6,7 +6,7 @@ from front import models
 import itertools
 import logging
 
-from spectrumwars.testbed.simulation import Testbed
+from spectrumwars.runner import get_testbed
 from spectrumwars.sandbox import SubprocessSandbox
 from spectrumwars import Game, GameController
 from spectrumwars.plotter import plot_player
@@ -16,7 +16,7 @@ import StringIO
 
 log = logging.getLogger(__name__)
 
-def run_game(code_list):
+def run_game(code_list, testbed):
 	logging.basicConfig(level=logging.DEBUG)
 	logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
 
@@ -29,7 +29,6 @@ def run_game(code_list):
 
 		file_list.append(f)
 
-	testbed = Testbed()
 	sandbox = SubprocessSandbox([f.name for f in file_list])
 
 	game = Game(testbed, sandbox, packet_limit=50, time_limit=30)
@@ -46,9 +45,9 @@ def run_game(code_list):
 
 	return game, result_list
 
-def record_game(round, player_list):
+def record_game(round, player_list, testbed):
 
-	gameo, result_list = run_game([player.code for player in player_list])
+	gameo, result_list = run_game([player.code for player in player_list], testbed)
 
 	duration = gameo.end_time - gameo.start_time
 
@@ -87,16 +86,27 @@ def record_game(round, player_list):
 class Command(BaseCommand):
 	help = 'Runs some games'
 
+	def add_arguments(self, parser):
+		parser.add_argument('-n', metavar="N", dest='nplayers', type=int, default=1,
+				help="Number of players per game")
+		parser.add_argument('-t', '--testbed', metavar='TESTBED', dest='testbed',
+				default='simulation', help='testbed to use (default: simulation)')
+		parser.add_argument('-O', '--testbed-option', metavar='KEY=VALUE', nargs='*',
+				dest='testbed_options', help='testbed options')
+
 	def handle(self, *args, **options):
 
-		N = 2
+		testbed = get_testbed(options['testbed'], options['testbed_options'])
 
-		round = models.Round(nplayers=N, state='started')
+		round = models.Round(
+				nplayers=options['nplayers'],
+				testbed=options['testbed'],
+				state='started')
 		round.save()
 
 		all_player_list = models.Player.objects.all()
-		for player_list in itertools.combinations(all_player_list, N):
-			record_game(round, player_list)
+		for player_list in itertools.combinations(all_player_list, options['nplayers']):
+			record_game(round, player_list, testbed)
 
 		round.state = 'finished'
 		round.save()

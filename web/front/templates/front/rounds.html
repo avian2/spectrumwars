@@ -10,13 +10,15 @@ Spectrum Wars
 
 <table>
 <tr>
-<th>id</th><th>created</th><th>games played</th><th>players</th><th>state</th><th></th>
+<th>id</th><th>created</th><th>games played</th><th>players</th><th>per game</th><th>testbed</th><th>state</th><th></th>
 {% for round in round_list %}
 <tr>
 <td>{{ round.id }}</a></td>
 <td>{{ round.started }}</td>
 <td>{{ round.n_games }}</td>
 <td>{{ round.n_players }}</td>
+<td>{{ round.nplayers }}</td>
+<td>{{ round.testbed }}</td>
 <td>{{ round.state }}</td>
 <td>{% if round.state == "finished" %}<a href="{% url "round" round.id %}">results</a>{% endif %}</td>
 </tr>

@@ -48,18 +48,22 @@ Requirements:
 
  * virtualenv (``apt-get install python-virtualenv``)
 
-To setup a local development instance of the web interface:
+To setup a local development instance of the web interface::
 
    $ cd web
    $ virtualenv --system-site-packages .virtualenv
 
 Note ``--system-site-packages`` is needed so that GNU Radio and the
 ``spectrumwars`` module is available inside virtualenv. You can instead
-install those into virtualenv, but this way is easier.
+install those into virtualenv, but this way is easier::
 
    $ . .virtualenv/bin/activate
    $ pip install -r requirements.txt
    $ python manage.py runserver
+
+To run a round::
+
+   $ python manage.py runround
 
 Building HTML documentation
 ---------------------------
