@@ -195,6 +195,8 @@ def round(request, id):
 	best_interferer = do_sort('other_packet_loss', reverse=True)
 
 	context = {
+		'round': round,
+		'game_list': game_list,
 		'most_reliable': most_reliable,
 		'fastest': fastest,
 		'most_cooperative': most_cooperative,

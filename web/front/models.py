@@ -22,6 +22,8 @@ class Game(models.Model):
 	ran = models.DateTimeField(auto_now_add=True)
 	round = models.ForeignKey(Round)
 
+	timeline = models.FileField(upload_to="timeline")
+
 class PlayerResult(models.Model):
 	game = models.ForeignKey(Game)
 	player = models.ForeignKey(Player)

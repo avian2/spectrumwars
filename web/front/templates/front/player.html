@@ -9,12 +9,25 @@
 
 <table>
 <tr>
+<th>Duration [s]</th>
+<th>Competitors</th>
 <th>crashed?</th>
 <th>RX packets</th><th>TX packets</th><th>Packet loss</th>
 <th>Payload</th>
 <th></th><th></th></tr>
 {% for result in result_list %}
 <tr>
+
+<td>{{ result.game.duration|floatformat:"1"}}</td>
+<td>
+<ol>
+{% for result2 in result.game.playerresult_set.all %}
+{% if result2 != result %}
+<li>"{{ result2.player }}" by {{ result2.player.user }}</li>
+{% endif %}
+{% endfor %}
+</ol>
+</td>
 
 <td>{{ result.crashed }}</td>
 

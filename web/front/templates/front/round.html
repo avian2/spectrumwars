@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block title %}
-Ranking
+Round {{ round.id }}
 {% endblock %}
 
 {% block content %}
-<h2>Most reliable</h2>
+<h2>Rankings</h2>
+
+<h3>Most reliable</h3>
 
 <table>
 <tr>
@@ -22,7 +24,7 @@ Ranking
 {% endfor %}
 </table>
 
-<h2>Fastest</h2>
+<h3>Fastest</h3>
 
 <table>
 <tr>
@@ -39,7 +41,7 @@ Ranking
 {% endfor %}
 </table>
 
-<h2>Most cooperative</h2>
+<h3>Most cooperative</h3>
 
 <table>
 <tr>
@@ -56,7 +58,7 @@ Ranking
 {% endfor %}
 </table>
 
-<h2>Best interferer</h2>
+<h3>Best interferer</h3>
 
 <table>
 <tr>
@@ -72,4 +74,29 @@ Ranking
 </tr>
 {% endfor %}
 </table>
+
+<h2>Games</h2>
+
+<table>
+<tr>
+<th>Players</th>
+<th>Duration [s]</th>
+<th></th>
+</tr>
+{% for game in game_list %}
+<tr>
+<td>
+<ol>
+{% for result in game.playerresult_set.all %}
+<li>"{{ result.player }}" by {{ result.player.user}}</li>
+{% endfor %}
+</ol>
+</td>
+<td>{{ game.duration|floatformat:"1" }}</td>
+<td>{% if game.timeline %}<a href="{{ game.timeline.url }}">timeline</a>{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+
+
 {% endblock %}

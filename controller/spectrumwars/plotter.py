@@ -191,9 +191,10 @@ def plot_game(log, out_path):
 	pyplot.grid()
 
 	nbg = np.array(bg)
-	nbg[:,0] -= min_t
+	if len(nbg):
+		nbg[:,0] -= min_t
+		pyplot.plot(nbg[:,0], nbg[:,1], color='w', ls='none', marker='x', markeredgewidth=2)
 
-	pyplot.plot(nbg[:,0], nbg[:,1], color='w', ls='none', marker='x', markeredgewidth=2)
 	pyplot.axis(extent)
 
 	pyplot.xlabel("game time [s]")

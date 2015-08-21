@@ -9,7 +9,7 @@ import logging
 from spectrumwars.runner import get_testbed
 from spectrumwars.sandbox import SubprocessSandbox
 from spectrumwars import Game, GameController
-from spectrumwars.plotter import plot_player
+from spectrumwars.plotter import plot_player, plot_game
 
 import tempfile
 import StringIO
@@ -31,7 +31,7 @@ def run_game(code_list, testbed):
 
 	sandbox = SubprocessSandbox([f.name for f in file_list])
 
-	game = Game(testbed, sandbox, packet_limit=50, time_limit=30)
+	game = Game(testbed, sandbox, packet_limit=None, time_limit=30)
 	ctl = GameController()
 
 	log.info("Running game...")
@@ -82,6 +82,13 @@ def record_game(round, player_list, testbed):
 			plot_player(gameo.log, i, timeline_img)
 
 			robj.timeline.save("timeline_%d.png" % (robj.id,), File(timeline_img))
+
+	if gameo.log:
+		timeline_img = StringIO.StringIO()
+		plot_game(gameo.log, timeline_img)
+
+		game.timeline.save("game_timeline_%d.png" % (game.id,), File(timeline_img))
+
 
 class Command(BaseCommand):
 	help = 'Runs some games'
