@@ -11,14 +11,24 @@ class ParsedLog:
 		self.tx = []
 		self.config = []
 
+def channel_tracker(log):
+	cur_ch = {}
+
+	for event in log:
+		event.ch = cur_ch.get((event.data['i'], event.data['role']), 0)
+		if event.type == "config":
+			event.prevch = event.ch
+			event.ch = cur_ch[(event.data['i'], event.data['role'])] = event.data['frequency']
+
+		yield event
+
+
 def plot_player(log, i, out_path):
 	fig = pyplot.figure(figsize=(16,10))
 	ax = fig.add_subplot(211, axis_bgcolor='k')
 
 	min_t = min(l.timestamp for l in log)
 	max_t = max(l.timestamp for l in log)
-
-	cur_ch = {}
 
 	parsed = { 'rx': ParsedLog(), 'tx': ParsedLog() }
 	bg = []
@@ -27,11 +37,7 @@ def plot_player(log, i, out_path):
 	pkt_sent = []
 	pkt_recv = []
 
-	for event in log:
-		ch = cur_ch.get((event.data['i'], event.data['role']), 0)
-		if event.type == "config":
-			chold = ch
-			ch = cur_ch[(event.data['i'], event.data['role'])] = event.data['frequency']
+	for event in channel_tracker(log):
 
 		timestamp = event.timestamp - min_t
 
@@ -46,7 +52,7 @@ def plot_player(log, i, out_path):
 
 			if event.type == "config":
 				l = p.config
-				l.append((chold, timestamp))
+				l.append((event.prevch, timestamp))
 			elif event.type == 'send':
 				l = p.tx
 			elif event.type == "recv":
@@ -55,7 +61,7 @@ def plot_player(log, i, out_path):
 				l = None
 
 			if l is not None:
-				l.append((ch, timestamp))
+				l.append((event.ch, timestamp))
 			elif event.type == "status":
 				s = np.array(event.data['status'].spectrum)
 
@@ -76,7 +82,7 @@ def plot_player(log, i, out_path):
 
 		else:
 			if event.type == 'send':
-					bg.append((ch, timestamp))
+					bg.append((event.ch, timestamp))
 
 	width = 1
 
@@ -108,6 +114,7 @@ def plot_player(log, i, out_path):
 
 
 	ax.set_xlim(0, max_t-min_t)
+	# FIXME
 	ax.set_ylim(0, 64)
 	pyplot.xlabel("game time [s]")
 	pyplot.ylabel("frequency [channel]")
@@ -151,6 +158,50 @@ def plot_player(log, i, out_path):
 
 	pyplot.savefig(out_path, dpi=120, format='png')
 
+def plot_game(log, out_path):
+	fig = pyplot.figure(figsize=(16,10))
+
+	l = []
+
+	min_t = min(l.timestamp for l in log)
+	max_t = max(l.timestamp for l in log)
+
+	bg = []
+
+	for event in channel_tracker(log):
+		if event.type == 'status' and event.data['role'] == 'log':
+			l.append([event.timestamp] + list(event.data['status'].spectrum))
+		elif event.type == 'send':
+			bg.append((event.timestamp, event.ch))
+
+	nl = np.array(l)
+
+	ch_num = nl.shape[1]-1
+
+	M = 100
+	m = np.empty((ch_num, M))
+	for ch in range(ch_num):
+		 t = np.linspace(min_t, max_t, M)
+		 m[ch,:] = np.interp(t, nl[:,0], nl[:,ch+1])
+
+	extent = [0, max_t-min_t, 0, ch_num]
+
+	pyplot.imshow(m, origin='lower', aspect='auto', extent=extent)
+	pyplot.colorbar()
+	pyplot.grid()
+
+	nbg = np.array(bg)
+	nbg[:,0] -= min_t
+
+	pyplot.plot(nbg[:,0], nbg[:,1], color='w', ls='none', marker='x', markeredgewidth=2)
+	pyplot.axis(extent)
+
+	pyplot.xlabel("game time [s]")
+	pyplot.ylabel("frequency [channel]")
+
+	pyplot.savefig(out_path, dpi=120)
+
+
 def plot(args):
 	log = pickle.load(open(args.log_path[0], "rb"))
 
@@ -164,6 +215,9 @@ def plot(args):
 	for i in xrange(nplayers):
 		out_path = os.path.join(args.out_path, "player%d.png" % (i,))
 		plot_player(log, i, out_path)
+
+	out_path = os.path.join(args.out_path, "game.png")
+	plot_game(log, out_path)
 
 def main():
 	parser = argparse.ArgumentParser(description="plot the progress of a spectrum wars game")

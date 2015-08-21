@@ -1,6 +1,7 @@
 import copy
 import logging
 import time
+import threading
 from spectrumwars.testbed import TestbedError, RadioTimeout, GameStatus
 from spectrumwars.transceiver import StopGame, TransceiverError
 from spectrumwars.rpc import RPCServer
@@ -207,6 +208,26 @@ class GameRPCServer(RPCServer):
 	def handle_should_finish_method(self):
 		return self.game.should_finish()
 
+class SpectrumLogger(object):
+	def __init__(self, game, update_interval):
+		self.want_stop = False
+		self.update_interval = update_interval
+		self.game = game
+
+	def start(self):
+		self.thread = threading.Thread(target=self.work)
+		self.thread.start()
+
+	def work(self):
+		while not self.want_stop:
+			status = self.game.get_status()
+			self.game.log_event("status", i=-1, role='log', status=status)
+			time.sleep(self.update_interval)
+
+	def stop(self):
+		self.want_stop = True
+		self.thread.join()
+
 class GameController(object):
 	def __init__(self):
 		pass
@@ -216,6 +237,9 @@ class GameController(object):
 		log.debug("Instantiating player classes")
 		game.instantiate()
 		game.testbed.start()
+
+		slogger = SpectrumLogger(game, game.update_interval/5.)
+		slogger.start()
 
 		game.state = 'running'
 
@@ -233,6 +257,8 @@ class GameController(object):
 
 		game.testbed.stop()
 		game.state = 'finished'
+
+		slogger.stop()
 
 		log.debug("Game concluded")
 
