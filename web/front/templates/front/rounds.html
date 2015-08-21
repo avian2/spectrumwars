@@ -22,7 +22,7 @@ Spectrum Wars
 </table>
 
 {% if user.is_authenticated %}
-<p><a href="{% url "index" %}">Your dashboard</a></p>
+<p>Hello, {{ user }}!. <a href="{% url "user" %}">Your dashboard</a>.</p>
 {% else %}
 <p><a href="{% url "auth_login" %}">Log in</a></p>
 {% endif %}

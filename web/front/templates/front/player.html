@@ -35,7 +35,7 @@
 {{ player.code }}
 </pre>
 
-<a href="{% url 'index' %}">back</a>
+<a href="{% url 'user' %}">back</a>
 <form action="{% url 'player_del' player.id %}" method="post">
 	{% csrf_token %}
 	<input type="submit" value="delete"/>

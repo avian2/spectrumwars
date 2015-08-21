@@ -24,5 +24,5 @@ import front.urls
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include(registration.backends.simple.urls)),
-    url(r'^front/', include(front.urls)),
+    url(r'^', include(front.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

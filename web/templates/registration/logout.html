@@ -1,0 +1,10 @@
+{% extends "registration/registration_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Logged out" %}{% endblock %}
+
+{% block content %}
+<p>{% trans "Successfully logged out" %}.</p>
+
+<p><a href="{% url "rounds" %}">Back</a></p>
+{% endblock %}

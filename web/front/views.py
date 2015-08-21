@@ -14,7 +14,7 @@ class PlayerForm(forms.ModelForm):
 		fields = ['name', 'code']
 
 @login_required
-def index(request):
+def user(request):
 	player_list = Player.objects.filter(user=request.user)
 
 	for player in player_list:
@@ -41,7 +41,7 @@ def index(request):
 		'player_list': player_list_sorted,
 	}
 
-	return render(request, 'front/index.html', context)
+	return render(request, 'front/user.html', context)
 
 @login_required
 def player_add(request):
@@ -54,7 +54,7 @@ def player_add(request):
 					code=form.cleaned_data['code'])
 			p.save()
 
-			return HttpResponseRedirect(reverse('index'))
+			return HttpResponseRedirect(reverse('user'))
 	else:
 		form = PlayerForm()
 
@@ -89,7 +89,7 @@ def player_del(request, id):
 	if request.method == 'POST':
 		player.delete()
 
-	return HttpResponseRedirect(reverse('index'))
+	return HttpResponseRedirect(reverse('user'))
 
 @login_required
 def result(request, id):
