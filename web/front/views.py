@@ -201,4 +201,4 @@ def round(request, id):
 		'best_interferer': best_interferer,
 	}
 
-	return render(request, 'front/halloffame.html', context)
+	return render(request, 'front/round.html', context)
