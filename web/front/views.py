@@ -106,8 +106,24 @@ def result(request, id):
 
 def rounds(request):
 
+	round_list = []
+
+	for round in Round.objects.all():
+
+		game_list = Game.objects.filter(round=round)
+
+		round.n_games = game_list.count()
+
+		players = set()
+		for result in PlayerResult.objects.filter(game__in=game_list):
+			players.add(result.player.id)
+
+		round.n_players = len(players)
+
+		round_list.append(round)
+
 	context = {
-		'round_list': Round.objects.all()
+		'round_list': round_list
 	}
 
 	return render(request, 'front/rounds.html', context)
