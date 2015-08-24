@@ -1,10 +1,14 @@
+import datetime
+
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
+from django.utils import timezone
 
 from front import models
 
 import itertools
 import logging
+import signal
 
 from spectrumwars.runner import get_testbed
 from spectrumwars.sandbox import SubprocessSandbox
@@ -12,14 +16,17 @@ from spectrumwars import Game, GameController
 from spectrumwars.plotter import plot_player, plot_game
 
 import tempfile
+import time
 import StringIO
 
 log = logging.getLogger(__name__)
 
-def run_game(code_list, testbed):
-	logging.basicConfig(level=logging.DEBUG)
-	logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger('jsonrpc2_zeromq').setLevel(logging.WARNING)
 
+want_stop = False
+
+def run_game(code_list, testbed):
 	file_list = []
 
 	for code in code_list:
@@ -90,6 +97,12 @@ def record_game(round, player_list, testbed):
 		game.timeline.save("game_timeline_%d.png" % (game.id,), File(timeline_img))
 
 
+def handler(signum, frame):
+	global want_stop
+	print "Signal %d caught! Stopping..." % (signum,)
+	want_stop = True
+
+
 class Command(BaseCommand):
 	help = 'Runs some games'
 
@@ -100,19 +113,65 @@ class Command(BaseCommand):
 				default='simulation', help='testbed to use (default: simulation)')
 		parser.add_argument('-O', '--testbed-option', metavar='KEY=VALUE', nargs='*',
 				dest='testbed_options', help='testbed options')
+		parser.add_argument('-p', '--period', metavar='MINUTES', dest='period', type=int, default=0,
+				help="run a round once per MINUTES")
 
 	def handle(self, *args, **options):
 
-		round = models.Round(
-				nplayers=options['nplayers'],
-				testbed=options['testbed'],
-				state='started')
-		round.save()
+		signal.signal(signal.SIGTERM, handler)
+		signal.signal(signal.SIGINT, handler)
 
-		all_player_list = models.Player.objects.filter(enabled=True)
-		for player_list in itertools.combinations(all_player_list, options['nplayers']):
-			testbed = get_testbed(options['testbed'], options['testbed_options'])
-			record_game(round, player_list, testbed)
+		period = datetime.timedelta(seconds=options['period']*60)
 
-		round.state = 'finished'
-		round.save()
+		start_time = timezone.now()
+
+		while not want_stop:
+
+			if options['period'] > 0:
+				self.clean_stale(period)
+
+			start_time += period
+
+			round = models.Round(
+					nplayers=options['nplayers'],
+					testbed=options['testbed'],
+					state='scheduled',
+					start_time=start_time)
+			round.save()
+
+
+			log.info("Waiting until %s" % (round.start_time,))
+			while (not want_stop) and (timezone.now() < round.start_time):
+				time.sleep(2)
+
+			if want_stop:
+				break
+
+
+			round.state = 'started'
+			round.save()
+
+
+			all_player_list = models.Player.objects.filter(enabled=True)
+			for player_list in itertools.combinations(all_player_list, options['nplayers']):
+				testbed = get_testbed(options['testbed'], options['testbed_options'])
+				record_game(round, player_list, testbed)
+
+			round.finish_time = timezone.now()
+			round.state = 'finished'
+			round.save()
+
+
+			if options['period'] == 0:
+				break
+
+	def clean_stale(self, period):
+
+		now = timezone.now()
+
+		for round in models.Round.objects.filter(state__in=('started', 'scheduled')):
+			d = now - round.start_time
+
+			if d > period*2:
+				log.info("Cleaning stale round %s" % (round,))
+				round.delete()

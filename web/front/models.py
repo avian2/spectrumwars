@@ -13,6 +13,10 @@ class Player(models.Model):
 
 class Round(models.Model):
 	started = models.DateTimeField(auto_now_add=True)
+
+	start_time = models.DateTimeField()
+	finish_time = models.DateTimeField(null=True)
+
 	nplayers = models.IntegerField()
 	testbed = models.CharField(max_length=255)
 
