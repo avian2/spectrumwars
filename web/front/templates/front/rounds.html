@@ -6,6 +6,8 @@ Spectrum Wars
 
 {% block content %}
 
+Currently ready to play: {{ player_num }} algorithms from {{ user_num }} users.
+
 <h2>Rounds</h2>
 
 <table>
@@ -41,5 +43,8 @@ Spectrum Wars
 {% endif %}
 
 <p><a href="/admin">Admin</a></p>
+
+
+<p><img src="{{ MEDIA_URL }}images/crew.png" style="margin-right: 40px"/><img src="{{ MEDIA_URL }}images/ijs.png" /></p>
 
 {% endblock %}

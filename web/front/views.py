@@ -136,8 +136,16 @@ def rounds(request):
 
 		round_list.append(round)
 
+	user_set = set()
+	player_num = 0
+	for player in Player.objects.filter(enabled=True):
+		user_set.add(player.user.id)
+		player_num += 1
+
 	context = {
-		'round_list': round_list
+		'round_list': round_list,
+		'player_num': player_num,
+		'user_num': len(user_set),
 	}
 
 	return render(request, 'front/rounds.html', context)
