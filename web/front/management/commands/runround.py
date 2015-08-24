@@ -103,8 +103,6 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 
-		testbed = get_testbed(options['testbed'], options['testbed_options'])
-
 		round = models.Round(
 				nplayers=options['nplayers'],
 				testbed=options['testbed'],
@@ -113,6 +111,7 @@ class Command(BaseCommand):
 
 		all_player_list = models.Player.objects.filter(enabled=True)
 		for player_list in itertools.combinations(all_player_list, options['nplayers']):
+			testbed = get_testbed(options['testbed'], options['testbed_options'])
 			record_game(round, player_list, testbed)
 
 		round.state = 'finished'
