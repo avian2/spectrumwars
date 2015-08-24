@@ -24,14 +24,14 @@ def user(request):
 		crash = []
 
 		for result in result_list:
-			crash.append(result.crashed)
+			crash.append(int(result.crashed)*100)
 
 			pl = result.get_packet_loss()
 
 			if not math.isnan(pl):
 				packet_loss.append(pl)
 
-		player.crash_ratio = get_mean(crash)*100.
+		player.crash_ratio = get_mean(crash)
 		player.packet_loss = get_mean(packet_loss)
 
 	player_list_sorted = sorted(player_list, key=lambda x:(x.crash_ratio, x.packet_loss))
@@ -51,7 +51,8 @@ def player_add(request):
 
 			p = Player(	user=request.user,
 					name=form.cleaned_data['name'],
-					code=form.cleaned_data['code'])
+					code=form.cleaned_data['code'],
+					enabled=True)
 			p.save()
 
 			return HttpResponseRedirect(reverse('user'))
