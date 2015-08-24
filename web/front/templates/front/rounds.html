@@ -20,7 +20,15 @@ Spectrum Wars
 <td>{{ round.n_players }}</td>
 <td>{{ round.nplayers }}</td>
 <td>{{ round.testbed }}</td>
-<td>{{ round.state }}</td>
+<td>
+{% if round.state == "started" %}
+<span style="color: #0c0; font-weight: bold">{{ round.state }}</span>
+{% elif round.state == "scheduled" %}
+<span style="color: #ec0; font-weight: bold">{{ round.state }}</span>
+{% else %}
+{{ round.state }}
+{% endif %}
+</td>
 <td>{% if round.state == "finished" %}<a href="{% url "round" round.id %}">results</a>{% endif %}</td>
 </tr>
 {% endfor %}
