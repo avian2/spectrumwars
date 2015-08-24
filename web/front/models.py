@@ -6,6 +6,7 @@ class Player(models.Model):
 	name = models.CharField(max_length=255)
 	code = models.TextField()
 	created = models.DateTimeField(auto_now_add=True)
+	enabled = models.BooleanField()
 
 	def __unicode__(self):
 		return self.name

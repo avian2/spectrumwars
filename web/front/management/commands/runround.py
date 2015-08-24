@@ -111,7 +111,7 @@ class Command(BaseCommand):
 				state='started')
 		round.save()
 
-		all_player_list = models.Player.objects.all()
+		all_player_list = models.Player.objects.filter(enabled=True)
 		for player_list in itertools.combinations(all_player_list, options['nplayers']):
 			record_game(round, player_list, testbed)
 

@@ -2,8 +2,8 @@ from django.contrib import admin
 from front.models import Player, Game, PlayerResult, Round
 
 class PlayerAdmin(admin.ModelAdmin):
-	list_display = ('id', 'name', 'user')
-	list_filter = ('user',)
+	list_display = ('id', 'name', 'user', 'enabled')
+	list_filter = ('user', 'enabled')
 
 class RoundAdmin(admin.ModelAdmin):
 	list_display = ('id', 'started', 'nplayers', 'testbed', 'state')

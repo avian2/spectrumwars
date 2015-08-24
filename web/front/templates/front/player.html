@@ -5,6 +5,20 @@
 {% endblock %}
 
 {% block content %}
+{% if player.enabled %}
+<form action="{% url 'player_disable' player.id %}" method="post">
+	{% csrf_token %}
+	<input type="submit" value="disable"/>
+</form>
+{% else %}
+<form action="{% url 'player_enable' player.id %}" method="post">
+	{% csrf_token %}
+	<input type="submit" value="enable"/>
+</form>
+{% endif %}
+
+<p>Disabling a player prevents it from participating in future rounds.</p>
+
 <h2>Results</h2>
 
 <table>
@@ -14,7 +28,8 @@
 <th>crashed?</th>
 <th>RX packets</th><th>TX packets</th><th>Packet loss</th>
 <th>Payload</th>
-<th></th><th></th></tr>
+<th></th><th></th>
+</tr>
 {% for result in result_list %}
 <tr>
 
@@ -29,15 +44,20 @@
 </ol>
 </td>
 
-<td>{{ result.crashed }}</td>
+<td>{% if result.crashed %}
+Yes (<a href="{% url 'result' result.id %}">log</a>)
+{% else %}
+No
+{% endif %}
+</td>
 
 <td>{{ result.received_packets }}</td>
 <td>{{ result.transmit_packets }}</td>
 <td>{{ result.get_packet_loss|floatformat:"1" }} %</td>
 <td>{{ result.payload_bytes }} bytes</td>
 
-<td><a href="{% url 'result' result.id %}">log</a></td>
-<td>{% if result.timeline %}<a href="{{ result.timeline.url }}">timeline</a>{% endif %}</td>
+<td>{% if result.timeline %}<a href="{{ result.timeline.url }}">player timeline</a>{% endif %}</td>
+<td>{% if result.game.timeline %}<a href="{{ result.game.timeline.url }}">game timeline</a>{% endif %}</td>
 </tr>
 {% endfor %}
 </table>
@@ -49,8 +69,4 @@
 </pre>
 
 <a href="{% url 'user' %}">back</a>
-<form action="{% url 'player_del' player.id %}" method="post">
-	{% csrf_token %}
-	<input type="submit" value="delete"/>
-</form>
 {% endblock %}

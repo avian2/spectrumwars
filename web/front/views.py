@@ -80,16 +80,30 @@ def player(request, id):
 	return render(request, 'front/player.html', context)
 
 @login_required
-def player_del(request, id):
+def player_enable(request, id):
 	player = get_object_or_404(Player, pk=id)
 
 	if player.user != request.user:
 		raise PermissionDenied
 
 	if request.method == 'POST':
-		player.delete()
+		player.enabled = True
+		player.save()
 
-	return HttpResponseRedirect(reverse('user'))
+	return HttpResponseRedirect(reverse('player', args=(id,)))
+
+@login_required
+def player_disable(request, id):
+	player = get_object_or_404(Player, pk=id)
+
+	if player.user != request.user:
+		raise PermissionDenied
+
+	if request.method == 'POST':
+		player.enabled = False
+		player.save()
+
+	return HttpResponseRedirect(reverse('player', args=(id,)))
 
 @login_required
 def result(request, id):
