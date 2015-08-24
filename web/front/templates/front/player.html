@@ -23,6 +23,7 @@
 
 <table>
 <tr>
+<th>Round</th>
 <th>Duration [s]</th>
 <th>Competitors</th>
 <th>crashed?</th>
@@ -32,6 +33,8 @@
 </tr>
 {% for result in result_list %}
 <tr>
+
+<td><a href="{% url "round" result.game.round.id %}">{{ result.game.round.id }}</a></td>
 
 <td>{{ result.game.duration|floatformat:"1"}}</td>
 <td>
