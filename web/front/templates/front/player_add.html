@@ -5,6 +5,9 @@ Add a player
 {% endblock %}
 
 {% block content %}
+<p><a href="https://github.com/avian2/spectrumwars/tree/master/examples">Examples</a></p>
+<p><a href="https://spectrumwars.readthedocs.org/en/latest/transceiver.html">Documentation</a></p>
+
 <form action="{% url 'player_add' %}" method="post">
 	{% csrf_token %}
 	{{ form.as_p }}
