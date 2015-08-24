@@ -17,6 +17,9 @@ class Round(models.Model):
 
 	state = models.CharField(max_length=255)
 
+	def __unicode__(self):
+		return "Round %d" % (self.id,)
+
 class Game(models.Model):
 	duration = models.FloatField()
 	ran = models.DateTimeField(auto_now_add=True)
