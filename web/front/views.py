@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django import forms
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 
 from front.models import Player, PlayerResult, Round, Game
 import math
@@ -52,7 +53,8 @@ def player_add(request):
 			p = Player(	user=request.user,
 					name=form.cleaned_data['name'],
 					code=form.cleaned_data['code'],
-					enabled=True)
+					enabled=True,
+					in_use=False)
 			p.save()
 
 			return HttpResponseRedirect(reverse('user'))
@@ -105,6 +107,22 @@ def player_disable(request, id):
 		player.save()
 
 	return HttpResponseRedirect(reverse('player', args=(id,)))
+
+@login_required
+def player_delete(request, id):
+	player = get_object_or_404(Player, pk=id)
+
+	if player.user != request.user:
+		raise PermissionDenied
+
+	with transaction.atomic():
+		if player.in_use:
+			raise PermissionDenied
+
+		if request.method == 'POST':
+			player.delete()
+
+	return HttpResponseRedirect(reverse('user'))
 
 @login_required
 def result(request, id):

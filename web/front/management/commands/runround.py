@@ -2,6 +2,7 @@ import datetime
 
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
+from django.db import transaction
 from django.utils import timezone
 
 from front import models
@@ -152,7 +153,14 @@ class Command(BaseCommand):
 			round.save()
 
 
-			all_player_list = models.Player.objects.filter(enabled=True)
+			# Atomically mark all currently existing players as in-use. This makes
+			# them impossible to delete.
+			with transaction.atomic():
+				all_player_list = models.Player.objects.filter(enabled=True)
+				for player in all_player_list:
+					player.in_use = True
+					player.save()
+
 			for player_list in itertools.combinations(all_player_list, options['nplayers']):
 				testbed = get_testbed(options['testbed'], options['testbed_options'])
 				record_game(round, player_list, testbed)

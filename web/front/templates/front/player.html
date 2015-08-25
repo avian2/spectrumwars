@@ -19,6 +19,13 @@
 
 <p>Disabling a player prevents it from participating in future rounds.</p>
 
+<form action="{% url 'player_delete' player.id %}" method="post">
+	{% csrf_token %}
+	<input type="submit" value="delete" {% if player.in_use %}disabled{% endif %} />
+</form>
+
+<p>You can only delete players that have not participated in any rounds yet.</p>
+
 <h2>Results</h2>
 
 <table>
