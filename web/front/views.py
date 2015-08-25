@@ -38,7 +38,7 @@ def user(request):
 		player.crash_ratio = get_mean(crash)
 		player.packet_loss = get_mean(packet_loss)
 
-	player_list_sorted = sorted(player_list, key=lambda x:(x.crash_ratio, x.packet_loss))
+	player_list_sorted = sorted(player_list, key=lambda x:(not x.enabled, x.crash_ratio, x.packet_loss))
 
 	context = {
 		'user': request.user,
