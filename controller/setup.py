@@ -19,4 +19,6 @@ setup(name='spectrumwars',
 
     test_loader = 'tests:Loader',
     test_suite = 'tests',
+
+    install_requires = [ 'numpy', 'matplotlib', 'jsonrpc2-zeromq' ],
 )
