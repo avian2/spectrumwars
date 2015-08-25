@@ -41,6 +41,12 @@ To run tests::
 Note that to run the testbed-specific tests, you need to have the hardware
 connected at this point.
 
+.. note::
+   If you get errors like ``SandboxError: Can't find 'spectrumwars_sandbox' in
+   PATH``, check whether the scripts installed by ``setup.py`` are in your
+   `PATH`. They are usually installed into ``$HOME/.local/bin`` if you used
+   the ``--user`` flag as suggested above.
+
 Building HTML documentation
 ---------------------------
 
