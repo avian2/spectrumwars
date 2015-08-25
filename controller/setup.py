@@ -16,6 +16,7 @@ setup(name='spectrumwars',
     license='GPL3',
     author='Tomaz Solc',
     author_email='tomaz.solc@ijs.si',
+    url='https://github.com/avian2/spectrumwars',
     long_description=get_long_description(),
     packages = [ 'spectrumwars', 'spectrumwars.testbed' ],
     entry_points = {
