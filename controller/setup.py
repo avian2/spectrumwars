@@ -17,5 +17,6 @@ setup(name='spectrumwars',
         ]
     },
 
+    test_loader = 'tests:Loader',
     test_suite = 'tests',
 )
