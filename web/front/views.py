@@ -179,6 +179,18 @@ def get_mean(x):
 	else:
 		return None
 
+def get_max(x):
+	if len(x) > 0:
+		return max(x)
+	else:
+		return None
+
+def get_min(x):
+	if len(x) > 0:
+		return min(x)
+	else:
+		return None
+
 def round(request, id):
 	round = get_object_or_404(Round, pk=id)
 	game_list = Game.objects.filter(round=round)
@@ -219,9 +231,11 @@ def round(request, id):
 			throughput.append(result.get_throughput())
 
 		player.avg_packet_loss = get_mean(packet_loss)
+		player.max_packet_loss = get_max(packet_loss)
 		player.avg_throughput = get_mean(throughput)
+		player.min_throughput = get_min(throughput)
 		player.game_packet_loss = get_mean(game_packet_loss)
-		player.other_packet_loss = get_mean(other_packet_loss)
+		player.other_packet_loss = get_min(other_packet_loss)
 
 		if in_round:
 			player_list2.append(player)
@@ -233,8 +247,8 @@ def round(request, id):
 
 		return a
 
-	most_reliable = do_sort('avg_packet_loss')
-	fastest = do_sort('avg_throughput', reverse=True)
+	most_reliable = do_sort('max_packet_loss')
+	fastest = do_sort('min_throughput', reverse=True)
 	most_cooperative = do_sort('game_packet_loss')
 	best_interferer = do_sort('other_packet_loss', reverse=True)
 

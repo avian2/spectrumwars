@@ -13,12 +13,14 @@ Round {{ round.id }}
 <tr>
 <th>Name</th>
 <th>Author</th>
-<th>Packet loss</th>
+<th>Worst packet loss</th>
+<th>Avg. packet loss</th>
 </tr>
 {% for player in most_reliable %}
 <tr>
 <td>"{{ player }}"</td>
 <td>{{ player.user }}</td>
+<td>{% if player.max_packet_loss != None %}{{ player.max_packet_loss|floatformat:"1" }} %{% endif %}</td>
 <td>{% if player.avg_packet_loss != None %}{{ player.avg_packet_loss|floatformat:"1" }} %{% endif %}</td>
 </tr>
 {% endfor %}
@@ -30,12 +32,14 @@ Round {{ round.id }}
 <tr>
 <th>Name</th>
 <th>Author</th>
-<th>Throughput</th>
+<th>Worst throughput</th>
+<th>Avg. throughput</th>
 </tr>
 {% for player in fastest %}
 <tr>
 <td>"{{ player }}"</td>
 <td>{{ player.user }}</td>
+<td>{% if player.min_throughput != None %}{{ player.min_throughput|floatformat:"1" }} bytes/s{% endif %}</td>
 <td>{% if player.avg_throughput != None %}{{ player.avg_throughput|floatformat:"1" }} bytes/s{% endif %}</td>
 </tr>
 {% endfor %}
@@ -64,7 +68,7 @@ Round {{ round.id }}
 <tr>
 <th>Name</th>
 <th>Author</th>
-<th>Packet loss of others</th>
+<th>Packet loss of <br/>best competitor</th>
 </tr>
 {% for player in best_interferer %}
 <tr>
