@@ -31,36 +31,100 @@ console. In the end, some game statistics are printed out::
    Results:
    Player 1:
        crashed             : False
-       transmitted packets : 95
-       received packets    : 51 (54%)
-       transferred payload : 12801 bytes (avg 1099.6 bytes/s)
-   Game time: 11.6 seconds
+       transmitted packets : 93
+       received packets    : 51 (45% packet loss)
+       transferred payload : 12801 bytes (avg 981.4 bytes/s)
 
-The game also saves a binary log file to ``example.log``. In addition to the
-ASCII log that is printed on the console, the binary log contains useful
+   Game time: 13.0 seconds
+
+If player code raised an unhandled exception at some point you will also see a
+backtrace. This should assist you in debugging the problem.
+
+In addition to the ASCII log that is printed on the console, the game also
+saves a binary log file to ``example.log``. The binary log contains useful
 debugging information about events that occurred during the game. You can
 visualize the log by running::
 
    $ spectrumwars_plot -o example.out example.log
 
-This creates a directory ``example.out`` with one image per player. For
-the example above, ``example.out/player0.png`` should look something like
-this:
+This creates a directory ``example.out`` with a few images in it. One
+visualization is created for each player participating in the game. These are
+named ``player0.png``, ``player1.png`` and so on, using the same order as it
+was used on the ``spectrumwars_runner`` command line. One additional
+visualization named ``game.png`` is created showing the overall progress of
+the game.
+
+Understanding the visualizations
+--------------------------------
+
+For the example above, ``player0.png`` should look something like this:
+
+.. image:: figures/example_player0.png
+   :width: 100%
+   :align: center
+
+The upper graph with the black background shows the progress of the game in a
+time-frequency diagram. Game time is on the horizontal axis and frequency
+channels are on the vertical. Key events in the game are displayed in this diagram
+with the focus on the current player.
+
+ * Red color marks events related to this player's ``Receiver`` class,
+ * green color marks events related to this player's ``Transmitter`` class and
+ * gray color marks events related to other player's transceivers.
+
+Since only one player participated in this game, there are no gray color
+markers on the diagram shown above. The behavior of the single player can be
+seen from the following markers:
+
+ * Green crosses show transmitted packets from the player's ``Transmitter``
+   class. These correspond to calls to the ``send()`` method.
+
+ * Red circles show packets, that were successfully received by the player's
+   ``Receiver`` class.
+
+ * Thick green and red vertical lines show spectral scans by the transmitter
+   and receiver respectively. These correspond  to calls to the
+   ``get_status()`` method, or when the ``status_update()`` event happens. The
+   lines vary slightly in color to show the result of the spectral scan -
+   lighter color means a higher detected signal level on the
+   corresponding channel.
+
+ * The small crosses connected with a thin green and vertical lines show the
+   currently tuned frequency of the transmitter and receiver respectively. The
+   lines shift in frequency for each call to the ``set_configuration()``
+   method.
+
+.. note::
+   Only packet transmissions are shown for other players.
+
+Reading the specific diagram above, you can see that the transmitter first
+started transmitting near channel 10. After around 3 seconds, it performed a
+spectral scan and shifted the frequency to channel 20. The receiver on the
+other hand, attempted first to unsuccessfully receive packets around channel
+60. Then it performed a spectral scan at around 2 second mark. After the scan
+it tuned to the transmitter's channel and started to successfully receive
+packets. This continued until the transmitted jumped to channel 20, after which
+the receiver started changing channels again in an attempt to restore packet
+reception.
+
+The bottom graph shows progress of some performance indicators: percentage of
+transferred payload, transmitted and received packets. These are relative to
+the total payload and packet counts in the game.
+
+The ``game.png`` show look something like this:
 
 .. image:: figures/example_game.png
    :width: 100%
    :align: center
 
-Left graph shows the progress of the game in a time-frequency diagram. Key
-events in the game are displayed in form of markers: Red markers show events
-from the ``Receiver`` class. Circles show successfully received packets.
-Crosses show radio reconfigurations (i.e.  ``set_configuration()`` method
-calls). Horizontal lines show spectral scans. A scan is shown each time the
-class requests it using ``get_status()`` method or when the
-``status_update()`` event happens. In a similar fashion, green markers show
-events from the ``Transmitter`` class. Crosses again show radio
-reconfigurations while exes show packet transmissions.
+Similar to the upper graph in the per-player visualization, this graph shows a
+time-frequency diagram. The color on the diagram shows signal level, as
+reported by the actual spectrum sensor, for each channel and moment in time while the
+game was running.
 
-Right graph shows progress of performance indicators: percentage of
-transferred payload required by the game and number of transmitted and
-received packets.
+The color bar on the right shows the mapping between the color and the
+specific value that would be seen by player code at that time and channel if
+it called the ``get_status()`` method.
+
+Exact time and frequency of packet transmissions of all players in the game
+are shown superimposed over the diagram using small white crosses.
