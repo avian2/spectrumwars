@@ -13,6 +13,9 @@ class PlayerForm(forms.ModelForm):
 	class Meta:
 		model = Player
 		fields = ['name', 'code']
+		widgets = {
+			'code': forms.Textarea(attrs={'cols': 80, 'rows': 20}),
+		}
 
 @login_required
 def user(request):

@@ -1,10 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django import forms
+
+def check_syntax(code):
+	try:
+		compile(code, '<string>', 'exec')
+	except Exception, e:
+		raise forms.ValidationError("SyntaxError: %s" %(e,))
 
 class Player(models.Model):
 	user = models.ForeignKey(User)
-	name = models.CharField(max_length=255)
-	code = models.TextField()
+	name = models.CharField(max_length=255, unique=True)
+	code = models.TextField(validators=[check_syntax])
 	created = models.DateTimeField(auto_now_add=True)
 	enabled = models.BooleanField()
 	in_use = models.BooleanField(default=True)
