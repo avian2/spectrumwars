@@ -14,6 +14,8 @@ from spectrumwars import Player
 
 log = logging.getLogger(__name__)
 
+class SandboxError(Exception): pass
+
 class SandboxPlayer(object):
 	def __init__(self, rx, tx, i):
 		self.rx = rx
