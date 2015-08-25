@@ -1,7 +1,5 @@
 import serial
 import unittest
-import threading
-import Queue
 
 from spectrumwars.testbed import RadioBase, RadioError, RadioTimeout
 from spectrumwars.testbed.vesna import RadioRaw as AsyncRadio
