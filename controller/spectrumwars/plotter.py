@@ -156,6 +156,7 @@ def plot_player(log, i, out_path):
 	pyplot.grid()
 
 	pyplot.savefig(out_path, dpi=120)
+	pyplot.close()
 
 def plot_game(log, out_path):
 	fig = pyplot.figure(figsize=(16,10))
@@ -199,6 +200,7 @@ def plot_game(log, out_path):
 	pyplot.ylabel("frequency [channel]")
 
 	pyplot.savefig(out_path, dpi=120)
+	pyplot.close()
 
 
 def plot(args):
