@@ -1,10 +1,11 @@
+import ast
 from django.db import models
 from django.contrib.auth.models import User
 from django import forms
 
 def check_syntax(code):
 	try:
-		compile(code, '<string>', 'exec')
+		ast.parse(code, '<string>', 'exec')
 	except Exception, e:
 		raise forms.ValidationError("SyntaxError: %s" %(e,))
 
