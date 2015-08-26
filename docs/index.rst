@@ -28,17 +28,12 @@ CREW (FP7-ICT-2009-258301).*
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   install
-   installtestbed
-   running
-   transceiver
-   reference
-   firmware
-   testbed
-   implementation
-
+   intro
+   
+   indexplayer
+   indexdevel
 
 Indices and tables
 ==================

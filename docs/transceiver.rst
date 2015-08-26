@@ -3,14 +3,16 @@
 Implementing a transceiver
 ==========================
 
-You should provide two subclasses of the base ``Transceiver`` class:
+The Python source code file you provide to SpectrumWars (called a `player`)
+should define two subclasses of the base ``Transceiver`` class:
 one for the transmitter (named ``Transmitter``) and one for the receiver
 (named ``Receiver``). Game controller makes one instance of the transmitter
-class and one instance of the receiver class.  From the standpoint of the
-programming interface, the transmitter and receiver class are mostly
-identical (e.g. receiver can also send data to the transmitter). However in
-the game, their role differs: only payload data sent from the transmitter
-to the receiver counts towards the final score.
+class and one instance of the receiver class.
+
+From the standpoint of the programming interface, the transmitter and receiver
+class are identical (e.g.  receiver can also send data to the transmitter).
+However in the game, their role differs: only payload data sent from the
+transmitter to the receiver counts towards the final score.
 
 The ``Transceiver`` class interface has been designed to accomodate two
 programming styles: procedural programming and event-based programming.
@@ -49,6 +51,8 @@ And this is how an identical event-based receiver looks like::
 
 Both styles are compatible and you can use a combination of both if you wish.
 If you are unsure which one to use, we recommend the procedural style.
+
+.. _transceiver-reference:
 
 Class reference
 ---------------

@@ -26,6 +26,10 @@ Required hardware
   Olimex ARM-USB-OCD programmer. For debugging, a serial-to-USB converter
   connected to VESNA's USART1 is recommended.
 
+.. note::
+   As of 0.0.3, ``spectrumwars_runner`` no longer uses VESNA nodes connected
+   over serial-to-USB converters.
+
 
 Firmware compilation
 ^^^^^^^^^^^^^^^^^^^^
@@ -75,6 +79,9 @@ Additional dependencies for game controller
 In addition to packages listed in :doc:`install`, the following additional
 packages are required to use Spectrum Wars game controller with the VESNA
 testbed:
+
+* GNU Radio with UHD (GNU Radio version 3.7.5.1 is known to work) - http://gnuradio.org
+* gr-specest - https://github.com/avian2/gr-specest
 
 * pyudev (``apt-get install python-pyudev``)
 * pyserial (``pip install pyserial --user``)

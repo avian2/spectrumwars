@@ -3,6 +3,23 @@
 Installation instructions
 =========================
 
+
+Getting the source
+------------------
+
+Up-to-date development version is available on GitHub at:
+
+https://github.com/avian2/spectrumwars
+
+You can download the source using the following command::
+
+   $ git clone https://github.com/avian2/spectrumwars.git
+
+If you intend to do development, it's best if you make your own fork of the
+repository on GitHub.
+
+SpectrumWars releases are also available from PyPi.
+
 Setting up the testbed
 ----------------------
 
@@ -18,28 +35,26 @@ Installing game controller
 
 You need the following packages installed:
 
-* GNU Radio with UHD (GNU Radio version 3.7.5.1 is known to work) - http://gnuradio.org
-
-* gr-specest - https://github.com/avian2/gr-specest
-
 * jsonrpc2-zeromq (``pip install jsonrpc2-zeromq --user``)
 
 * numpy (``apt-get install python-numpy``)
 * matplotlib (``apt-get install python-matplotlib``)
-
-* Sphinx (only required for building documentation; ``apt-get install python-sphinx``)
 
 To install, run::
 
    $ cd controller
    $ python setup.py install --user
 
-To run tests::
+To run unit tests shipped with the code::
 
    $ python setup.py test
 
-Note that to run the testbed-specific tests, you need to have the hardware
-connected at this point.
+Note that to run the testbed-specific tests, you need to have the testbed
+hardware connected and working at this point.
+
+Tests that require hardware or optional external dependencies that were not
+found on the system are skipped (check the console output for any lines that
+say ``skip``).
 
 .. note::
    If you get errors like ``SandboxError: Can't find 'spectrumwars_sandbox' in
@@ -50,9 +65,13 @@ connected at this point.
 Building HTML documentation
 ---------------------------
 
+You need the following software installed to build documentation:
+
+* Sphinx (``apt-get install python-sphinx``)
+
 To rebuild documentation run::
 
    $ cd docs
    $ make html
 
-Index is in ``_build/html/index.html``
+Index page is created at ``_build/html/index.html``.
