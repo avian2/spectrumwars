@@ -55,6 +55,11 @@ class Transceiver(object):
 		return status
 
 	def set_configuration(self, frequency, bandwidth, power):
+		# some numpy types are not directly serializable to JSON
+		frequency = int(frequency)
+		bandwidth = int(bandwidth)
+		power = int(power)
+
 		if frequency < 0 or frequency >= self._frequency_range:
 			raise RadioError("invalid frequency (%d not in range 0-%d)" % (
 				frequency, self._frequency_range))
@@ -93,6 +98,9 @@ class Transceiver(object):
 			pass
 
 	def recv_loop(self, timeout=1.):
+		# some numpy types are not directly serializable to JSON
+		timeout = float(timeout)
+
 		while True:
 			packet_json = self._client.recv(timeout=timeout)
 			if packet_json is None:
