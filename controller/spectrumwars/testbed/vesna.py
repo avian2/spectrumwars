@@ -104,7 +104,7 @@ class RadioRaw(object):
 
 class Radio(RadioBase):
 
-	DATA_LEN = 252
+	PACKET_SIZE = 252
 	CMD_RETRIES = 3
 
 	def __init__(self, path, addr):
@@ -138,13 +138,13 @@ class Radio(RadioBase):
 		if data is None:
 			data = ''
 
-		assert len(data) <= self.DATA_LEN - 1
+		assert len(data) <= self.PACKET_SIZE - 1
 
 		bindata =	[ len(data) ] + \
 				[ ord(c) for c in data ] + \
-				[ 0 ] * (self.DATA_LEN - 1 - len(data))
+				[ 0 ] * (self.PACKET_SIZE - 1 - len(data))
 
-		assert len(bindata) == self.DATA_LEN
+		assert len(bindata) == self.PACKET_SIZE
 
 		strdata = ''.join(("%02x" % v) for v in bindata)
 
@@ -166,10 +166,10 @@ class Radio(RadioBase):
 		strdata = data[2:]
 
 		# NOTE: have seen this fail in clean-up
-		assert len(strdata) == self.DATA_LEN*2
+		assert len(strdata) == self.PACKET_SIZE*2
 
 		n = int(strdata[0:2], 16)
-		assert n <= self.DATA_LEN - 1
+		assert n <= self.PACKET_SIZE - 1
 
 		bindata = []
 
@@ -182,6 +182,8 @@ class Radio(RadioBase):
 		self.raw.stop()
 
 class Testbed(TestbedBase):
+
+	RADIO_CLASS = Radio
 
 	def __init__(self):
 		self.n = 0
@@ -234,9 +236,6 @@ class Testbed(TestbedBase):
 
 	def get_spectrum(self):
 		return self.sensor.get_spectrum()
-
-	def get_packet_size(self):
-		return Radio.DATA_LEN - 1
 
 	def get_frequency_range(self):
 		return min(self.sensor.fft_size, 256)

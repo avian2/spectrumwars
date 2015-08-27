@@ -21,7 +21,7 @@ class TestbedBase(object):
 		raise NotImplementedError
 
 	def get_packet_size(self):
-		raise NotImplementedError
+		return self.RADIO_CLASS.PACKET_SIZE - 1
 
 	def get_frequency_range(self):
 		raise NotImplementedError

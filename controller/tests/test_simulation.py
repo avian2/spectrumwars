@@ -96,6 +96,11 @@ class TestSimulation(unittest.TestCase):
 		self.r1.send_delay = sd
 		self.r3.send_delay = sd
 
+	def test_get_packet_size(self):
+		t = Testbed(packet_size=100)
+		self.assertEqual(self.t.get_packet_size(), 100)
+
+
 class TestSimulationGame(unittest.TestCase):
 
 	PACKET_LIMIT = 1

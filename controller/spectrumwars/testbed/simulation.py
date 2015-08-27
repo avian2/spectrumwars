@@ -46,12 +46,15 @@ class Radio(RadioBase):
 
 class Testbed(TestbedBase):
 
+	RADIO_CLASS = Radio
+
 	def __init__(self, send_delay=.1, frequency_range=64, bandwidth_range=10, power_range=10, packet_size=1024):
 		self.send_delay = float(send_delay)
 		self.frequency_range = int(frequency_range)
 		self.bandwidth_range = int(bandwidth_range)
 		self.power_range = int(power_range)
-		self.packet_size = int(packet_size)
+
+		self.RADIO_CLASS.PACKET_SIZE = int(packet_size) + 1
 
 		self.radios = []
 
@@ -118,6 +121,3 @@ class Testbed(TestbedBase):
 
 	def get_power_range(self):
 		return self.power_range
-
-	def get_packet_size(self):
-		return self.packet_size
