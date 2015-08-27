@@ -47,8 +47,8 @@ def plot_player(log, i, out_path):
 
 
 			payload.append((event.results[i].payload_bytes, timestamp))
-			pkt_sent.append((event.results[i].transmit_packets, timestamp))
-			pkt_recv.append((event.results[i].received_packets, timestamp))
+			pkt_sent.append((event.results[i].tx_transmit_packets, timestamp))
+			pkt_recv.append((event.results[i].rx_received_packets, timestamp))
 
 			if event.type == "config":
 				l = p.config

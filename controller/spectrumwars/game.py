@@ -52,9 +52,11 @@ class Player(object):
 class PlayerResult(object):
 	def __init__(self):
 		# number of received packets in both directions
-		self.received_packets = 0
+		self.rx_received_packets = 0
+		self.tx_received_packets = 0
 		# number of transmitted packets in both directions
-		self.transmit_packets = 0
+		self.rx_transmit_packets = 0
+		self.tx_transmit_packets = 0
 		# whether the player's code raised an unhandled exception
 		self.crashed = False
 		# list of reasons why the player's code crashed
@@ -89,7 +91,7 @@ class Game(object):
 
 		for player in self.players:
 			if self.packet_limit is not None:
-				if player.result.received_packets >= self.packet_limit:
+				if player.result.rx_received_packets >= self.packet_limit:
 					log.debug("game packet limit reached by player %d!" %
 							player.i)
 					return True
@@ -152,7 +154,11 @@ class GameRPCServer(RPCServer):
 
 	def handle_send_method(self, data):
 		self.game.log_event("send", i=self.i, role=self.role)
-		self.player.result.transmit_packets += 1
+
+		if self.role == 'tx':
+			self.player.result.tx_transmit_packets += 1
+		else:
+			self.player.result.rx_transmit_packets += 1
 
 		return self.radio.send(data)
 
@@ -160,13 +166,15 @@ class GameRPCServer(RPCServer):
 		try:
 			packet = self.radio.recv(timeout)
 
-			self.player.result.received_packets += 1
-
 			if self.role == 'rx':
+				self.player.result.rx_received_packets += 1
+
 				payload_bytes = self.game.testbed.get_packet_size()
 				if packet.data:
 					payload_bytes -= len(packet.data)
 				self.player.result.payload_bytes += payload_bytes
+			else:
+				self.player.result.tx_received_packets += 1
 
 			self.game.log_event("recv",  i=self.i, role=self.role)
 
