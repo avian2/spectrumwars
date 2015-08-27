@@ -140,10 +140,12 @@ Class reference
 
       Send a data packet over the air.
 
-      ``data`` is a string with the data to be included into the packet.
-      Length of ``data`` can be up to :py:attr:`PACKET_SIZE`.
+      ``bindata`` is a binary string with the data to be included into the
+      packet. Length of ``bindata`` can be up to :py:attr:`PACKET_SIZE`.
 
-      Corresponds to :py:meth:`Transceiver.send`.
+      Corresponds to :py:meth:`Transceiver.send`. Note that the game
+      controller packs the packet with payload, so ``bindata`` will not be
+      identical to the ``data`` string passed to :py:meth:`Transceiver.send`.
 
    .. py:method:: binrecv(timeout=None)
 
@@ -153,9 +155,9 @@ Class reference
       received within the timeout interval, the method raises ``RadioTimeout``
       exception.
 
-      Upon successfull reception, the method should return a string. The
-      returned string should be equal to the ``data`` parameter that was
-      passed to the corresponding ``send()`` call.
+      Upon successfull reception, the method should return a binary string.
+      The returned string should be equal to the ``bindata`` parameter that
+      was passed to the corresponding ``send()`` call.
 
       .. note::
 
@@ -167,7 +169,10 @@ Class reference
          :py:meth:`Testbed.start`) and that the received packets are held
          in a queue until the next ``recv()`` call.
 
-      Corresponds to :py:meth:`Transceiver.recv`.
+      Corresponds to :py:meth:`Transceiver.recv`. Note that the game
+      controller unpacks the payload from the packet before passing it to
+      :py:meth:`Transceiver.recv`.
+
 
 .. py:class:: usrp_sensing.SpectrumSensor(base_hz, step_hz, nchannels, time_window=200e-3, gain=10)
 
