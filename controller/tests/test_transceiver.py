@@ -25,6 +25,12 @@ class MockGameRPCServer(RPCServer):
 	def handle_recv_method(self, timeout):
 		pass
 
+	def handle_send_method(self, data):
+		pass
+
+	def handle_get_packet_size_method(self):
+		return 10
+
 class MockTransceiver(Transceiver):
 	def start(self):
 		raise StopGame
@@ -66,3 +72,14 @@ class TestTransceiver(unittest.TestCase):
 
 		for packet in t.recv_loop(timeout=np.float64(.1)):
 			pass
+
+	def test_send(self):
+
+		class T(Transceiver):
+			def start(self):
+				for n in xrange(256):
+					self.send(chr(n))
+				raise StopGame
+
+		t = T(0, 'rx', .1)
+		t._start(self.client)

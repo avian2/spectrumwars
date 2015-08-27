@@ -53,11 +53,16 @@ class RadioPacket(object):
 		self.data = data
 
 	def to_json(self):
-		return (self.data,)
+		d = [ ord(c) for c in self.data ]
+		return (d,)
 
 	@classmethod
 	def from_json(cls, json):
-		return cls(*json)
+
+		d = json[0]
+		data = ''.join(chr(c) for c in d)
+
+		return cls(data)
 
 class GameStatus(object):
 	def __init__(self, spectrum):

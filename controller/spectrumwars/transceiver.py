@@ -85,10 +85,14 @@ class Transceiver(object):
 		return self._power_range
 
 	def send(self, data=None):
-		if data and len(data) > self.get_packet_size():
+		if data is None:
+			data = ''
+
+		if len(data) > self.get_packet_size():
 			raise RadioError("packet too long")
 
-		self._client.send(data)
+		packet_json = RadioPacket(data).to_json()
+		self._client.send(packet_json)
 
 		if self._client.should_finish():
 			raise StopGame
