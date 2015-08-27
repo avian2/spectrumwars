@@ -1,3 +1,16 @@
+2015-08-27	spectrumwars 0.0.5
+
+	* Refactor payload packing out of testbed-specific code. See reference
+	  for RADIO_CLASS attribute in Testbed class and PACKET_SIZE, binsend()
+	  and binrecv() in Radio class.
+	* Documentation improvements - split documentation into Player's and
+	  Developer's guides.
+	* Improved game visualizations. spectrumwars_plot now also makes a game
+	  overview plot in addition to player specific plots.
+	* Record package counts separately for RX -> TX and TX -> RX.
+	* Various minor bug fixes.
+	* PyPi package.
+
 2015-08-17	spectrumwars 0.0.4
 
 	* Add "--testbed" parameter to spectrumwars_runner for specifying the

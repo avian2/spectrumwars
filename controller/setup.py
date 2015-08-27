@@ -11,7 +11,7 @@ def get_long_description():
 	return read_doc("README.rst")
 
 setup(name='spectrumwars',
-    version='0.0.4',
+    version='0.0.5',
     description='A programming game where players compete for radio bandwidth.',
     license='GPL3',
     author='Tomaz Solc',
