@@ -75,8 +75,8 @@ def record_game(round, player_list, testbed):
 			game=game,
 			player=player,
 
-			transmit_packets=result.transmit_packets,
-			received_packets=result.received_packets,
+			transmit_packets=result.tx_transmit_packets,
+			received_packets=result.rx_received_packets,
 			payload_bytes=result.payload_bytes,
 
 			crashed=result.crashed,
