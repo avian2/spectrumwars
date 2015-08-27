@@ -1,11 +1,11 @@
 import serial
 import unittest
 
-from spectrumwars.testbed import RadioBase, RadioError, RadioTimeout
+from spectrumwars.testbed import RadioError, RadioTimeout
 from spectrumwars.testbed.vesna import RadioRaw as AsyncRadio
 from spectrumwars.testbed.vesna import list_radio_devices
 
-class SyncRadio(RadioBase):
+class SyncRadio(object):
 	def __init__(self, device):
 		self.device = device
 		self.comm = serial.Serial(device, 115200, timeout=2.)
@@ -44,6 +44,13 @@ class SyncRadio(RadioBase):
 	def debug(self, msg):
 		#print "%s >>> %s" % (self.device, msg)
 		pass
+
+	def start(self):
+		pass
+
+	def stop(self):
+		pass
+
 
 class OnLineRadioTestCase(unittest.TestCase):
 

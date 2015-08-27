@@ -11,6 +11,8 @@ class Radio(RadioBase):
 	RECEIVE_TIMEOUT = 2.
 
 	def __init__(self, addr, dispatcher, send_delay):
+		super(Radio, self).__init__()
+
 		self.addr = addr
 		self.neighbor = None
 		self.dispatcher = dispatcher
@@ -21,37 +23,40 @@ class Radio(RadioBase):
 
 		self.send_delay = send_delay
 
-	def _recv(self, addr, data, frequency, bandwidth):
+	def _recv(self, addr, bindata, frequency, bandwidth):
 		if self.frequency == frequency and self.bandwidth == bandwidth and self.addr == addr:
-			self.q.put(data)
+			self.q.put(bindata)
 
 	def set_configuration(self, frequency, bandwidth, power):
 		self.frequency = frequency
 		self.bandwidth = bandwidth
 
-	def send(self, data):
-		self.dispatcher(self.neighbor, data, self.frequency, self.bandwidth)
+	def binsend(self, bindata):
+		self.dispatcher(self.neighbor, bindata, self.frequency, self.bandwidth)
 		time.sleep(self.send_delay)
 
-	def recv(self, timeout=None):
+	def binrecv(self, timeout=None):
 		if timeout is None:
 			timeout = self.RECEIVE_TIMEOUT
 
 		try:
-			data = self.q.get(True, timeout)
+			bindata = self.q.get(True, timeout)
 		except Queue.Empty:
 			raise RadioTimeout
 		else:
-			return RadioPacket(data)
+			return bindata
 
 class Testbed(TestbedBase):
+
+	RADIO_CLASS = Radio
 
 	def __init__(self, send_delay=.1, frequency_range=64, bandwidth_range=10, power_range=10, packet_size=1024):
 		self.send_delay = float(send_delay)
 		self.frequency_range = int(frequency_range)
 		self.bandwidth_range = int(bandwidth_range)
 		self.power_range = int(power_range)
-		self.packet_size = int(packet_size)
+
+		self.RADIO_CLASS.PACKET_SIZE = int(packet_size) + 1
 
 		self.radios = []
 
@@ -70,7 +75,7 @@ class Testbed(TestbedBase):
 
 		return r
 
-	def _dispatcher(self, addr, data, frequency, bandwidth):
+	def _dispatcher(self, addr, bindata, frequency, bandwidth):
 		now = self.time()
 
 		has_collision = (now - self.channels[frequency]) > self.send_delay
@@ -82,7 +87,7 @@ class Testbed(TestbedBase):
 			# than in reality: all should fail. But this would
 			# be complicated to implement in practice.
 			for radio in self.radios:
-				radio._recv(addr, data, frequency, bandwidth)
+				radio._recv(addr, bindata, frequency, bandwidth)
 		else:
 			log.debug("packet collision detected on channel %d" % (frequency,))
 
@@ -118,6 +123,3 @@ class Testbed(TestbedBase):
 
 	def get_power_range(self):
 		return self.power_range
-
-	def get_packet_size(self):
-		return self.packet_size

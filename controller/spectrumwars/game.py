@@ -2,7 +2,7 @@ import copy
 import logging
 import time
 import threading
-from spectrumwars.testbed import TestbedError, RadioTimeout, GameStatus
+from spectrumwars.testbed import TestbedError, RadioTimeout, RadioPacket, GameStatus
 from spectrumwars.transceiver import StopGame, TransceiverError
 from spectrumwars.rpc import RPCServer
 
@@ -152,15 +152,18 @@ class GameRPCServer(RPCServer):
 		self.game.log_event("status", i=self.i, role=self.role, status=status)
 		return status.to_json()
 
-	def handle_send_method(self, data):
+	def handle_send_method(self, packet_json):
 		self.game.log_event("send", i=self.i, role=self.role)
 
 		if self.role == 'tx':
 			self.player.result.tx_transmit_packets += 1
+			payload = True
 		else:
 			self.player.result.rx_transmit_packets += 1
+			payload = False
 
-		return self.radio.send(data)
+		data = RadioPacket.from_json(packet_json).data
+		return self.radio.send(data, payload)
 
 	def handle_recv_method(self, timeout):
 		try:
