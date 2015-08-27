@@ -11,6 +11,8 @@ class Radio(RadioBase):
 	RECEIVE_TIMEOUT = 2.
 
 	def __init__(self, addr, dispatcher, send_delay):
+		super(Radio, self).__init__()
+
 		self.addr = addr
 		self.neighbor = None
 		self.dispatcher = dispatcher
@@ -29,11 +31,11 @@ class Radio(RadioBase):
 		self.frequency = frequency
 		self.bandwidth = bandwidth
 
-	def send(self, data):
+	def binsend(self, data):
 		self.dispatcher(self.neighbor, data, self.frequency, self.bandwidth)
 		time.sleep(self.send_delay)
 
-	def recv(self, timeout=None):
+	def binrecv(self, timeout=None):
 		if timeout is None:
 			timeout = self.RECEIVE_TIMEOUT
 
@@ -42,7 +44,7 @@ class Radio(RadioBase):
 		except Queue.Empty:
 			raise RadioTimeout
 		else:
-			return RadioPacket(data)
+			return data
 
 class Testbed(TestbedBase):
 

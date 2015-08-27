@@ -16,7 +16,40 @@ def log_exc_on():
 	logging.getLogger().setLevel(level)
 
 
+class MockRadio(RadioBase):
+	PACKET_SIZE = 201
+
+	def __init__(self, testbed):
+		super(MockRadio, self).__init__()
+
+		self.testbed = testbed
+		self.neighbor = None
+
+		self.settings = None
+		self.rx_queue = Queue.Queue()
+
+	def binsend(self, data):
+		if self.settings == self.neighbor.settings:
+			self.neighbor.rx_queue.put(data)
+
+	def set_configuration(self, frequency, power, bandwidth):
+		self.settings = (frequency, power, bandwidth)
+
+	def get_configuration(self):
+		return self.settings
+
+	def binrecv(self, timeout=None):
+		try:
+			data = self.rx_queue.get(timeout=.01)
+		except Queue.Empty:
+			self.testbed.clock += timeout
+			raise RadioTimeout
+		else:
+			return data
+
 class MockTestbed(TestbedBase):
+	RADIO_CLASS = MockRadio
+
 	def get_radio_pair(self):
 
 		rxradio = MockRadio(self)
@@ -44,35 +77,6 @@ class MockTestbed(TestbedBase):
 	def get_power_range(self):
 		return 12
 
-	def get_packet_size(self):
-		return 200
-
-class MockRadio(RadioBase):
-	def __init__(self, testbed):
-		self.testbed = testbed
-		self.neighbor = None
-
-		self.settings = None
-		self.rx_queue = Queue.Queue()
-
-	def send(self, data):
-		if self.settings == self.neighbor.settings:
-			self.neighbor.rx_queue.put(data)
-
-	def set_configuration(self, frequency, power, bandwidth):
-		self.settings = (frequency, power, bandwidth)
-
-	def get_configuration(self):
-		return self.settings
-
-	def recv(self, timeout=None):
-		try:
-			data = self.rx_queue.get(timeout=.01)
-		except Queue.Empty:
-			self.testbed.clock += timeout
-			raise RadioTimeout
-		else:
-			return RadioPacket(data)
 
 class TestGame(unittest.TestCase):
 

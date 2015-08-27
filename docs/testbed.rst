@@ -136,7 +136,7 @@ Class reference
 
       Corresponds to :py:meth:`Transceiver.set_configuration`.
 
-   .. py:method:: send(data)
+   .. py:method:: binsend(bindata)
 
       Send a data packet over the air.
 
@@ -145,7 +145,7 @@ Class reference
 
       Corresponds to :py:meth:`Transceiver.send`.
 
-   .. py:method:: recv(timeout=None)
+   .. py:method:: binrecv(timeout=None)
 
       Return a packet from the receive queue.
 
@@ -153,11 +153,9 @@ Class reference
       received within the timeout interval, the method raises ``RadioTimeout``
       exception.
 
-      Upon successfull reception, the method should return an instance of
-      :py:class:`RadioPacket`. This method should revert the control data
-      packing performed by ``send()``. The content of the ``RadioPacket.data``
-      property should be equal to the ``data`` parameter that was passed to
-      the corresponding ``send()`` call.
+      Upon successfull reception, the method should return a string. The
+      returned string should be equal to the ``data`` parameter that was
+      passed to the corresponding ``send()`` call.
 
       .. note::
 

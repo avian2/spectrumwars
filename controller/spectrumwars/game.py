@@ -157,11 +157,13 @@ class GameRPCServer(RPCServer):
 
 		if self.role == 'tx':
 			self.player.result.tx_transmit_packets += 1
+			payload = True
 		else:
 			self.player.result.rx_transmit_packets += 1
+			payload = False
 
 		data = RadioPacket.from_json(packet_json).data
-		return self.radio.send(data)
+		return self.radio.send(data, payload)
 
 	def handle_recv_method(self, timeout):
 		try:
