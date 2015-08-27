@@ -4,6 +4,10 @@
 Developer's Guide
 #################
 
+.. image:: figures/architecture.png
+   :width: 60%
+   :align: center
+
 This part of the documentation covers parts that are interesting for testbed
 operators wanting to add support for their hardware to SpectrumWars,
 administrators wanting to deploy SpectrumWars on their testbed and
