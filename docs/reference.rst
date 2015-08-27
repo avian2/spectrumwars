@@ -63,6 +63,7 @@ Central frequency of a channel can be calculated using the following formula::
    16         < -55
    =========  =====
 
+.. _sim-reference:
 
 Simulated testbed
 -----------------
@@ -74,7 +75,8 @@ This testbed is used by default by ``spectrumwars_runner``, if no ``-t``
 argument is specified.
 
 Capabilities of this testbed can be customized using the following keyword
-arguments (use ``-Okeyword=value`` to modify their values from default):
+arguments (use ``-Okeyword=value`` in the ``spectrumwars_runner`` command-line
+to modify their values from default):
 
 ===============  =====================================  =======  =====
 keyword          meaning                                default  unit

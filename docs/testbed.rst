@@ -29,16 +29,21 @@ Class reference
 
    ``Testbed`` objects represent a physical testbed that is used to run a
    game. Unless stated otherwise, subclasses should override all of the
-   methods described below.
+   methods and attributes described below.
 
    The class constructor can take optional string-typed keyword arguments.
    These can be specified in ``spectrumwars_runner`` using the ``-O``
    arguments.
 
+   .. py:attribute:: RADIO_CLASS
+
+      Should be set to the subclass of the ``RadioBase`` class that is used by
+      the testbed (i.e. :py:class:`Radio` in the testbed's module)
+
    .. py:method:: get_radio_pair()
 
       Returns a ``rxradio, txradio`` tuple. ``rxradio`` and ``txradio`` should
-      be instances of a subclass of :py:class:`Radio`.
+      be instances of :py:attr:`RADIO_CLASS`.
 
       This method is called multiple times by the game controller, once for
       each player to obtain the interfaces to player's radios. It is called
@@ -75,13 +80,6 @@ Class reference
 
       Corresponds to :py:meth:`Transceiver.get_power_range`.
 
-   .. py:method:: get_packet_size()
-
-      Returns the maximum length of a string that can be passed to the
-      :py:meth:`Radio.send` method.
-
-      Corresponds to :py:meth:`Transceiver.get_packet_size`.
-
    .. py:method:: get_spectrum()
 
       Returns the current state of the radio spectrum as a list of floating
@@ -107,6 +105,16 @@ Class reference
    transceiver. Unless stated otherwise, subclasses should override all of the
    methods described below.
 
+   .. py:attribute:: PACKET_SIZE
+
+      Set to the maximum length of a string that can be passed to the
+      :py:meth:`send` method.
+
+      Approximately corresponds to :py:meth:`Transceiver.get_packet_size`.
+      Game controller adds a header to separate control data from payload
+      which adds an overhead of a few bytes. Because of this, the player
+      visible maximum packet size will be lower.
+
    .. py:method:: set_configuration(frequency, bandwidth, power)
 
       Set up the transceiver for transmission or reception of packets on the
@@ -128,45 +136,18 @@ Class reference
 
       Corresponds to :py:meth:`Transceiver.set_configuration`.
 
-   .. py:method:: send(data)
+   .. py:method:: binsend(bindata)
 
       Send a data packet over the air.
-      
-      ``data`` is a string with the optional control data to be included into
-      the packet, or ``None``. Length of ``data`` can be up to ``PACKET_SIZE``,
-      where ``PACKET_SIZE`` is the value returned by
-      :py:meth:`Transceiver.get_packet_size`.
 
-      Note that the game's scoring expects that all packets sent over the air
-      have the same length and that any length unused by the control data is
-      used by packet payload. It is up to the testbed to decide how this is
-      implemented.
+      ``bindata`` is a binary string with the data to be included into the
+      packet. Length of ``bindata`` can be up to :py:attr:`PACKET_SIZE`.
 
-      For example, the ``send()`` method can pack the ``data`` string into a
-      fixed-length packet like this::
+      Corresponds to :py:meth:`Transceiver.send`. Note that the game
+      controller packs the packet with payload, so ``bindata`` will not be
+      identical to the ``data`` string passed to :py:meth:`Transceiver.send`.
 
-         ------------------------------------------> bytes
-
-         +-----+-----+     +-----+-----+     +-----+
-         |  0  |  1  | ... |  n  | n+1 | ... |  m  |
-         +-----+-----+     +-----+-----+     +-----+
-
-            ^   <---- data -----> <---- payload --->
-            |
-            |
-
-            len(data)
-
-
-         n = len(data)
-
-         m = PACKET_SIZE + 1
-
-      Payload is discarded on reception and can be filled with random bytes.
-
-      Corresponds to :py:meth:`Transceiver.send`.
-
-   .. py:method:: recv(timeout=None)
+   .. py:method:: binrecv(timeout=None)
 
       Return a packet from the receive queue.
 
@@ -174,11 +155,9 @@ Class reference
       received within the timeout interval, the method raises ``RadioTimeout``
       exception.
 
-      Upon successfull reception, the method should return an instance of
-      :py:class:`RadioPacket`. This method should revert the control data
-      packing performed by ``send()``. The content of the ``RadioPacket.data``
-      property should be equal to the ``data`` parameter that was passed to
-      the corresponding ``send()`` call.
+      Upon successfull reception, the method should return a binary string.
+      The returned string should be equal to the ``bindata`` parameter that
+      was passed to the corresponding ``send()`` call.
 
       .. note::
 
@@ -190,7 +169,10 @@ Class reference
          :py:meth:`Testbed.start`) and that the received packets are held
          in a queue until the next ``recv()`` call.
 
-      Corresponds to :py:meth:`Transceiver.recv`.
+      Corresponds to :py:meth:`Transceiver.recv`. Note that the game
+      controller unpacks the payload from the packet before passing it to
+      :py:meth:`Transceiver.recv`.
+
 
 .. py:class:: usrp_sensing.SpectrumSensor(base_hz, step_hz, nchannels, time_window=200e-3, gain=10)
 

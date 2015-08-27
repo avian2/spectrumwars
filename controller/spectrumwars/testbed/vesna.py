@@ -104,10 +104,11 @@ class RadioRaw(object):
 
 class Radio(RadioBase):
 
-	DATA_LEN = 252
+	PACKET_SIZE = 252
 	CMD_RETRIES = 3
 
 	def __init__(self, path, addr):
+		super(Radio, self).__init__()
 
 		self.raw = RadioRaw(path)
 		self.addr = addr
@@ -133,20 +134,10 @@ class Radio(RadioBase):
 
 		log.error("Giving up on %r after %d errors" % (cmd, n+1))
 
-	def send(self, data):
+	def binsend(self, bindata):
 
-		if data is None:
-			data = ''
-
-		assert len(data) <= self.DATA_LEN - 1
-
-		bindata =	[ len(data) ] + \
-				[ ord(c) for c in data ] + \
-				[ 0 ] * (self.DATA_LEN - 1 - len(data))
-
-		assert len(bindata) == self.DATA_LEN
-
-		strdata = ''.join(("%02x" % v) for v in bindata)
+		assert len(bindata) <= self.PACKET_SIZE
+		strdata = ''.join(("%02x" % ord(v)) for v in bindata)
 
 		self._cmd("t %02x %s" % (self.neighbor, strdata))
 
@@ -158,30 +149,30 @@ class Radio(RadioBase):
 	def get_configuration(self):
 		return self.config
 
-	def recv(self, timeout=1.):
+	def binrecv(self, timeout=1.):
 		data = self.raw.recv(timeout=timeout)
 
 		assert data.startswith("R ")
 
 		strdata = data[2:]
 
-		# NOTE: have seen this fail in clean-up
-		assert len(strdata) == self.DATA_LEN*2
+		assert len(strdata) % 2 == 0
+		n = len(strdata) / 2
 
-		n = int(strdata[0:2], 16)
-		assert n <= self.DATA_LEN - 1
+		assert n <= self.PACKET_SIZE
 
 		bindata = []
-
-		for i in xrange(1, n+1):
+		for i in xrange(n):
 			bindata.append(chr(int(strdata[i*2:i*2+2], 16)))
 
-		return RadioPacket(''.join(bindata))
+		return ''.join(bindata)
 
 	def stop(self):
 		self.raw.stop()
 
 class Testbed(TestbedBase):
+
+	RADIO_CLASS = Radio
 
 	def __init__(self):
 		self.n = 0
@@ -234,9 +225,6 @@ class Testbed(TestbedBase):
 
 	def get_spectrum(self):
 		return self.sensor.get_spectrum()
-
-	def get_packet_size(self):
-		return Radio.DATA_LEN - 1
 
 	def get_frequency_range(self):
 		return min(self.sensor.fft_size, 256)

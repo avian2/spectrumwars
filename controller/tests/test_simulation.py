@@ -19,7 +19,7 @@ class TestSimulation(unittest.TestCase):
 		self.r1.set_configuration(0, 0, 0)
 		self.r2.set_configuration(0, 0, 0)
 
-		self.r1.send("foo")
+		self.r1.send("foo", True)
 		d = self.r2.recv(.1)
 
 		self.assertEqual(d.data, "foo")
@@ -27,28 +27,28 @@ class TestSimulation(unittest.TestCase):
 	def test_send_self(self):
 		self.r1.set_configuration(0, 0, 0)
 
-		self.r1.send("foo")
+		self.r1.send("foo", True)
 		self.assertRaises(RadioTimeout, self.r1.recv, .1)
 
 	def test_send_invalid(self):
 		self.r1.set_configuration(0, 0, 0)
 		self.r2.set_configuration(1, 0, 0)
 
-		self.r1.send("foo")
+		self.r1.send("foo", True)
 		self.assertRaises(RadioTimeout, self.r2.recv, .1)
 
 	def test_send_invalid_2(self):
 		self.r1.set_configuration(0, 0, 0)
 		self.r2.set_configuration(0, 1, 0)
 
-		self.r1.send("foo")
+		self.r1.send("foo", True)
 		self.assertRaises(RadioTimeout, self.r2.recv, .1)
 
 	def test_power_ignored(self):
 		self.r1.set_configuration(0, 0, 0)
 		self.r2.set_configuration(0, 0, 1)
 
-		self.r1.send("foo")
+		self.r1.send("foo", True)
 		self.assertEqual(self.r2.recv().data, "foo")
 
 	def test_get_spectrum(self):
@@ -67,8 +67,8 @@ class TestSimulation(unittest.TestCase):
 		self.r1.send_delay = 0
 		self.r3.send_delay = 0
 
-		self.r1.send("foo")
-		self.r3.send("bar")
+		self.r1.send("foo", True)
+		self.r3.send("bar", True)
 
 		self.assertEqual(self.r2.recv().data, "foo")
 		self.assertEqual(self.r4.recv().data, "bar")
@@ -87,14 +87,19 @@ class TestSimulation(unittest.TestCase):
 		self.r1.send_delay = 0
 		self.r3.send_delay = 0
 
-		self.r1.send("foo")
-		self.r3.send("bar")
+		self.r1.send("foo", True)
+		self.r3.send("bar", True)
 
 		self.assertEqual(self.r2.recv().data, "foo")
 		self.assertRaises(RadioTimeout, self.r4.recv, .1)
 
 		self.r1.send_delay = sd
 		self.r3.send_delay = sd
+
+	def test_get_packet_size(self):
+		t = Testbed(packet_size=100)
+		self.assertEqual(self.t.get_packet_size(), 100)
+
 
 class TestSimulationGame(unittest.TestCase):
 

@@ -8,22 +8,24 @@ On-line documentation:
 
 https://spectrumwars.readthedocs.org/en/latest/
 
+Source code repository:
 
-Contents at a glance
---------------------
+https://github.com/avian2/spectrumwars
 
-docs/
-  Documentation.
 
-firmware/
-  Firmware for uploading onto VESNA nodes.
+Contents
+--------
 
-controller/
-  Game controller implementation.
+This Python package contains the game controller.
 
-examples/
-  Examples of player supplied code.
+It can be used run the game on a simulated testbed. In that case, no special
+hardware or exotic software dependencies are required. This is useful if you
+are developing player code to compete in a SpectrumWars game.
 
+It can also be used to run a game on a real wireless testbed, however this
+requires a more complicated setup.
+
+More information can be found in documentation linked above.
 
 
 License
