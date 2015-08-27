@@ -11,8 +11,10 @@ class and one instance of the receiver class.
 
 From the standpoint of the programming interface, the transmitter and receiver
 class are identical (e.g.  receiver can also send data to the transmitter).
-However in the game, their role differs: only payload data sent from the
-transmitter to the receiver counts towards the final score.
+However in the game, their role differs: payload data is only sent from the
+transmitter to the receiver. This means that statistics like packet loss and
+throughput which are used in ranking the players are only counted in that
+direction.
 
 The ``Transceiver`` class interface has been designed to accomodate two
 programming styles: procedural programming and event-based programming.

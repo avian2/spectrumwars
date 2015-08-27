@@ -15,6 +15,7 @@ special hardware connected to the computer.
    installplayer
    running
    visualizations
+   scoring
    transceiver
    annexample
    reference
