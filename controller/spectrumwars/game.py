@@ -3,7 +3,6 @@ import logging
 import time
 import threading
 from spectrumwars.testbed import TestbedError, RadioTimeout, RadioPacket, GameStatus
-from spectrumwars.transceiver import StopGame, TransceiverError
 from spectrumwars.rpc import RPCServer
 
 log = logging.getLogger(__name__)
