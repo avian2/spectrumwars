@@ -38,7 +38,7 @@ class BaseTestSandbox(unittest.TestCase):
 		self.server.join()
 		del self.server
 
-from spectrumwars.sandbox import ThreadedSandbox
+from spectrumwars.sandbox.threaded import ThreadedSandbox
 
 class TestThreadedSandbox(BaseTestSandbox):
 
@@ -76,7 +76,7 @@ class TestThreadedSandbox(BaseTestSandbox):
 		self.assertEqual(self.server.stopped, 2)
 		self.assertEqual(self.server.crashed, 0)
 
-from spectrumwars.sandbox import SubprocessSandbox
+from spectrumwars.sandbox.process import SubprocessSandbox
 
 class TestSubprocessSandbox(BaseTestSandbox):
 	def write_temp_py(self, code):

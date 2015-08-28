@@ -1,13 +1,9 @@
-import imp
 import importlib
 import logging
-import os
-import re
-import sys
 import pickle
 import argparse
 
-from spectrumwars.sandbox import SubprocessSandbox
+from spectrumwars.sandbox.process import SubprocessSandbox
 from spectrumwars import Player, Game, GameController
 
 log = logging.getLogger(__name__)

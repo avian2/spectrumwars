@@ -3,7 +3,7 @@ import unittest
 
 from spectrumwars import Player, Game, GameController, Transceiver, RadioTimeout, RadioError
 from spectrumwars.testbed.simulation import Testbed
-from spectrumwars.sandbox import ThreadedSandbox
+from spectrumwars.sandbox.threaded import ThreadedSandbox
 
 level = logging.WARNING
 logging.basicConfig(level=level)

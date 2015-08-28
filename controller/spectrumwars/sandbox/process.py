@@ -9,54 +9,11 @@ import threading
 import time
 import traceback
 from spectrumwars.rpc import RPCClient
-
-from spectrumwars import Player
+from spectrumwars.sandbox import SandboxPlayer, SandboxError, SandboxBase, SandboxInstanceBase
 
 log = logging.getLogger(__name__)
 
-class SandboxError(Exception): pass
-
-class SandboxPlayer(object):
-	def __init__(self, rx, tx, i):
-		self.rx = rx
-		self.tx = tx
-		self.i = i
-
-# ThreadedSandbox provides no isolation between the player's code and the game
-# controller. It is mostly used for debugging and as an example of how the
-# Sandbox interface works.
-
-class ThreadedSandboxInstance(object):
-	def __init__(self, cls, role):
-		self.cls = cls
-		self.role = role
-
-	def init(self, i, update_interval):
-		self.ins = self.cls(i, self.role, update_interval)
-
-	def start(self, endpoint):
-		client = RPCClient(endpoint)
-
-		self.thread = threading.Thread(target=self.ins._start, args=(client,))
-		self.thread.start()
-
-	def join(self, deadline=None, timefunc=time.time):
-		self.thread.join()
-
-class ThreadedSandbox(object):
-	def __init__(self, cls_list):
-		self.players = []
-
-		for i, (rxcls, txcls) in enumerate(cls_list):
-			player = SandboxPlayer(
-				ThreadedSandboxInstance(rxcls, 'rx'),
-				ThreadedSandboxInstance(txcls, 'tx'), i)
-			self.players.append(player)
-
-	def get_players(self):
-		return self.players
-
-class SubprocessSandboxInstance(object):
+class SubprocessSandboxInstance(SandboxInstanceBase):
 	def __init__(self, path, role):
 		self.path = path
 		self.role = role
@@ -153,7 +110,7 @@ class SubprocessSandboxInstance(object):
 
 		log.info("(%d %s) sandbox stopping" % (args['i'], args['role']))
 
-class SubprocessSandbox(object):
+class SubprocessSandbox(SandboxBase):
 	def __init__(self, paths):
 		self.paths = paths
 

@@ -18,12 +18,12 @@ setup(name='spectrumwars',
     author_email='tomaz.solc@ijs.si',
     url='https://github.com/avian2/spectrumwars',
     long_description=get_long_description(),
-    packages = [ 'spectrumwars', 'spectrumwars.testbed' ],
+    packages = [ 'spectrumwars', 'spectrumwars.testbed', 'spectrumwars.sandbox' ],
     entry_points = {
         'console_scripts': [
             'spectrumwars_runner = spectrumwars.runner:main',
             'spectrumwars_plot = spectrumwars.plotter:main',
-	    'spectrumwars_sandbox = spectrumwars.sandbox:SubprocessSandboxInstance.run',
+	    'spectrumwars_sandbox = spectrumwars.sandbox.process:SubprocessSandboxInstance.run',
         ]
     },
 

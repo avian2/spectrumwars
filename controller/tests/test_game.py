@@ -4,7 +4,7 @@ import unittest
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout, RadioError
 from spectrumwars.testbed import TestbedBase, RadioBase, RadioPacket
-from spectrumwars.sandbox import ThreadedSandbox
+from spectrumwars.sandbox.threaded import ThreadedSandbox
 
 level = logging.WARNING
 logging.basicConfig(level=level)
