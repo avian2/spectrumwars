@@ -67,7 +67,7 @@ for all but the most simple algorithms.
 
 Players are ranked by different statistics, like average packet loss and
 throughput. Different challenges are possible within the basic SpectrumWars
-framework. Some challenges might give more weight to the poewr efficiency of
+framework. Some challenges might give more weight to the power efficiency of
 the players, while others might favor resilience against interference. Some
 might encourage players to intentionally interfere with competitors. Again
 some others might introduce an interfering spectrum user to the testbed where
