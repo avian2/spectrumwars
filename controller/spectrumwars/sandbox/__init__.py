@@ -12,6 +12,9 @@ class SandboxBase(object):
 	def get_players(self):
 		raise NotImplementedError
 
+	def stop(self):
+		pass
+
 class SandboxInstanceBase(object):
 	def init(self, i, update_interval):
 		raise NotImplementedError

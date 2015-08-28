@@ -271,6 +271,9 @@ class GameController(object):
 
 		slogger.stop()
 
+		log.debug("Stopping sandbox")
+		game.sandbox.stop()
+
 		log.debug("Game concluded")
 
 		return [ player.result for player in game.players ]
