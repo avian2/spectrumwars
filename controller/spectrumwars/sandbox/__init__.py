@@ -15,7 +15,7 @@ class SandboxBase(object):
 	def stop(self):
 		pass
 
-class SandboxInstanceBase(object):
+class SandboxTransceiverBase(object):
 	def init(self, i, update_interval):
 		raise NotImplementedError
 

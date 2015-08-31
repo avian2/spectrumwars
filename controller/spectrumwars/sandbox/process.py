@@ -9,11 +9,11 @@ import threading
 import time
 import traceback
 from spectrumwars.rpc import RPCClient
-from spectrumwars.sandbox import SandboxPlayer, SandboxError, SandboxBase, SandboxInstanceBase
+from spectrumwars.sandbox import SandboxPlayer, SandboxError, SandboxBase, SandboxTransceiverBase
 
 log = logging.getLogger(__name__)
 
-class SubprocessSandboxInstance(SandboxInstanceBase):
+class SubprocessSandboxTransceiver(SandboxTransceiverBase):
 	def __init__(self, path, role):
 		self.path = path
 		self.role = role
@@ -118,8 +118,8 @@ class SubprocessSandbox(SandboxBase):
 		players = []
 
 		for i, path in enumerate(self.paths):
-			sbrx = SubprocessSandboxInstance(path, 'rx')
-			sbtx = SubprocessSandboxInstance(path, 'tx')
+			sbrx = SubprocessSandboxTransceiver(path, 'rx')
+			sbtx = SubprocessSandboxTransceiver(path, 'tx')
 
 			player = SandboxPlayer(sbrx, sbtx, i)
 			players.append(player)

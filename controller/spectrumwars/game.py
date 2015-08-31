@@ -8,9 +8,9 @@ from spectrumwars.rpc import RPCServer
 
 log = logging.getLogger(__name__)
 
-class PlayerInstance(object):
-	def __init__(self, transceiver, server):
-		self.transceiver = transceiver
+class TransceiverContext(object):
+	def __init__(self, sb_transceiver, server):
+		self.sb_transceiver = sb_transceiver
 		self.server = server
 
 class Player(object):
@@ -20,34 +20,34 @@ class Player(object):
 		self.game = game
 
 		self.result = PlayerResult()
-		self.instances = []
+		self.contexts = []
 
 		rxradio, txradio = game.testbed.get_radio_pair()
 
-		for radio, transceiver in zip((rxradio, txradio), (sb_player.rx, sb_player.tx)):
-			transceiver.init(self.i, game.update_interval)
-			server = GameRPCServer(game, self, transceiver.role, radio)
+		for radio, sb_transceiver in zip((rxradio, txradio), (sb_player.rx, sb_player.tx)):
+			sb_transceiver.init(self.i, game.update_interval)
+			server = GameRPCServer(game, self, sb_transceiver.role, radio)
 			server.start()
 
-			instance = PlayerInstance(transceiver, server)
-			self.instances.append(instance)
+			context = TransceiverContext(sb_transceiver, server)
+			self.contexts.append(context)
 
 	def start(self):
-		for instance in self.instances:
-			instance.transceiver.start(instance.server.endpoint)
+		for context in self.contexts:
+			context.sb_transceiver.start(context.server.endpoint)
 
 	def join(self):
 		if self.game.hard_time_limit is None:
 			deadline = None
 		else:
 			deadline = self.game.start_time + self.game.hard_time_limit
-		for instance in self.instances:
-			instance.transceiver.join(deadline, timefunc=self.game.testbed.time)
+		for context in self.contexts:
+			context.sb_transceiver.join(deadline, timefunc=self.game.testbed.time)
 
-			instance.server.stop()
-			instance.server.join()
+			context.server.stop()
+			context.server.join()
 
-		self.instances = []
+		self.contexts = []
 
 class PlayerResult(object):
 	def __init__(self):
