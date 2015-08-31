@@ -16,7 +16,11 @@ class SandboxBase(object):
 		pass
 
 class SandboxTransceiverBase(object):
-	def init(self, i, update_interval):
+	def __init__(self, i, role):
+		self.i = i
+		self.role = role
+
+	def init(self, update_interval):
 		raise NotImplementedError
 
 	def start(self, endpoint):

@@ -9,12 +9,12 @@ from spectrumwars.sandbox import SandboxPlayer, SandboxBase, SandboxTransceiverB
 # Sandbox interface works.
 
 class ThreadedSandboxTransceiver(SandboxTransceiverBase):
-	def __init__(self, cls, role):
+	def __init__(self, cls, i, role):
+		super(ThreadedSandboxTransceiver, self).__init__(i, role)
 		self.cls = cls
-		self.role = role
 
-	def init(self, i, update_interval):
-		self.ins = self.cls(i, self.role, update_interval)
+	def init(self, update_interval):
+		self.ins = self.cls(self.i, self.role, update_interval)
 
 	def start(self, endpoint):
 		client = RPCClient(endpoint)
@@ -31,8 +31,8 @@ class ThreadedSandbox(SandboxBase):
 
 		for i, (rxcls, txcls) in enumerate(cls_list):
 			player = SandboxPlayer(
-				ThreadedSandboxTransceiver(rxcls, 'rx'),
-				ThreadedSandboxTransceiver(txcls, 'tx'), i)
+				ThreadedSandboxTransceiver(rxcls, i, 'rx'),
+				ThreadedSandboxTransceiver(txcls, i, 'tx'), i)
 			self.players.append(player)
 
 	def get_players(self):

@@ -14,12 +14,11 @@ from spectrumwars.sandbox import SandboxPlayer, SandboxError, SandboxBase, Sandb
 log = logging.getLogger(__name__)
 
 class SubprocessSandboxTransceiver(SandboxTransceiverBase):
-	def __init__(self, path, role):
+	def __init__(self, path, i, role):
+		super(SubprocessSandboxTransceiver, self).__init__(i, role)
 		self.path = path
-		self.role = role
 
-	def init(self, i, update_interval):
-		self.i = i
+	def init(self, update_interval):
 		self.update_interval = update_interval
 
 	def start(self, endpoint):
@@ -118,8 +117,8 @@ class SubprocessSandbox(SandboxBase):
 		players = []
 
 		for i, path in enumerate(self.paths):
-			sbrx = SubprocessSandboxTransceiver(path, 'rx')
-			sbtx = SubprocessSandboxTransceiver(path, 'tx')
+			sbrx = SubprocessSandboxTransceiver(path, i, 'rx')
+			sbtx = SubprocessSandboxTransceiver(path, i, 'tx')
 
 			player = SandboxPlayer(sbrx, sbtx, i)
 			players.append(player)

@@ -64,8 +64,8 @@ class TestThreadedSandbox(BaseTestSandbox):
 
 		player = players[0]
 
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
+		player.rx.init(1.)
+		player.tx.init(1.)
 
 		player.rx.start(self.endpoint)
 		player.tx.start(self.endpoint)
@@ -104,8 +104,8 @@ class Transmitter(Transceiver):
 
 		player = players[0]
 
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
+		player.rx.init(1.)
+		player.tx.init(1.)
 
 		player.rx.start(self.endpoint)
 		player.tx.start(self.endpoint)
@@ -136,8 +136,8 @@ class Transmitter(Transceiver):
 
 		player = players[0]
 
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
+		player.rx.init(1.)
+		player.tx.init(1.)
 
 		player.rx.start(self.endpoint)
 		player.tx.start(self.endpoint)
@@ -162,8 +162,8 @@ class Transmitter(Transceiver):
 
 		player = players[0]
 
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
+		player.rx.init(1.)
+		player.tx.init(1.)
 
 		player.rx.start(self.endpoint)
 		player.tx.start(self.endpoint)

@@ -25,7 +25,9 @@ class Player(object):
 		rxradio, txradio = game.testbed.get_radio_pair()
 
 		for radio, sb_transceiver in zip((rxradio, txradio), (sb_player.rx, sb_player.tx)):
-			sb_transceiver.init(self.i, game.update_interval)
+			assert self.i == sb_transceiver.i
+
+			sb_transceiver.init(game.update_interval)
 			server = GameRPCServer(game, self, sb_transceiver.role, radio)
 			server.start()
 
