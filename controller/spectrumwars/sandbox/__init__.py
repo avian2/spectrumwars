@@ -12,6 +12,9 @@ class SandboxBase(object):
 	def get_players(self):
 		raise NotImplementedError
 
+	def get_iface(self):
+		pass
+
 	def stop(self):
 		pass
 

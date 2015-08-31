@@ -1,5 +1,6 @@
 import copy
 import logging
+from netifaces import ifaddresses, AF_INET
 import time
 import threading
 from spectrumwars.testbed import TestbedError, RadioTimeout, RadioPacket, GameStatus
@@ -139,15 +140,23 @@ class GameRPCServer(RPCServer):
 		self.radio = radio
 
 		self.i = player.i
-		j = 1 if role == 'rx' else 0
-
 		self.role = role
-		self.xname = "(%d %s)" % (self.i, self.role)
 
-		port = 50000 + self.i*10 + j
-		self.endpoint = "tcp://127.0.0.1:%d" % (port,)
+		self.endpoint = self.get_endpoint(self.i, self.role, self.game.sandbox.get_iface())
 
 		super(GameRPCServer, self).__init__(self.endpoint, timeout=.5)
+
+	@classmethod
+	def get_endpoint(cls, i, role, iface=None, baseport=50000):
+		if iface is None:
+			iface = 'lo'
+
+		addr = ifaddresses(iface)[AF_INET][0]['addr']
+		port = baseport + i*2
+		if role == 'rx':
+			port += 1
+
+		return 'tcp://%s:%d' % (addr, port)
 
 	def handle_get_status_method(self):
 		status = self.game.get_status()

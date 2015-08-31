@@ -422,5 +422,12 @@ class TestGame(unittest.TestCase):
 		self._run_game(Receiver, Transceiver)
 		self.assertEqual(cnt[0], 1)
 
+from spectrumwars.game import GameRPCServer
+
+class TestGameRPCServer(unittest.TestCase):
+	def test_get_endpoint(self):
+		endpoint = GameRPCServer.get_endpoint(0, 'tx')
+		self.assertEqual(endpoint, "tcp://127.0.0.1:50000")
+
 if __name__ == '__main__':
 	unittest.main()
