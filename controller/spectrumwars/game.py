@@ -146,13 +146,16 @@ class GameRPCServer(RPCServer):
 
 		super(GameRPCServer, self).__init__(self.endpoint, timeout=.5)
 
+	def log_event(self, type, **kwargs):
+		self.game.log_event(type, i=self.i, role=self.role, **kwargs)
+
 	def handle_get_status_method(self):
 		status = self.game.get_status()
-		self.game.log_event("status", i=self.i, role=self.role, status=status)
+		self.log_event("status", status=status)
 		return status.to_json()
 
 	def handle_send_method(self, packet_json):
-		self.game.log_event("send", i=self.i, role=self.role)
+		self.log_event("send")
 
 		if self.role == 'tx':
 			self.player.result.tx_transmit_packets += 1
@@ -178,7 +181,7 @@ class GameRPCServer(RPCServer):
 			else:
 				self.player.result.tx_received_packets += 1
 
-			self.game.log_event("recv",  i=self.i, role=self.role)
+			self.log_event("recv")
 
 			return packet.to_json()
 
@@ -186,8 +189,7 @@ class GameRPCServer(RPCServer):
 			return None
 
 	def handle_set_configuration_method(self, frequency, bandwidth, power):
-		self.game.log_event("config", i=self.i, role=self.role,
-				frequency=frequency, bandwidth=bandwidth, power=power)
+		self.log_event("config", frequency=frequency, bandwidth=bandwidth, power=power)
 		self.radio.set_configuration(frequency, bandwidth, power)
 
 	def handle_get_configuration_method(self):
