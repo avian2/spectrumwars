@@ -12,7 +12,7 @@ class SandboxBase(object):
 	def get_players(self):
 		raise NotImplementedError
 
-	def get_iface(self):
+	def get_listen_addr(self):
 		pass
 
 	def start(self):
