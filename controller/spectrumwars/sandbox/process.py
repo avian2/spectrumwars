@@ -21,6 +21,19 @@ class SubprocessSandboxTransceiver(SandboxTransceiverBase):
 	def init(self, update_interval):
 		self.update_interval = update_interval
 
+	def get_args_json(self, path):
+
+		args_json = json.dumps({
+			'path': path,
+			'i': self.i,
+			'role': self.role,
+			'update_interval': self.update_interval,
+			'endpoint': self.endpoint,
+			'loglevel': logging.getLogger().getEffectiveLevel()
+		})
+
+		return args_json
+
 	def start(self, endpoint):
 
 		self.endpoint = endpoint
@@ -34,13 +47,7 @@ class SubprocessSandboxTransceiver(SandboxTransceiverBase):
 		else:
 			raise SandboxError("Can't find %r in PATH" % (cmdname,))
 
-		args_json = json.dumps({
-			'path': self.path,
-			'i': self.i,
-			'role': self.role,
-			'update_interval': self.update_interval,
-			'endpoint': endpoint,
-			'loglevel': logging.getLogger().getEffectiveLevel() })
+		args_json = self.get_args_json(self.path)
 		cmd = (excpath, args_json)
 
 		self.p = subprocess.Popen(cmd)
