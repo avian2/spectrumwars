@@ -257,6 +257,9 @@ class GameController(object):
 
 	def run(self, game):
 
+		log.debug("Starting sandbox")
+		game.sandbox.start()
+
 		log.debug("Instantiating player classes")
 		game.instantiate()
 		game.testbed.start()
@@ -265,7 +268,6 @@ class GameController(object):
 		slogger.start()
 
 		game.state = 'running'
-
 		game.start_time = game.testbed.time()
 
 		for player in game.players:
@@ -275,13 +277,12 @@ class GameController(object):
 			player.join()
 
 		game.end_time = game.testbed.time()
-
-		log.debug("Cleaning up testbed")
-
-		game.testbed.stop()
 		game.state = 'finished'
 
 		slogger.stop()
+
+		log.debug("Cleaning up testbed")
+		game.testbed.stop()
 
 		log.debug("Stopping sandbox")
 		game.sandbox.stop()
