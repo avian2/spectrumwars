@@ -65,6 +65,11 @@ say ``skip``).
 Installing web interface
 ------------------------
 
+.. warning::
+   Do not run the web interface on an publicly accessible port! At the moment,
+   this is equivalent to granting anyone on the Internet unlimited code
+   execution on the system running the game controller.
+
 Requirements:
 
  * virtualenv (``apt-get install python-virtualenv``)
