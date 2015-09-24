@@ -2,7 +2,7 @@ from spectrumwars import Transceiver
 import time
 import numpy as np
 
-class Transmitter(Transceiver):
+class Source(Transceiver):
 	def start(self):
 		time.sleep(.2)
 		spectrum = np.array( self.get_status().spectrum )
@@ -13,7 +13,7 @@ class Transmitter(Transceiver):
 		while True:
 			self.send()
 
-class Receiver(Transceiver):
+class Destination(Transceiver):
 	def start(self):
 		while True:
 			time.sleep(.3)

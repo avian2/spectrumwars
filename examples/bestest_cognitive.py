@@ -3,7 +3,7 @@ import random
 import time
 import numpy as np
 
-class Transmitter(Transceiver):
+class Source(Transceiver):
 	def start(self):
 		while True:
 			spectrum = np.array( self.get_status().spectrum )
@@ -17,7 +17,7 @@ class Transmitter(Transceiver):
 			for n in xrange(9):
 				self.send()
 
-class Receiver(Transceiver):
+class Destination(Transceiver):
 	def start(self):
 		time.sleep(.2)
 		while True:

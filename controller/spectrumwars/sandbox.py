@@ -144,9 +144,15 @@ class SubprocessSandboxInstance(object):
 			client.report_stop(True, desc)
 		else:
 			if args['role'] == 'rx':
-				cls = mod.Receiver
+				try:
+					cls = mod.Destination
+				except AttributeError:
+					cls = mod.Receiver
 			else:
-				cls = mod.Transmitter
+				try:
+					cls = mod.Source
+				except AttributeError:
+					cls = mod.Transmitter
 
 			ins = cls(args['i'], args['role'], args['update_interval'])
 			ins._start(client)

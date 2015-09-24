@@ -86,6 +86,19 @@ class TestSubprocessSandbox(BaseTestSandbox):
 
 		return f
 
+	def run_players(self, players):
+		for player in players:
+			player.rx.init(player.i, 1.)
+			player.tx.init(player.i, 1.)
+
+		for player in players:
+			player.rx.start(self.endpoint)
+			player.tx.start(self.endpoint)
+
+		for player in players:
+			player.rx.join()
+			player.tx.join()
+
 	def test_simple(self):
 
 		f = self.write_temp_py("""from spectrumwars import Transceiver
@@ -102,18 +115,29 @@ class Transmitter(Transceiver):
 
 		self.assertEqual(len(players), 1)
 
-		player = players[0]
-
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
-
-		player.rx.start(self.endpoint)
-		player.tx.start(self.endpoint)
-
-		player.rx.join()
-		player.tx.join()
+		self.run_players(players)
 
 		self.assertEqual(self.server.stopped, 2)
+		self.assertEqual(self.server.crashed, 0)
+
+	def test_new_names(self):
+
+		f = self.write_temp_py("""from spectrumwars import Transceiver
+
+class Destination(Transceiver):
+	pass
+
+class Source(Transceiver):
+	pass
+""")
+
+		sandbox = SubprocessSandbox([f.name])
+		players = sandbox.get_players()
+
+		self.assertEqual(len(players), 1)
+
+		self.run_players(players)
+
 		self.assertEqual(self.server.crashed, 0)
 
 	def test_loop(self):
@@ -160,16 +184,7 @@ class Transmitter(Transceiver):
 
 		self.assertEqual(len(players), 1)
 
-		player = players[0]
-
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
-
-		player.rx.start(self.endpoint)
-		player.tx.start(self.endpoint)
-
-		player.rx.join()
-		player.tx.join()
+		self.run_players(players)
 
 		self.assertEqual(self.server.crashed, 2)
 		self.assertEqual(self.server.stopped, 2)

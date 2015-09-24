@@ -3,7 +3,7 @@ import random
 import time
 import numpy as np
 
-class Transmitter(Transceiver):
+class Source(Transceiver):
 	def start(self):
 		while True:
 			time.sleep(.2)
@@ -18,7 +18,7 @@ class Transmitter(Transceiver):
 				self.send()
 				time.sleep(.05)
 
-class Receiver(Transceiver):
+class Destination(Transceiver):
 	def start(self):
 		time.sleep(.2)
 		while True:
