@@ -38,7 +38,7 @@ Overview of the game
 
 Competitors develop their algorithms using the Python scripting language. In a
 single game, two or more algorithms (`players`) compete with each other to
-transfer some useful data from a transmitter to a receiver as quickly and as reliably
+transfer some useful data from a source to a destination as quickly and as reliably
 as possible. A good player for example will avoid interference from other
 players and the environment.
 
@@ -57,13 +57,13 @@ the air.
 
 Each player is given control of two transceivers (radio front-ends). For the
 purpose of the game, payload only needs to go from one transceiver
-(called `transmitter`) to the other one (called `receiver`). The players make
+(called `source`) to the other one (called `destination`). The players make
 use of a simple interface that provides basic control over the radio.
 
-The separation between the receiver and transmitter poses another challenge
+The separation between the source and the destination poses another challenge
 the players must overcome. There is no reliable back channel to use for
-synchronization between the two. A rendezvous strategy is therefore required
-for all but the most simple algorithms.
+synchronization between the two ends of the radio link. A rendezvous strategy
+is therefore required for all but the most simple algorithms.
 
 Players are ranked by different statistics, like average packet loss and
 throughput. Different challenges are possible within the basic SpectrumWars

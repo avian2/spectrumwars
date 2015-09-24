@@ -5,23 +5,23 @@ Implementing a transceiver
 
 The Python source code file you provide to SpectrumWars (called a `player`)
 should define two subclasses of the base ``Transceiver`` class:
-one for the transmitter (named ``Transmitter``) and one for the receiver
-(named ``Receiver``). Game controller makes one instance of the transmitter
-class and one instance of the receiver class.
+one for the source (named ``Source``) and one for the destination
+(named ``Destination``). Game controller makes one instance of the source
+class and one instance of the destination class.
 
-From the standpoint of the programming interface, the transmitter and receiver
-class are identical (e.g.  receiver can also send data to the transmitter).
+From the standpoint of the programming interface, the source and destination
+classes are identical (e.g.  destination can also send data to the source).
 However in the game, their role differs: payload data is only sent from the
-transmitter to the receiver. This means that statistics like packet loss and
+source to the destination. This means that statistics like packet loss and
 throughput which are used in ranking the players are only counted in that
 direction.
 
 The ``Transceiver`` class interface has been designed to accomodate two
 programming styles: procedural programming and event-based programming.
 
-This is how a simple procedural receiver looks like::
+This is how a simple procedural destination looks like::
 
-   class Receiver(Transceiver):
+   class Destination(Transceiver):
       def start(self):
          # do some setup
          self.set_configuration(...)
@@ -36,9 +36,9 @@ This is how a simple procedural receiver looks like::
                # do something with queued-up packet data
                ...
 
-And this is how an identical event-based receiver looks like::
+And this is how an identical event-based destination looks like::
 
-   class Receiver(Transceiver):
+   class Destination(Transceiver):
       def start(self):
          # do some setup
          self.set_configuration(...)
@@ -62,7 +62,7 @@ Class reference
 .. py:class:: Transceiver
 
    You should override the following methods in the ``Transceiver`` class to
-   create your transmitter and receiver classes. Do not override or use any
+   create your source and destination classes. Do not override or use any
    members prefixed with an underscore (``_``). These are for internal use
    only.
 
