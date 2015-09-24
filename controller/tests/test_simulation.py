@@ -109,8 +109,8 @@ class TestSimulationGame(unittest.TestCase):
 	def setUp(self):
 		self.testbed = Testbed()
 
-	def _run_game(self, rxcls, txcls):
-		sandbox = ThreadedSandbox([[rxcls, txcls]])
+	def _run_game(self, dst_cls, src_cls):
+		sandbox = ThreadedSandbox([[dst_cls, src_cls]])
 		game = Game(self.testbed, sandbox,
 				packet_limit=self.PACKET_LIMIT, time_limit=self.TIME_LIMIT)
 		ctl = GameController()

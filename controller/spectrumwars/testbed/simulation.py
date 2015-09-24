@@ -92,13 +92,13 @@ class Testbed(TestbedBase):
 			log.debug("packet collision detected on channel %d" % (frequency,))
 
 	def get_radio_pair(self):
-		rx = self._get_radio()
-		tx = self._get_radio()
+		dst = self._get_radio()
+		src = self._get_radio()
 
-		rx.neighbor = tx.addr
-		tx.neighbor = rx.addr
+		dst.neighbor = src.addr
+		src.neighbor = dst.addr
 
-		return rx, tx
+		return dst, src
 
 	def get_spectrum(self):
 

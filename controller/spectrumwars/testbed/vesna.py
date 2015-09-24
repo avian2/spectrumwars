@@ -199,13 +199,13 @@ class Testbed(TestbedBase):
 
 	def get_radio_pair(self):
 
-		rxradio = self._get_radio()
-		txradio = self._get_radio()
+		dst_radio = self._get_radio()
+		src_radio = self._get_radio()
 
-		rxradio.neighbor = txradio.addr
-		txradio.neighbor = rxradio.addr
+		dst_radio.neighbor = src_radio.addr
+		src_radio.neighbor = dst_radio.addr
 
-		return rxradio, txradio
+		return dst_radio, src_radio
 
 	def start(self):
 		log.debug("starting spectrum sensor")

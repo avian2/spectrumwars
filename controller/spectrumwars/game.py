@@ -21,9 +21,9 @@ class Player(object):
 		self.result = PlayerResult()
 		self.instances = []
 
-		rxradio, txradio = game.testbed.get_radio_pair()
+		dst_radio, src_radio = game.testbed.get_radio_pair()
 
-		for radio, transceiver in zip((rxradio, txradio), (sb_player.rx, sb_player.tx)):
+		for radio, transceiver in zip((dst_radio, src_radio), (sb_player.dst, sb_player.src)):
 			transceiver.init(self.i, game.update_interval)
 			server = GameRPCServer(game, self, transceiver.role, radio)
 			server.start()
@@ -51,16 +51,16 @@ class Player(object):
 class PlayerResult(object):
 	def __init__(self):
 		# number of received packets in both directions
-		self.rx_received_packets = 0
-		self.tx_received_packets = 0
+		self.dst_received_packets = 0
+		self.src_received_packets = 0
 		# number of transmitted packets in both directions
-		self.rx_transmit_packets = 0
-		self.tx_transmit_packets = 0
+		self.dst_transmit_packets = 0
+		self.src_transmit_packets = 0
 		# whether the player's code raised an unhandled exception
 		self.crashed = False
 		# list of reasons why the player's code crashed
 		self.crash_report = []
-		# number of bytes transferred from transmitter to receiver
+		# number of bytes transferred from source to destination
 		self.payload_bytes = 0
 
 class Game(object):
@@ -90,7 +90,7 @@ class Game(object):
 
 		for player in self.players:
 			if self.packet_limit is not None:
-				if player.result.rx_received_packets >= self.packet_limit:
+				if player.result.dst_received_packets >= self.packet_limit:
 					log.debug("game packet limit reached by player %d!" %
 							player.i)
 					return True
@@ -136,7 +136,7 @@ class GameRPCServer(RPCServer):
 		self.radio = radio
 
 		self.i = player.i
-		j = 1 if role == 'rx' else 0
+		j = 1 if role == 'dst' else 0
 
 		self.role = role
 		self.xname = "(%d %s)" % (self.i, self.role)
@@ -157,11 +157,11 @@ class GameRPCServer(RPCServer):
 	def handle_send_method(self, packet_json):
 		self.log_event("send")
 
-		if self.role == 'tx':
-			self.player.result.tx_transmit_packets += 1
+		if self.role == 'src':
+			self.player.result.src_transmit_packets += 1
 			payload = True
 		else:
-			self.player.result.rx_transmit_packets += 1
+			self.player.result.dst_transmit_packets += 1
 			payload = False
 
 		data = RadioPacket.from_json(packet_json).data
@@ -171,15 +171,15 @@ class GameRPCServer(RPCServer):
 		try:
 			packet = self.radio.recv(timeout)
 
-			if self.role == 'rx':
-				self.player.result.rx_received_packets += 1
+			if self.role == 'dst':
+				self.player.result.dst_received_packets += 1
 
 				payload_bytes = self.game.testbed.get_packet_size()
 				if packet.data:
 					payload_bytes -= len(packet.data)
 				self.player.result.payload_bytes += payload_bytes
 			else:
-				self.player.result.tx_received_packets += 1
+				self.player.result.src_received_packets += 1
 
 			self.log_event("recv")
 
@@ -208,10 +208,10 @@ class GameRPCServer(RPCServer):
 		if crashed:
 			self.player.result.crashed = True
 
-			if self.role == 'rx':
-				header = "Receiver crash report:\n\n"
+			if self.role == 'dst':
+				header = "Destination crash report:\n\n"
 			else:
-				header = "Transmitter crash report:\n\n"
+				header = "Source crash report:\n\n"
 
 			self.player.result.crash_report.append(header + crash_report)
 

@@ -30,7 +30,7 @@ def plot_player(log, i, out_path):
 	min_t = min(l.timestamp for l in log)
 	max_t = max(l.timestamp for l in log)
 
-	parsed = { 'rx': ParsedLog(), 'tx': ParsedLog() }
+	parsed = { 'dst': ParsedLog(), 'src': ParsedLog() }
 	bg = []
 
 	payload = []
@@ -47,8 +47,8 @@ def plot_player(log, i, out_path):
 
 
 			payload.append((event.results[i].payload_bytes, timestamp))
-			pkt_sent.append((event.results[i].tx_transmit_packets, timestamp))
-			pkt_recv.append((event.results[i].rx_received_packets, timestamp))
+			pkt_sent.append((event.results[i].src_transmit_packets, timestamp))
+			pkt_recv.append((event.results[i].dst_received_packets, timestamp))
 
 			if event.type == "config":
 				l = p.config
@@ -65,7 +65,7 @@ def plot_player(log, i, out_path):
 			elif event.type == "status":
 				s = np.array(event.data['status'].spectrum)
 
-				if 'rx' in event.data['role']:
+				if 'dst' in event.data['role']:
 					cmap = 'YlOrRd_r'
 				else:
 					cmap='YlGn_r'
@@ -95,20 +95,20 @@ def plot_player(log, i, out_path):
 	plot(bg, color=bgcolor, alpha=.8, ls='none',
 			marker='x')
 
-	txcolor = (0,1,0)
-	plot(parsed['tx'].rx, label='tx recv', color=txcolor, alpha=.5, ls='none',
+	srccolor = (0,1,0)
+	plot(parsed['src'].rx, label='src recv', color=srccolor, alpha=.5, ls='none',
 			marker='o', markersize=10, markeredgecolor=(.5,.1,.5), markeredgewidth=width)
-	plot(parsed['tx'].tx, label='tx send', color=txcolor, ls='none',
+	plot(parsed['src'].tx, label='src send', color=srccolor, ls='none',
 			marker='x', markeredgewidth=width)
-	plot(parsed['tx'].config, label='tx config', color=txcolor,
+	plot(parsed['src'].config, label='src config', color=srccolor,
 			marker='+', markeredgewidth=width)
 
-	rxcolor = (1,0,0)
-	plot(parsed['rx'].rx, label='rx recv', color=rxcolor, alpha=.5, ls='none',
+	dstcolor = (1,0,0)
+	plot(parsed['dst'].rx, label='dst recv', color=dstcolor, alpha=.5, ls='none',
 			marker='o', markersize=10, markeredgecolor=(1.,.5,.5), markeredgewidth=width)
-	plot(parsed['rx'].tx, label='rx send', color=rxcolor, ls='none',
+	plot(parsed['dst'].tx, label='dst send', color=dstcolor, ls='none',
 			marker='x', markeredgewidth=width)
-	plot(parsed['rx'].config, label='rx config', color=rxcolor,
+	plot(parsed['dst'].config, label='dst config', color=dstcolor,
 			marker='+', markeredgewidth=width)
 
 
