@@ -52,15 +52,15 @@ class MockTestbed(TestbedBase):
 
 	def get_radio_pair(self):
 
-		rxradio = MockRadio(self)
-		txradio = MockRadio(self)
+		dst_radio = MockRadio(self)
+		src_radio = MockRadio(self)
 
-		rxradio.neighbor = txradio
-		txradio.neighbor = rxradio
+		dst_radio.neighbor = src_radio
+		src_radio.neighbor = dst_radio
 
 		self.clock = 0.
 
-		return rxradio, txradio
+		return dst_radio, src_radio
 
 	def time(self):
 		return self.clock
@@ -87,10 +87,10 @@ class TestGame(unittest.TestCase):
 	def setUp(self):
 		self.testbed = MockTestbed()
 
-	def _run_game(self, rxcls, txcls, packet_limit=PACKET_LIMIT, payload_limit=PAYLOAD_LIMIT,
+	def _run_game(self, dst_cls, src_cls, packet_limit=PACKET_LIMIT, payload_limit=PAYLOAD_LIMIT,
 			time_limit=TIME_LIMIT):
 
-		sandbox = ThreadedSandbox([[rxcls, txcls]])
+		sandbox = ThreadedSandbox([[dst_cls, src_cls]])
 		game = Game(self.testbed, sandbox,
 				packet_limit=packet_limit,
 				time_limit=time_limit,
@@ -100,109 +100,109 @@ class TestGame(unittest.TestCase):
 
 	def test_timeout(self):
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			pass
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			pass
 
-		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(result.rx_received_packets, 0)
-		self.assertEqual(result.tx_received_packets, 0)
-		self.assertEqual(result.rx_transmit_packets, 0)
-		self.assertEqual(result.tx_transmit_packets, 0)
+		result = self._run_game(Destination, Source)
+		self.assertEqual(result.dst_received_packets, 0)
+		self.assertEqual(result.src_received_packets, 0)
+		self.assertEqual(result.dst_transmit_packets, 0)
+		self.assertEqual(result.src_transmit_packets, 0)
 
 	def test_one_packet(self):
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 				self.send()
 
-		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(result.rx_received_packets, 1)
-		self.assertEqual(result.tx_received_packets, 0)
-		self.assertEqual(result.rx_transmit_packets, 0)
-		self.assertEqual(result.tx_transmit_packets, 1)
+		result = self._run_game(Destination, Source)
+		self.assertEqual(result.dst_received_packets, 1)
+		self.assertEqual(result.src_received_packets, 0)
+		self.assertEqual(result.dst_transmit_packets, 0)
+		self.assertEqual(result.src_transmit_packets, 1)
 		self.assertEqual(result.payload_bytes, self.testbed.get_packet_size())
 
 	def test_one_packet_reverse(self):
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				self.send()
 
-		result = self._run_game(Receiver, Transceiver)
-		self.assertEqual(result.rx_received_packets, 0)
-		self.assertEqual(result.tx_received_packets, 1)
-		self.assertEqual(result.rx_transmit_packets, 1)
-		self.assertEqual(result.tx_transmit_packets, 0)
+		result = self._run_game(Destination, Transceiver)
+		self.assertEqual(result.dst_received_packets, 0)
+		self.assertEqual(result.src_received_packets, 1)
+		self.assertEqual(result.dst_transmit_packets, 1)
+		self.assertEqual(result.src_transmit_packets, 0)
 		self.assertEqual(result.payload_bytes, 0)
 
 	def test_one_packet_miss(self):
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				self.set_configuration(1, 0, 0)
 				self.send()
 
-		result = self._run_game(Receiver, Transmitter)
-		self.assertEqual(result.rx_received_packets, 0)
-		self.assertEqual(result.tx_received_packets, 0)
-		self.assertEqual(result.rx_transmit_packets, 0)
-		self.assertEqual(result.tx_transmit_packets, 1)
+		result = self._run_game(Destination, Source)
+		self.assertEqual(result.dst_received_packets, 0)
+		self.assertEqual(result.src_received_packets, 0)
+		self.assertEqual(result.dst_transmit_packets, 0)
+		self.assertEqual(result.src_transmit_packets, 1)
 
 	def test_all_packets(self):
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 
 				while True:
 					self.send()
 
-		result = self._run_game(Receiver, Transmitter, payload_limit=None, time_limit=None)
-		self.assertGreaterEqual(result.rx_received_packets, self.PACKET_LIMIT)
+		result = self._run_game(Destination, Source, payload_limit=None, time_limit=None)
+		self.assertGreaterEqual(result.dst_received_packets, self.PACKET_LIMIT)
 
 	def test_all_payload(self):
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				while True:
 					self.send()
 
-		result = self._run_game(Transceiver, Transmitter, packet_limit=None, time_limit=None)
+		result = self._run_game(Transceiver, Source, packet_limit=None, time_limit=None)
 		self.assertGreaterEqual(result.payload_bytes, self.PAYLOAD_LIMIT)
 
 	def test_recv_packet(self):
 
 		cnt = [0]
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 
 			def recv(self, packet):
 				cnt[0] += 1
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 				self.send()
 
-		result = self._run_game(Receiver, Transmitter)
+		result = self._run_game(Destination, Source)
 		self.assertEqual(cnt[0], 1)
 
 	def test_recv_packet_data(self):
@@ -210,19 +210,19 @@ class TestGame(unittest.TestCase):
 		cnt = [0]
 		foo = "foo"
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 
 			def recv(self, packet):
 				cnt[0] = packet
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				self.set_configuration(0, 0, 0)
 				self.send(foo)
 
-		result = self._run_game(Receiver, Transmitter)
+		result = self._run_game(Destination, Source)
 		self.assertEqual(cnt[0].data, foo)
 		self.assertEqual(result.payload_bytes, self.testbed.get_packet_size() - len(foo))
 
@@ -231,15 +231,15 @@ class TestGame(unittest.TestCase):
 		cnt = [0]
 		foo = "x" * self.testbed.get_packet_size()
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def recv(self, packet):
 				cnt[0] = packet
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				self.send(foo)
 
-		result = self._run_game(Receiver, Transmitter)
+		result = self._run_game(Destination, Source)
 		self.assertEqual(cnt[0].data, foo)
 		self.assertEqual(result.payload_bytes, 0)
 
@@ -247,13 +247,13 @@ class TestGame(unittest.TestCase):
 
 		foo = "x" * (self.testbed.get_packet_size() + 1)
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				self.send(foo)
 
 
 		log_exc_off()
-		result = self._run_game(Transceiver, Transmitter)
+		result = self._run_game(Transceiver, Source)
 		log_exc_on()
 		self.assertTrue(result.crashed)
 
@@ -261,11 +261,11 @@ class TestGame(unittest.TestCase):
 
 		cnt = [0]
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def status_update(self, status):
 				cnt[0] += 1
 
-		result = self._run_game(Receiver, Transceiver)
+		result = self._run_game(Destination, Transceiver)
 		self.assertGreater(cnt[0], 1)
 		#self.assertEqual(cnt[0], self.TIME_LIMIT)
 
@@ -273,68 +273,68 @@ class TestGame(unittest.TestCase):
 
 		cnt = [0]
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				cnt[0] = self.get_packet_size()
 
-		result = self._run_game(Receiver, Transceiver)
+		result = self._run_game(Destination, Transceiver)
 		self.assertEqual(cnt[0], self.testbed.get_packet_size())
 
 	def test_error_recv(self):
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def recv(self, packet):
 				raise Exception
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				while True:
 					self.send()
 
 		log_exc_off()
-		result = self._run_game(Receiver, Transmitter)
+		result = self._run_game(Destination, Source)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
 		self.assertEqual(len(result.crash_report), 1)
 		self.assertTrue("Traceback" in result.crash_report[0])
-		self.assertTrue("Receiver" in result.crash_report[0])
-		self.assertTrue("Transmitter" not in result.crash_report[0])
+		self.assertTrue("Destination" in result.crash_report[0])
+		self.assertTrue("Source" not in result.crash_report[0])
 
 	def test_error_start(self):
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				raise Exception
 
 		log_exc_off()
-		result = self._run_game(Receiver, Transceiver)
+		result = self._run_game(Destination, Transceiver)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
 		self.assertEqual(len(result.crash_report), 1)
 		self.assertTrue("Traceback" in result.crash_report[0])
-		self.assertTrue("Receiver" in result.crash_report[0])
-		self.assertTrue("Transmitter" not in result.crash_report[0])
+		self.assertTrue("Destination" in result.crash_report[0])
+		self.assertTrue("Source" not in result.crash_report[0])
 
 	def test_error_status_update(self):
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def status_update(self, status):
 				raise Exception
 
 		log_exc_off()
-		result = self._run_game(Receiver, Transceiver)
+		result = self._run_game(Destination, Transceiver)
 		log_exc_on()
 		self.assertEqual(result.crashed, True)
 		self.assertEqual(len(result.crash_report), 1)
 		self.assertTrue("Traceback" in result.crash_report[0])
-		self.assertTrue("Receiver" in result.crash_report[0])
-		self.assertTrue("Transmitter" not in result.crash_report[0])
+		self.assertTrue("Destination" in result.crash_report[0])
+		self.assertTrue("Source" not in result.crash_report[0])
 
 	def test_recv_in_start(self):
 
 		cnt = [0, 0, 0]
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				for data in self.recv_loop(timeout=2.):
 					cnt[1] += 1
@@ -342,13 +342,13 @@ class TestGame(unittest.TestCase):
 			def recv(self, packet):
 				cnt[0] += 1
 
-		class Transmitter(Transceiver):
+		class Source(Transceiver):
 			def start(self):
 				while True:
 					cnt[2] += 1
 					self.send()
 
-		result = self._run_game(Receiver, Transmitter, payload_limit=None)
+		result = self._run_game(Destination, Source, payload_limit=None)
 
 		self.assertEqual(result.crashed, False)
 		self.assertGreaterEqual(cnt[0], self.PACKET_LIMIT)
@@ -359,11 +359,11 @@ class TestGame(unittest.TestCase):
 
 		sl = []
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def status_update(self, status):
 				sl.append(status)
 
-		self._run_game(Receiver, Transceiver)
+		self._run_game(Destination, Transceiver)
 
 		for s in sl:
 			self.assertTrue(s.spectrum)
@@ -371,55 +371,55 @@ class TestGame(unittest.TestCase):
 	def test_get_configuration(self):
 		sl = []
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				self.set_configuration(0, 1, 2)
 				sl.append(self.get_configuration())
 
-		self._run_game(Receiver, Transceiver)
+		self._run_game(Destination, Transceiver)
 		self.assertEqual([0, 1, 2], sl[0])
 
 	def test_get_frequency_range(self):
 		sl = []
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				sl.append(self.get_frequency_range())
 
-		self._run_game(Receiver, Transceiver)
+		self._run_game(Destination, Transceiver)
 		self.assertEqual(10, sl[0])
 
 	def test_get_bandwidth_range(self):
 		sl = []
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				sl.append(self.get_bandwidth_range())
 
-		self._run_game(Receiver, Transceiver)
+		self._run_game(Destination, Transceiver)
 		self.assertEqual(11, sl[0])
 
 	def test_get_power_range(self):
 		sl = []
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				sl.append(self.get_power_range())
 
-		self._run_game(Receiver, Transceiver)
+		self._run_game(Destination, Transceiver)
 		self.assertEqual(12, sl[0])
 
 	def test_set_configuration_error(self):
 		cnt = [0]
 
-		class Receiver(Transceiver):
+		class Destination(Transceiver):
 			def start(self):
 				try:
 					self.set_configuration(self.get_frequency_range(), 0, 0)
 				except RadioError:
 					cnt[0] += 1
 
-		self._run_game(Receiver, Transceiver)
+		self._run_game(Destination, Transceiver)
 		self.assertEqual(cnt[0], 1)
 
 if __name__ == '__main__':

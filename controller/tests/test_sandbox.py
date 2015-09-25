@@ -64,14 +64,14 @@ class TestThreadedSandbox(BaseTestSandbox):
 
 		player = players[0]
 
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
+		player.dst.init(player.i, 1.)
+		player.src.init(player.i, 1.)
 
-		player.rx.start(self.endpoint)
-		player.tx.start(self.endpoint)
+		player.dst.start(self.endpoint)
+		player.src.start(self.endpoint)
 
-		player.rx.join()
-		player.tx.join()
+		player.dst.join()
+		player.src.join()
 
 		self.assertEqual(self.server.stopped, 2)
 		self.assertEqual(self.server.crashed, 0)
@@ -85,6 +85,19 @@ class TestSubprocessSandbox(BaseTestSandbox):
 		f.flush()
 
 		return f
+
+	def run_players(self, players):
+		for player in players:
+			player.dst.init(player.i, 1.)
+			player.src.init(player.i, 1.)
+
+		for player in players:
+			player.dst.start(self.endpoint)
+			player.src.start(self.endpoint)
+
+		for player in players:
+			player.dst.join()
+			player.src.join()
 
 	def test_simple(self):
 
@@ -102,18 +115,29 @@ class Transmitter(Transceiver):
 
 		self.assertEqual(len(players), 1)
 
-		player = players[0]
-
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
-
-		player.rx.start(self.endpoint)
-		player.tx.start(self.endpoint)
-
-		player.rx.join()
-		player.tx.join()
+		self.run_players(players)
 
 		self.assertEqual(self.server.stopped, 2)
+		self.assertEqual(self.server.crashed, 0)
+
+	def test_new_names(self):
+
+		f = self.write_temp_py("""from spectrumwars import Transceiver
+
+class Destination(Transceiver):
+	pass
+
+class Source(Transceiver):
+	pass
+""")
+
+		sandbox = SubprocessSandbox([f.name])
+		players = sandbox.get_players()
+
+		self.assertEqual(len(players), 1)
+
+		self.run_players(players)
+
 		self.assertEqual(self.server.crashed, 0)
 
 	def test_loop(self):
@@ -136,17 +160,17 @@ class Transmitter(Transceiver):
 
 		player = players[0]
 
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
+		player.dst.init(player.i, 1.)
+		player.src.init(player.i, 1.)
 
-		player.rx.start(self.endpoint)
-		player.tx.start(self.endpoint)
+		player.dst.start(self.endpoint)
+		player.src.start(self.endpoint)
 
 		now = time.time()
 		deadline = now + 1
 
-		player.rx.join(deadline=deadline)
-		player.tx.join(deadline=deadline)
+		player.dst.join(deadline=deadline)
+		player.src.join(deadline=deadline)
 
 		self.assertEqual(self.server.crashed, 1)
 		self.assertEqual(self.server.stopped, 2)
@@ -160,16 +184,7 @@ class Transmitter(Transceiver):
 
 		self.assertEqual(len(players), 1)
 
-		player = players[0]
-
-		player.rx.init(player.i, 1.)
-		player.tx.init(player.i, 1.)
-
-		player.rx.start(self.endpoint)
-		player.tx.start(self.endpoint)
-
-		player.rx.join()
-		player.tx.join()
+		self.run_players(players)
 
 		self.assertEqual(self.server.crashed, 2)
 		self.assertEqual(self.server.stopped, 2)

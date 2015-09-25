@@ -1,10 +1,10 @@
 from spectrumwars import Transceiver
 
-class Receiver(Transceiver):
+class Destination(Transceiver):
 	def start(self):
 		self.set_configuration(0, 0, 0)
 
-class Transmitter(Transceiver):
+class Source(Transceiver):
 	def start(self):
 		self.set_configuration(0, 0, 0)
 		while True:

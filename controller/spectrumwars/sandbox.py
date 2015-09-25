@@ -17,9 +17,9 @@ log = logging.getLogger(__name__)
 class SandboxError(Exception): pass
 
 class SandboxPlayer(object):
-	def __init__(self, rx, tx, i):
-		self.rx = rx
-		self.tx = tx
+	def __init__(self, dst, src, i):
+		self.dst = dst
+		self.src = src
 		self.i = i
 
 # ThreadedSandbox provides no isolation between the player's code and the game
@@ -47,10 +47,10 @@ class ThreadedSandbox(object):
 	def __init__(self, cls_list):
 		self.players = []
 
-		for i, (rxcls, txcls) in enumerate(cls_list):
+		for i, (dst_cls, src_cls) in enumerate(cls_list):
 			player = SandboxPlayer(
-				ThreadedSandboxInstance(rxcls, 'rx'),
-				ThreadedSandboxInstance(txcls, 'tx'), i)
+				ThreadedSandboxInstance(dst_cls, 'dst'),
+				ThreadedSandboxInstance(src_cls, 'src'), i)
 			self.players.append(player)
 
 	def get_players(self):
@@ -143,10 +143,16 @@ class SubprocessSandboxInstance(object):
 			desc = traceback.format_exc()
 			client.report_stop(True, desc)
 		else:
-			if args['role'] == 'rx':
-				cls = mod.Receiver
+			if args['role'] == 'dst':
+				try:
+					cls = mod.Destination
+				except AttributeError:
+					cls = mod.Receiver
 			else:
-				cls = mod.Transmitter
+				try:
+					cls = mod.Source
+				except AttributeError:
+					cls = mod.Transmitter
 
 			ins = cls(args['i'], args['role'], args['update_interval'])
 			ins._start(client)
@@ -161,10 +167,10 @@ class SubprocessSandbox(object):
 		players = []
 
 		for i, path in enumerate(self.paths):
-			sbrx = SubprocessSandboxInstance(path, 'rx')
-			sbtx = SubprocessSandboxInstance(path, 'tx')
+			dst = SubprocessSandboxInstance(path, 'dst')
+			src = SubprocessSandboxInstance(path, 'src')
 
-			player = SandboxPlayer(sbrx, sbtx, i)
+			player = SandboxPlayer(dst, src, i)
 			players.append(player)
 
 		log.info("Loaded %d players" % (len(players),))

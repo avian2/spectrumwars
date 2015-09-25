@@ -27,12 +27,12 @@ code. See `NumPy reference
    import random
    import time
 
-   # First, let's write the code that controls our transmitter.
-   class Transmitter(Transceiver):
+   # First, let's write the code that controls our source.
+   class Source(Transceiver):
 
       # We use the procedural style in this example, so we only override the
       # start() method. This way our code gets called right at the start of
-      # the game. Our transmitter will not leave this method until the game
+      # the game. Our source will not leave this method until the game
       # ends.
       def start(self):
 
@@ -86,29 +86,29 @@ code. See `NumPy reference
             # same channel again.
 
 
-   # Now for the receiver side of the code.
-   class Receiver(Transceiver):
+   # Now for the destination side of the code.
+   class Destination(Transceiver):
 
-      # Again, receiver spends the duration of the game in the start() method.
+      # Again, destination spends the duration of the game in the start() method.
       def start(self):
 
-         # Since the first thing we do in the transmitter is a 200 ms delay,
+         # Since the first thing we do in the source is a 200 ms delay,
          # there is no point in trying to receive anything earlier than that.
          time.sleep(.2)
 
          # Another infinite loop.
          while True:
 
-            # Wait a bit more to be sure that the transmitter is transmitting
+            # Wait a bit more to be sure that the source is transmitting
             # at this point and that its packets have been picket up by the
             # spectrum sensor.
             time.sleep(.1)
 
-            # Use the same method as in the transmitter to get a NumPy array
+            # Use the same method as in the source to get a NumPy array
             # containing RSSI values for all channels.
             spectrum = np.array( self.get_status().spectrum )
 
-            # This line uses a similar argsort trick as in the transmitter.
+            # This line uses a similar argsort trick as in the source.
             # We want an array of channel numbers, sorted with the channel with
             # the highest signal strength on top.
             chl = np.argsort(spectrum)[::-1]
@@ -117,10 +117,10 @@ code. See `NumPy reference
             for ch in chl[:5]:
 
                # ... tune the radio to that channel. Set bitrate to the same
-               # one as used by the transmitter.
+               # one as used by the source.
                #
                # We also set the transmit power to the higher setting. However
-               # we don't transmit anything from the receiver side in this
+               # we don't transmit anything from the destination side in this
                # example.
                self.set_configuration(ch, 0, 0)
 
@@ -128,7 +128,7 @@ code. See `NumPy reference
                for packet in self.recv_loop(timeout=.2):
 
                   # We don't do anything with the received packet - the
-                  # transmitter did not include any control data that would be
+                  # source did not include any control data that would be
                   # interesting to us.
                   #
                   # Game controller takes care of the payload data automatically.

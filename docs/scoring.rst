@@ -16,11 +16,11 @@ a game:
               Ntx
 
    Where ``Ntx`` is the total number of packets transmitted by the player's
-   transmitter during the game and ``Nrx`` is the total number of packets
-   received by the player's receiver during the game.
+   source during the game and ``Nrx`` is the total number of packets
+   received by the player's destination during the game.
 
-   Note that packets with control data in the direction from the *receiver*
-   to the *transmitter* do not count.
+   Note that packets with control data in the direction from the *destination*
+   to the *source* do not count.
 
 **Throughput**
    Throughput is defined as::
@@ -30,7 +30,7 @@ a game:
              T       s
 
    Where ``Prx`` is the total amount of payload data received by the player's
-   receiver in bytes and ``T`` is the duration of the game in seconds.
+   destination in bytes and ``T`` is the duration of the game in seconds.
 
 
 .. image:: figures/payload.png

@@ -50,24 +50,24 @@ class TestTransceiver(unittest.TestCase):
 		del self.server
 
 	def test_numpy_int32(self):
-		t = MockTransceiver(0, 'rx', 1.)
+		t = MockTransceiver(0, 'dst', 1.)
 		t._start(self.client)
 		t.set_configuration(np.int32(0), np.int32(0), np.int32(0))
 
 	def test_numpy_int64(self):
-		t = MockTransceiver(0, 'rx', 1.)
+		t = MockTransceiver(0, 'dst', 1.)
 		t._start(self.client)
 		t.set_configuration(np.int64(0), np.int64(0), np.int64(0))
 
 	def test_numpy_float32(self):
-		t = MockTransceiver(0, 'rx', .1)
+		t = MockTransceiver(0, 'dst', .1)
 		t._start(self.client)
 
 		for packet in t.recv_loop(timeout=np.float32(.1)):
 			pass
 
 	def test_numpy_float64(self):
-		t = MockTransceiver(0, 'rx', .1)
+		t = MockTransceiver(0, 'dst', .1)
 		t._start(self.client)
 
 		for packet in t.recv_loop(timeout=np.float64(.1)):
@@ -81,5 +81,5 @@ class TestTransceiver(unittest.TestCase):
 					self.send(chr(n))
 				raise StopGame
 
-		t = T(0, 'rx', .1)
+		t = T(0, 'dst', .1)
 		t._start(self.client)

@@ -1,7 +1,7 @@
 from spectrumwars import Transceiver
 import random
 
-class Transmitter(Transceiver):
+class Source(Transceiver):
 	def start(self):
 		ch = random.randint(0, self.get_frequency_range()-1)
 		self.set_configuration(ch, 3, 0)
@@ -9,7 +9,7 @@ class Transmitter(Transceiver):
 		while True:
 			self.send()
 
-class Receiver(Transceiver):
+class Destination(Transceiver):
 	def start(self):
 		ch = 0
 
