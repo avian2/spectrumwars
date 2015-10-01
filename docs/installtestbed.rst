@@ -84,4 +84,10 @@ testbed:
 * gr-specest - https://github.com/avian2/gr-specest
 
 * pyudev (``apt-get install python-pyudev``)
-* pyserial (``pip install pyserial --user``)
+* pyserial (``apt-get install python-serial`` or ``pip install pyserial --user``)
+
+Also, make sure that ``/dev/ttyACMxx`` devices are accessible to the user
+running the game controller. Typically, this requires adding the user to the
+``dialout``  group. For example::
+
+   # adduser myuser dialout
