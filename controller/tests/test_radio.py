@@ -1,3 +1,4 @@
+from itertools import combinations
 import serial
 import unittest
 
@@ -230,6 +231,65 @@ class TestAsyncRadio(OnLineRadioTestCase):
 			n += 1
 
 		self.assertEqual(n, N)
+
+class TestRadioCombinations(unittest.TestCase):
+
+	def test_combinations(self):
+
+		nodes = []
+		for device in list_radio_devices():
+			nodes.append(AsyncRadio(device))
+
+		for node in nodes:
+			node.start()
+
+		for node1, node2 in combinations(nodes, 2):
+			self._send_one(node1, node2)
+			self._send_one(node2, node1)
+
+		for node in nodes:
+			node.stop()
+
+	def _send_one(self, node1, node2):
+		print node1.device, '->', node2.device
+
+		npkt = 20
+
+		for bitrate in xrange(4):
+			nrcv = self._send(node1, node2, npkt=npkt, bitrate=bitrate)
+			loss = float(npkt-nrcv) / npkt
+
+			self.assertLess(loss, .1)
+
+			print "bitrate=%d: %.1f%% packet loss" % (bitrate, loss*100.)
+
+	def _send(self, node1, node2, len=100, npkt=1, bitrate=0):
+		node1.cmd("a 41")
+		node1.cmd("c a %d 0" % (bitrate,))
+		node2.cmd("a 42")
+		node2.cmd("c a %d 0" % (bitrate,))
+
+		data = "cd" * len
+
+		nrcv = 0
+		for n in xrange(npkt):
+			node1.cmd("t 42 %s" % (data,))
+
+		for n in xrange(npkt):
+			expected = "R %s" % (data,)
+
+			try:
+				resp = node2.recv(timeout=.1)
+			except:
+				pass
+			else:
+				self.assertEqual(resp, expected)
+				nrcv += 1
+
+		node1.cmd("a 0")
+		node2.cmd("a 0")
+
+		return nrcv
 
 if __name__ == "__main__":
 	unittest.main()
