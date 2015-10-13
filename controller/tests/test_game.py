@@ -20,6 +20,7 @@
 
 import logging
 import unittest
+import threading
 
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout, RadioError
@@ -224,6 +225,31 @@ class TestGame(unittest.TestCase):
 
 		result = self._run_game(Destination, Source)
 		self.assertEqual(cnt[0], 1)
+
+	def test_dst_starts_after_src(self):
+		# This is mostly to test that our MockRadio and MockTestbed
+		# operate deterministically.
+		#
+		# Since we're not doing any real time.sleep(), it might happen
+		# that destination event loop only starts running after source
+		# has already triggered end game condition.
+
+		lock = threading.Lock()
+		lock.acquire()
+
+		class Destination(Transceiver):
+			def start(self):
+				lock.acquire()
+
+		class Source(Transceiver):
+			def start(self):
+				self.send()
+
+			def _stop(self):
+				lock.release()
+
+		result = self._run_game(Destination, Source)
+		self.assertEqual(result.dst_received_packets, 1)
 
 	def test_recv_packet_data(self):
 

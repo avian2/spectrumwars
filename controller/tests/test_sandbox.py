@@ -43,6 +43,9 @@ class MockGameRPCServer(RPCServer):
 	def handle_get_ranges_method(self):
 		return (0, 0, 0)
 
+	def handle_recv_method(self, timeout):
+		return None
+
 class BaseTestSandbox(unittest.TestCase):
 
 	def setUp(self):

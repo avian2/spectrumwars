@@ -64,10 +64,19 @@ class Transceiver(object):
 	def start(self):
 		pass
 
+	def _stop(self):
+		# Note: This not something we expose to the user - there is no
+		# point in her running any code when the game finishes. It's
+		# useful for testing, etc.
+		pass
+
 	def status_update(self, status):
 		pass
 
 	def get_status(self):
+		if self._client.should_finish():
+			raise StopGame
+
 		status_json = self._client.get_status()
 		status = GameStatus.from_json(status_json)
 
@@ -159,8 +168,7 @@ class Transceiver(object):
 			self._safe_call(self.start)
 
 			i = 0
-			while not self._client.should_finish():
-
+			while True:
 				self._recv(timeout=self._update_interval)
 
 				log.debug("%s status update (%d)" % (self._name, i))
@@ -174,6 +182,8 @@ class Transceiver(object):
 		except TransceiverError, e:
 			crashed = True
 			desc = e.desc
+
+		self._stop()
 
 		log.debug("%s worker stopped" % self._name)
 
