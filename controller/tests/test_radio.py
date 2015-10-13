@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see http://www.gnu.org/licenses/
 
+from itertools import combinations
 import serial
 import unittest
 
@@ -97,7 +98,7 @@ class TestRadioInterface(OnLineRadioTestCase):
 	RADIO_CLASS = SyncRadio
 
 	def test_set_address(self):
-		self.node2.cmd("a 01")
+		self.node2.cmd("a 00")
 
 	def test_invalid_cmd(self):
 		self.assertRaisesRegexp(RadioError, "unknown command", self.node1.cmd, "x")
@@ -125,29 +126,27 @@ class TestRadio(OnLineRadioTestCase):
 	RADIO_CLASS = SyncRadio
 
 	def setUp(self):
-		for node in self.node1, self.node2:
-			node.cmd("a 00")
-			node.cmd("c 0 0 0")
-
-	def test_set_address_1(self):
-		self.node2.cmd("a 01")
-		self._send_one(addr=1)
-		self.node2.cmd("a 00")
-
-	def test_set_address_1(self):
-		self.node2.cmd("a 01")
-		self.assertRaises(RadioTimeout, self._send_one, addr=2)
-		self.node2.cmd("a 00")
-
-	def test_set_channel_1(self):
+		self.node1.cmd("a 01")
+		self.node2.cmd("a 02")
+		self.node1.cmd("c 0 0 0")
 		self.node2.cmd("c 0 0 0")
+
+	def tearDown(self):
+		self.node1.cmd("a 00")
+		self.node2.cmd("a 00")
+
+	def test_send_one(self):
 		self._send_one()
 
-	def test_set_channel_2(self):
+	def test_set_address(self):
+		self.node2.cmd("a 03")
+		self.assertRaises(RadioTimeout, self._send_one)
+
+	def test_set_channel(self):
 		self.node2.cmd("c 1 0 0")
 		self.assertRaises(RadioTimeout, self._send_one)
 
-	def _send_one(self, addr=0, n=20):
+	def _send_one(self, addr=2, n=20):
 		data = "cd" * n
 		self.node1.cmd("t %x %s" % (addr, data))
 		expected = "R %s" % (data,)
@@ -180,13 +179,9 @@ class TestRadio(OnLineRadioTestCase):
 			self._send_one()
 
 	def test_send_collision(self):
-		self.node1.cmd("a 01")
-		self.node2.cmd("a 02")
 		for n in xrange(50):
 			self.node1.cmd("t 02 " + "ab" * 10)
 			self.node2.cmd("t 01 " + "ab" * 10)
-		self.node1.cmd("a 00")
-		self.node2.cmd("a 00")
 
 		self.node1.recv_flush()
 		self.node2.recv_flush()
@@ -198,11 +193,7 @@ class TestRadio(OnLineRadioTestCase):
 				self.node2.cmd("c %x %x 0" % (chan, bw))
 				self._send_one()
 
-	def test_config_2(self):
-		self.node1.cmd("c 1 0 0")
-		self.assertRaises(RadioTimeout, self._send_one)
-
-	def test_config_3(self):
+	def test_set_bitrate(self):
 		self.node1.cmd("c 0 1 0")
 		self.assertRaises(RadioTimeout, self._send_one)
 
@@ -211,9 +202,14 @@ class TestAsyncRadio(OnLineRadioTestCase):
 	RADIO_CLASS = AsyncRadio
 
 	def setUp(self):
-		for node in self.node1, self.node2:
-			node.cmd("a 00")
-			node.cmd("c 0 0 0")
+		self.node1.cmd("a 01")
+		self.node2.cmd("a 02")
+		self.node1.cmd("c 0 0 0")
+		self.node2.cmd("c 0 0 0")
+
+	def tearDown(self):
+		self.node1.cmd("a 00")
+		self.node2.cmd("a 00")
 
 	def test_long_null_packet(self):
 		# this fails if data whitening isn't working
@@ -221,7 +217,7 @@ class TestAsyncRadio(OnLineRadioTestCase):
 		N = 10
 
 		for n in xrange(N):
-			self.node1.cmd("t 0 %s" % (data,))
+			self.node1.cmd("t 2 %s" % (data,))
 
 		expected = "R %s" % (data,)
 		for n in xrange(N):
@@ -233,9 +229,9 @@ class TestAsyncRadio(OnLineRadioTestCase):
 		N = 10
 
 		for n in xrange(N):
-			self.node1.cmd("t 0 %s" % (data,))
+			self.node1.cmd("t 2 %s" % (data,))
 			self.node1.cmd("c 1 0 0")
-			self.node1.cmd("t 0 12")
+			self.node1.cmd("t 2 12")
 			self.node1.cmd("c 0 0 0")
 
 		expected = "R %s" % (data,)
@@ -250,6 +246,65 @@ class TestAsyncRadio(OnLineRadioTestCase):
 			n += 1
 
 		self.assertEqual(n, N)
+
+class TestRadioCombinations(unittest.TestCase):
+
+	def test_combinations(self):
+
+		nodes = []
+		for device in list_radio_devices():
+			nodes.append(AsyncRadio(device))
+
+		for node in nodes:
+			node.start()
+
+		for node1, node2 in combinations(nodes, 2):
+			self._send_one(node1, node2)
+			self._send_one(node2, node1)
+
+		for node in nodes:
+			node.stop()
+
+	def _send_one(self, node1, node2):
+		print node1.device, '->', node2.device
+
+		npkt = 20
+
+		for bitrate in xrange(4):
+			nrcv = self._send(node1, node2, npkt=npkt, bitrate=bitrate)
+			loss = float(npkt-nrcv) / npkt
+
+			self.assertLess(loss, .1)
+
+			print "bitrate=%d: %.1f%% packet loss" % (bitrate, loss*100.)
+
+	def _send(self, node1, node2, len=100, npkt=1, bitrate=0):
+		node1.cmd("a 41")
+		node1.cmd("c a %d 0" % (bitrate,))
+		node2.cmd("a 42")
+		node2.cmd("c a %d 0" % (bitrate,))
+
+		data = "cd" * len
+
+		nrcv = 0
+		for n in xrange(npkt):
+			node1.cmd("t 42 %s" % (data,))
+
+		for n in xrange(npkt):
+			expected = "R %s" % (data,)
+
+			try:
+				resp = node2.recv(timeout=.1)
+			except RadioTimeout:
+				pass
+			else:
+				self.assertEqual(resp, expected)
+				nrcv += 1
+
+		node1.cmd("a 0")
+		node2.cmd("a 0")
+
+		return nrcv
 
 if __name__ == "__main__":
 	unittest.main()
