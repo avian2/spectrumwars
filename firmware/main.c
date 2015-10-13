@@ -15,6 +15,7 @@
 #include "vsnpm.h"
 #include "vsncc1101.h"
 #include "vsnccradio.h"
+#include "vsnledind.h"
 
 static int cc2500_patable[] = {
 	0xfe,	//     0 dBm
@@ -207,7 +208,10 @@ static void cmd_buff_dispatch()
 	if(sscanf(cmd_buff, "a %x", &addr) == 1) {
 		cmd_set_addr(addr);
 	} else if(sscanf(cmd_buff, "t %x %508s", &addr, data) == 2) {
+		vsnLEDInd_pwrState(LED_IND_ON);
+		GPIO_SetBits(GPIO_LED, PIN_LED);
 		cmd_transmit(addr, data);
+		vsnLEDInd_pwrState(LED_IND_PWM);
 	} else if(sscanf(cmd_buff, "c %x %x %x", &chan, &bw, &power) == 3) {
 		cmd_config(chan, bw, power);
 	} else {
@@ -304,6 +308,9 @@ int main(void)
 
 	/* Init functions for sensors, actuators,... */
 	radio_setup();
+
+	vsnLEDInd_pwm(95, 1.);
+	vsnLEDInd_pwrState(LED_IND_PWM);
 
 	while(1)
 	{
