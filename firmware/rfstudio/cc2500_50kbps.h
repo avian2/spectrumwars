@@ -3,10 +3,10 @@
 // Channel spacing = 99.906921 
 // Data format = Normal mode 
 // Data rate = 49.9535 
-// RX filter BW = 105.468750 
+// RX filter BW = 120.535714 
 // Preamble count = 8 
 // Whitening = true
-// Address config = No address check 
+// Address config = Address check, no broadcast 
 // Carrier frequency = 2399.999908 
 // Device address = 0 
 // TX power = 0 
@@ -36,7 +36,7 @@ const uint8_t init_seq[] = {
 	CC1100_FREQ2,          0x58,     // Frequency Control Word, High Byte 
 	CC1100_FREQ1,          0xE3,     // Frequency Control Word, Middle Byte 
 	CC1100_FREQ0,          0x8E,     // Frequency Control Word, Low Byte 
-	CC1100_MDMCFG4,        0xCA,     // Modem Configuration 
+	CC1100_MDMCFG4,        0xBA,     // Modem Configuration 
 	CC1100_MDMCFG3,        0xE5,     // Modem Configuration 
 	CC1100_MDMCFG2,        0x73,     // Modem Configuration
 	CC1100_MDMCFG1,        0x41,     // Modem Configuration

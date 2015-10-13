@@ -145,7 +145,7 @@ static void cmd_config(int chan, int bw, int power)
 	switch(bw) {
 		case 0:
 			// 50 kbps
-			vsnCC_write(CC1100_MDMCFG4, 0xCA);
+			vsnCC_write(CC1100_MDMCFG4, 0xBA);
 			vsnCC_write(CC1100_FSCAL3, 0xA9);
 			vsnCC_write(CC1100_FSCAL0, 0x11);
 			break;
