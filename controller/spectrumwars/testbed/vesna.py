@@ -61,9 +61,15 @@ class RadioRaw(object):
 		self.worker_thread = threading.Thread(target=self.worker)
 		self.worker_thread.start()
 
+		try:
+			self.cmd('')
+		except RadioError:
+			pass
+
 	def stop(self):
 		self.run = False
 		self.worker_thread.join()
+		self.comm.close()
 
 	def cmd(self, cmd):
 		self.command_lock.acquire()

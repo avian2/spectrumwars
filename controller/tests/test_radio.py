@@ -31,6 +31,11 @@ class SyncRadio(object):
 		self.device = device
 		self.comm = serial.Serial(device, 115200, timeout=2.)
 
+		try:
+			self.cmd('')
+		except RadioError:
+			pass
+
 	def cmd(self, cmd):
 		self.comm.write("%s\n" % (cmd,))
 
@@ -70,8 +75,37 @@ class SyncRadio(object):
 		pass
 
 	def stop(self):
-		pass
+		self.comm.close()
 
+class TestRadioStartUp(unittest.TestCase):
+	# Sometimes when starting up, nodes will have some garbage in their
+	# input buffers. This causes the first command issued to the node to
+	# fail with "unknown command". This tests whether radio classes can
+	# handle that.
+
+	def _do(self, cls):
+		l = list_radio_devices()
+
+		if len(l) < 2:
+			raise unittest.SkipTest("less than two VESNA nodes connected")
+
+		device = l[0]
+
+		f = serial.Serial(device, 115200, timeout=2.)
+		f.write('\x00')
+		f.close()
+
+		r = cls(device)
+		r.start()
+		r.cmd('a 0')
+
+		r.stop()
+
+	def test_sync_radio(self):
+		self._do(SyncRadio)
+
+	def test_async_radio(self):
+		self._do(AsyncRadio)
 
 class OnLineRadioTestCase(unittest.TestCase):
 
