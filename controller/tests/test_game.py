@@ -394,7 +394,7 @@ class TestGame(unittest.TestCase):
 					cnt[2] += 1
 					self.send()
 
-		result = self._run_game(Destination, Source, payload_limit=None)
+		result = self._run_game(Destination, Source, payload_limit=None, time_limit=None)
 
 		self.assertEqual(result.crashed, False)
 		self.assertGreaterEqual(cnt[0], self.PACKET_LIMIT)
