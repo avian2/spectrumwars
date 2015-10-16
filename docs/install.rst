@@ -18,7 +18,8 @@ You can download the source using the following command::
 If you intend to do development, it's best if you make your own fork of the
 repository on GitHub.
 
-SpectrumWars releases are also available from PyPi.
+SpectrumWars releases are also `available from PyPi
+<https://pypi.python.org/pypi/spectrumwars>`_.
 
 Setting up the testbed
 ----------------------
