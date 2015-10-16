@@ -18,16 +18,12 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see http://www.gnu.org/licenses/
 
-import imp
 import importlib
 import logging
-import os
-import re
-import sys
 import pickle
 import argparse
 
-from spectrumwars.sandbox import SubprocessSandbox
+from spectrumwars.sandbox.process import SubprocessSandbox
 from spectrumwars import Player, Game, GameController
 
 log = logging.getLogger(__name__)

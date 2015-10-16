@@ -20,6 +20,7 @@
 
 import copy
 import logging
+from netifaces import ifaddresses, AF_INET
 import time
 import threading
 from spectrumwars.testbed import TestbedError, RadioTimeout, RadioPacket, GameStatus
@@ -27,9 +28,9 @@ from spectrumwars.rpc import RPCServer
 
 log = logging.getLogger(__name__)
 
-class PlayerInstance(object):
-	def __init__(self, transceiver, server):
-		self.transceiver = transceiver
+class TransceiverContext(object):
+	def __init__(self, sb_transceiver, server):
+		self.sb_transceiver = sb_transceiver
 		self.server = server
 
 class Player(object):
@@ -39,34 +40,36 @@ class Player(object):
 		self.game = game
 
 		self.result = PlayerResult()
-		self.instances = []
+		self.contexts = []
 
 		dst_radio, src_radio = game.testbed.get_radio_pair()
 
-		for radio, transceiver in zip((dst_radio, src_radio), (sb_player.dst, sb_player.src)):
-			transceiver.init(self.i, game.update_interval)
-			server = GameRPCServer(game, self, transceiver.role, radio)
+		for radio, sb_transceiver in zip((dst_radio, src_radio), (sb_player.dst, sb_player.src)):
+			assert self.i == sb_transceiver.i
+
+			sb_transceiver.init(game.update_interval)
+			server = GameRPCServer(game, self, sb_transceiver.role, radio)
 			server.start()
 
-			instance = PlayerInstance(transceiver, server)
-			self.instances.append(instance)
+			context = TransceiverContext(sb_transceiver, server)
+			self.contexts.append(context)
 
 	def start(self):
-		for instance in self.instances:
-			instance.transceiver.start(instance.server.endpoint)
+		for context in self.contexts:
+			context.sb_transceiver.start(context.server.endpoint)
 
 	def join(self):
 		if self.game.hard_time_limit is None:
 			deadline = None
 		else:
 			deadline = self.game.start_time + self.game.hard_time_limit
-		for instance in self.instances:
-			instance.transceiver.join(deadline, timefunc=self.game.testbed.time)
+		for context in self.contexts:
+			context.sb_transceiver.join(deadline, timefunc=self.game.testbed.time)
 
-			instance.server.stop()
-			instance.server.join()
+			context.server.stop()
+			context.server.join()
 
-		self.instances = []
+		self.contexts = []
 
 class PlayerResult(object):
 	def __init__(self):
@@ -156,15 +159,23 @@ class GameRPCServer(RPCServer):
 		self.radio = radio
 
 		self.i = player.i
-		j = 1 if role == 'dst' else 0
-
 		self.role = role
-		self.xname = "(%d %s)" % (self.i, self.role)
 
-		port = 50000 + self.i*10 + j
-		self.endpoint = "tcp://127.0.0.1:%d" % (port,)
+		self.endpoint = self.get_endpoint(self.i, self.role, self.game.sandbox.get_iface())
 
 		super(GameRPCServer, self).__init__(self.endpoint, timeout=.5)
+
+	@classmethod
+	def get_endpoint(cls, i, role, iface=None, baseport=50000):
+		if iface is None:
+			iface = 'lo'
+
+		addr = ifaddresses(iface)[AF_INET][0]['addr']
+		port = baseport + i*2
+		if role == 'dst':
+			port += 1
+
+		return 'tcp://%s:%d' % (addr, port)
 
 	def log_event(self, type, **kwargs):
 		self.game.log_event(type, i=self.i, role=self.role, **kwargs)
@@ -266,6 +277,9 @@ class GameController(object):
 
 	def run(self, game):
 
+		log.debug("Starting sandbox")
+		game.sandbox.start()
+
 		log.debug("Instantiating player classes")
 		game.instantiate()
 		game.testbed.start()
@@ -274,7 +288,6 @@ class GameController(object):
 		slogger.start()
 
 		game.state = 'running'
-
 		game.start_time = game.testbed.time()
 
 		for player in game.players:
@@ -284,13 +297,15 @@ class GameController(object):
 			player.join()
 
 		game.end_time = game.testbed.time()
-
-		log.debug("Cleaning up testbed")
-
-		game.testbed.stop()
 		game.state = 'finished'
 
 		slogger.stop()
+
+		log.debug("Cleaning up testbed")
+		game.testbed.stop()
+
+		log.debug("Stopping sandbox")
+		game.sandbox.stop()
 
 		log.debug("Game concluded")
 

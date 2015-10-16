@@ -25,7 +25,7 @@ import threading
 import Queue
 from spectrumwars import Transceiver, Player, Game, GameController, RadioTimeout, RadioError
 from spectrumwars.testbed import TestbedBase, RadioBase, RadioPacket
-from spectrumwars.sandbox import ThreadedSandbox
+from spectrumwars.sandbox.threaded import ThreadedSandbox
 
 level = logging.WARNING
 logging.basicConfig(level=level)
@@ -467,6 +467,13 @@ class TestGame(unittest.TestCase):
 
 		self._run_game(Destination, Transceiver)
 		self.assertEqual(cnt[0], 1)
+
+from spectrumwars.game import GameRPCServer
+
+class TestGameRPCServer(unittest.TestCase):
+	def test_get_endpoint(self):
+		endpoint = GameRPCServer.get_endpoint(0, 'tx')
+		self.assertEqual(endpoint, "tcp://127.0.0.1:50000")
 
 if __name__ == '__main__':
 	unittest.main()

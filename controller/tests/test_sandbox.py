@@ -61,7 +61,7 @@ class BaseTestSandbox(unittest.TestCase):
 		self.server.join()
 		del self.server
 
-from spectrumwars.sandbox import ThreadedSandbox
+from spectrumwars.sandbox.threaded import ThreadedSandbox
 
 class TestThreadedSandbox(BaseTestSandbox):
 
@@ -87,8 +87,8 @@ class TestThreadedSandbox(BaseTestSandbox):
 
 		player = players[0]
 
-		player.dst.init(player.i, 1.)
-		player.src.init(player.i, 1.)
+		player.dst.init(1.)
+		player.src.init(1.)
 
 		player.dst.start(self.endpoint)
 		player.src.start(self.endpoint)
@@ -99,7 +99,7 @@ class TestThreadedSandbox(BaseTestSandbox):
 		self.assertEqual(self.server.stopped, 2)
 		self.assertEqual(self.server.crashed, 0)
 
-from spectrumwars.sandbox import SubprocessSandbox
+from spectrumwars.sandbox.process import SubprocessSandbox
 
 class TestSubprocessSandbox(BaseTestSandbox):
 	def write_temp_py(self, code):
@@ -111,8 +111,8 @@ class TestSubprocessSandbox(BaseTestSandbox):
 
 	def run_players(self, players):
 		for player in players:
-			player.dst.init(player.i, 1.)
-			player.src.init(player.i, 1.)
+			player.dst.init(1.)
+			player.src.init(1.)
 
 		for player in players:
 			player.dst.start(self.endpoint)
@@ -183,8 +183,8 @@ class Transmitter(Transceiver):
 
 		player = players[0]
 
-		player.dst.init(player.i, 1.)
-		player.src.init(player.i, 1.)
+		player.dst.init(1.)
+		player.src.init(1.)
 
 		player.dst.start(self.endpoint)
 		player.src.start(self.endpoint)

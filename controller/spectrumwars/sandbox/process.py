@@ -29,61 +29,30 @@ import threading
 import time
 import traceback
 from spectrumwars.rpc import RPCClient
-
-from spectrumwars import Player
+from spectrumwars.sandbox import SandboxPlayer, SandboxError, SandboxBase, SandboxTransceiverBase
 
 log = logging.getLogger(__name__)
 
-class SandboxError(Exception): pass
-
-class SandboxPlayer(object):
-	def __init__(self, dst, src, i):
-		self.dst = dst
-		self.src = src
-		self.i = i
-
-# ThreadedSandbox provides no isolation between the player's code and the game
-# controller. It is mostly used for debugging and as an example of how the
-# Sandbox interface works.
-
-class ThreadedSandboxInstance(object):
-	def __init__(self, cls, role):
-		self.cls = cls
-		self.role = role
-
-	def init(self, i, update_interval):
-		self.ins = self.cls(i, self.role, update_interval)
-
-	def start(self, endpoint):
-		client = RPCClient(endpoint)
-
-		self.thread = threading.Thread(target=self.ins._start, args=(client,))
-		self.thread.start()
-
-	def join(self, deadline=None, timefunc=time.time):
-		self.thread.join()
-
-class ThreadedSandbox(object):
-	def __init__(self, cls_list):
-		self.players = []
-
-		for i, (dst_cls, src_cls) in enumerate(cls_list):
-			player = SandboxPlayer(
-				ThreadedSandboxInstance(dst_cls, 'dst'),
-				ThreadedSandboxInstance(src_cls, 'src'), i)
-			self.players.append(player)
-
-	def get_players(self):
-		return self.players
-
-class SubprocessSandboxInstance(object):
-	def __init__(self, path, role):
+class SubprocessSandboxTransceiver(SandboxTransceiverBase):
+	def __init__(self, path, i, role):
+		super(SubprocessSandboxTransceiver, self).__init__(i, role)
 		self.path = path
-		self.role = role
 
-	def init(self, i, update_interval):
-		self.i = i
+	def init(self, update_interval):
 		self.update_interval = update_interval
+
+	def get_args_json(self, path):
+
+		args_json = json.dumps({
+			'path': path,
+			'i': self.i,
+			'role': self.role,
+			'update_interval': self.update_interval,
+			'endpoint': self.endpoint,
+			'loglevel': logging.getLogger().getEffectiveLevel()
+		})
+
+		return args_json
 
 	def start(self, endpoint):
 
@@ -98,13 +67,7 @@ class SubprocessSandboxInstance(object):
 		else:
 			raise SandboxError("Can't find %r in PATH" % (cmdname,))
 
-		args_json = json.dumps({
-			'path': self.path,
-			'i': self.i,
-			'role': self.role,
-			'update_interval': self.update_interval,
-			'endpoint': endpoint,
-			'loglevel': logging.getLogger().getEffectiveLevel() })
+		args_json = self.get_args_json(self.path)
 		cmd = (excpath, args_json)
 
 		self.p = subprocess.Popen(cmd)
@@ -179,7 +142,7 @@ class SubprocessSandboxInstance(object):
 
 		log.info("(%d %s) sandbox stopping" % (args['i'], args['role']))
 
-class SubprocessSandbox(object):
+class SubprocessSandbox(SandboxBase):
 	def __init__(self, paths):
 		self.paths = paths
 
@@ -187,8 +150,8 @@ class SubprocessSandbox(object):
 		players = []
 
 		for i, path in enumerate(self.paths):
-			dst = SubprocessSandboxInstance(path, 'dst')
-			src = SubprocessSandboxInstance(path, 'src')
+			dst = SubprocessSandboxTransceiver(path, i, 'dst')
+			src = SubprocessSandboxTransceiver(path, i, 'src')
 
 			player = SandboxPlayer(dst, src, i)
 			players.append(player)

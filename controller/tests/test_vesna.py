@@ -23,7 +23,7 @@ import unittest
 
 from spectrumwars import Player, Game, GameController, Transceiver, RadioError
 from spectrumwars.testbed.vesna import Testbed, list_radio_devices
-from spectrumwars.sandbox import ThreadedSandbox
+from spectrumwars.sandbox.threaded import ThreadedSandbox
 
 level = logging.WARNING
 logging.basicConfig(level=level)
