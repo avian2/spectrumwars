@@ -1,3 +1,17 @@
+2015-10-16	spectrumwars 0.0.6
+
+	* Renamed "Transmitter" to "Source" and "Receiver" to "Destination" in
+	  the public Transceiver API to reduce confusion regarding the fact
+	  that Destination node can also send packets back to Source node. Old
+	  class names are still supported by the game controller.
+	* Moved sandbox-specific code into separate modules under
+	  spectrumwars.testbed.
+	* Fixed problems with some unit tests randomly failing due to race
+	  conditions when using the mocked testbed class.
+	* [VESNA firmware] fixed problem with insufficient RX channel filter
+	  bandwidth that caused packet loss on some specific pairs of nodes.
+	* [VESNA firmware] blink LED on packet transmission.
+
 2015-08-27	spectrumwars 0.0.5
 
 	* Refactor payload packing out of testbed-specific code. See reference
