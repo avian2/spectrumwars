@@ -153,6 +153,8 @@ class GameEvent(object):
 class GameRPCServer(RPCServer):
 
 	def __init__(self, game, player, role, radio):
+		assert role in ('src', 'dst')
+
 		self.game = game
 		self.player = player
 		self.radio = radio
