@@ -56,7 +56,10 @@ def run(args):
 	testbed = get_testbed(args.testbed, args.testbed_options)
 	sandbox = SubprocessSandbox(args.player_paths)
 
-	game = Game(testbed, sandbox, packet_limit=args.packet_limit, time_limit=args.time_limit)
+	packet_limit = args.packet_limit if args.packet_limit > 0 else None
+	time_limit = args.time_limit if args.time_limit > 0 else None
+
+	game = Game(testbed, sandbox, packet_limit=packet_limit, time_limit=time_limit)
 	ctl = GameController()
 
 	log.info("Running game...")
@@ -101,9 +104,9 @@ def main():
 			help='path to .py file containing player classes')
 
 	parser.add_argument('--time-limit', metavar='SECONDS', type=int, dest='time_limit', default=30,
-			help='time limit for the game (default: 30 seconds)')
+			help='time limit for the game (default is 30 seconds, use 0 for unlimited)')
 	parser.add_argument('--packet-limit', metavar='PACKETS', type=int, dest='packet_limit', default=50,
-			help='number of packets required to win (default: 50)')
+			help='number of packets required to win (default is 50, use 0 for unlimited)')
 
 	parser.add_argument('-l', '--log', metavar='PATH', dest='log_path',
 			help='path to save binary game log to')
