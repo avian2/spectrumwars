@@ -48,6 +48,7 @@ class MockRadio(RadioBase):
 
 		self.settings = None
 		self.rx_queue = Queue.Queue()
+		self.clock = 0.
 
 	def binsend(self, data):
 		if self.settings == self.neighbor.settings:
@@ -63,13 +64,17 @@ class MockRadio(RadioBase):
 		try:
 			data = self.rx_queue.get(timeout=.01)
 		except Queue.Empty:
-			self.testbed.clock += timeout
+			self.clock += timeout
 			raise RadioTimeout
 		else:
 			return data
 
 class MockTestbed(TestbedBase):
 	RADIO_CLASS = MockRadio
+
+	def __init__(self):
+		super(MockTestbed, self).__init__()
+		self.radios = []
 
 	def get_radio_pair(self):
 
@@ -79,12 +84,12 @@ class MockTestbed(TestbedBase):
 		dst_radio.neighbor = src_radio
 		src_radio.neighbor = dst_radio
 
-		self.clock = 0.
+		self.radios += [ dst_radio, src_radio ]
 
 		return dst_radio, src_radio
 
 	def time(self):
-		return self.clock
+		return min(radio.clock for radio in self.radios)
 
 	def get_spectrum(self):
 		return True
@@ -226,31 +231,6 @@ class TestGame(unittest.TestCase):
 		result = self._run_game(Destination, Source)
 		self.assertEqual(cnt[0], 1)
 
-	def test_dst_starts_after_src(self):
-		# This is mostly to test that our MockRadio and MockTestbed
-		# operate deterministically.
-		#
-		# Since we're not doing any real time.sleep(), it might happen
-		# that destination event loop only starts running after source
-		# has already triggered end game condition.
-
-		lock = threading.Lock()
-		lock.acquire()
-
-		class Destination(Transceiver):
-			def start(self):
-				lock.acquire()
-
-		class Source(Transceiver):
-			def start(self):
-				self.send()
-
-			def _stop(self):
-				lock.release()
-
-		result = self._run_game(Destination, Source)
-		self.assertEqual(result.dst_received_packets, 1)
-
 	def test_recv_packet_data(self):
 
 		cnt = [0]
@@ -382,8 +362,9 @@ class TestGame(unittest.TestCase):
 
 		class Destination(Transceiver):
 			def start(self):
-				for data in self.recv_loop(timeout=2.):
-					cnt[1] += 1
+				while True:
+					for data in self.recv_loop(timeout=2.):
+						cnt[1] += 1
 
 			def recv(self, packet):
 				cnt[0] += 1
