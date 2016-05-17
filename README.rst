@@ -6,7 +6,7 @@ bandwidth on a limited piece of a radio spectrum.
 
 On-line documentation:
 
-https://spectrumwars.readthedocs.org/en/latest/
+https://spectrumwars.readthedocs.io/en/latest/
 
 
 Contents at a glance
